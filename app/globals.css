@@ -1,0 +1,301 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* Убираем горизонтальный скролл */
+body {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Убираем скролл для всех контейнеров */
+* {
+  max-width: 100%;
+}
+
+/* УБИРАЕМ ВСЕ МАЛЕНЬКИЕ СКРОЛЛЫ, ОСТАВЛЯЕМ ТОЛЬКО БОЛЬШОЙ */
+.assistant-container {
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+/* Убираем скролл у ВСЕХ элементов кроме главного контейнера */
+.assistant-container * {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  max-width: 100% !important;
+}
+
+/* Оставляем скролл только для главной контентной области */
+.assistant-content-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin !important; /* Firefox - тонкий скролл */
+  -ms-overflow-style: auto !important; /* IE and Edge */
+}
+
+.assistant-content-scroll::-webkit-scrollbar {
+  width: 8px !important; /* Ширина скроллбара */
+  background: transparent !important;
+}
+
+.assistant-content-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.assistant-content-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(102, 126, 234, 0.3) !important;
+  border-radius: 4px !important;
+}
+
+.assistant-content-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(102, 126, 234, 0.5) !important;
+}
+
+/* Убираем скролл у кнопок, изображений и всех вложенных элементов */
+.assistant-container button,
+.assistant-container img,
+.assistant-container .space-y-3,
+.assistant-container .space-y-4,
+.assistant-container div:not(.assistant-content-scroll),
+.assistant-container .bg-white.border-2,
+.assistant-container .flex,
+.assistant-container .space-x-4 {
+  overflow: hidden !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+/* Убираем скролл у изображений */
+.assistant-container img {
+  overflow: hidden !important;
+  max-width: 100% !important;
+  display: block;
+}
+
+/* Убираем скролл у контейнеров с изображениями */
+.assistant-container .overflow-hidden {
+  overflow: hidden !important;
+}
+
+/* Убираем горизонтальный скролл при анимациях */
+[data-framer-component] {
+  overflow-x: hidden !important;
+}
+
+/* Для всех motion.div */
+.motion-container {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+/* Убираем скролл из хедера */
+.assistant-header {
+  overflow: hidden !important;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Выпадающие списки в хедере - ПОВЕРХ ВСЕГО */
+header {
+  position: sticky !important;
+  z-index: 1000 !important;
+}
+
+header nav {
+  position: relative !important;
+  z-index: 1001 !important;
+}
+
+header nav .relative {
+  position: relative !important;
+  z-index: 1002 !important;
+}
+
+/* Выпадающие списки */
+header nav .relative > div[style*="zIndex"],
+header nav .relative > div[style*="99999"] {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+/* Убеждаемся что выпадающие списки поверх всего контента */
+header .absolute[style*="99999"] {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+/* Контент страницы не должен перекрывать выпадающие списки */
+main {
+  position: relative;
+  z-index: 1;
+}
+
+section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Исправление ширины окна ассистента */
+.assistant-container {
+  box-sizing: border-box !important;
+  width: 500px !important;
+  max-width: calc(100vw - 4rem) !important;
+}
+
+.assistant-container * {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.assistant-container .break-words,
+.assistant-container [class*="break-words"] {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .gradient-primary-light {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  
+  .glow {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+  }
+  
+  .glow-hover:hover {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.7);
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+  }
+}
+
+/* Анимации для ассистента */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Плавная прокрутка с параллаксом */
+.parallax {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Градиентный фон для секций */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-bg-light {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-bg-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
