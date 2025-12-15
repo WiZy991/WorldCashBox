@@ -1,9 +1,42 @@
-# Инструкция по размещению сайта на сервере Ubuntu
+# Инструкция по размещению сайта WorldCashBox на сервере Ubuntu
 
 ## Требования
 - Сервер Ubuntu 20.04 или выше
 - Доступ по SSH с правами sudo
-- Доменное имя (опционально, но рекомендуется)
+- Доменное имя: **worldcashboxvl.ru**
+- Настроенные DNS записи для домена (A-запись указывает на IP сервера)
+
+## Шаг 0: Настройка DNS записей
+
+Перед началом деплоя убедитесь, что DNS записи для домена настроены правильно:
+
+### 0.1 Настройка A-записи
+В панели управления вашего доменного регистратора добавьте следующие DNS записи:
+
+```
+Тип: A
+Имя: @ (или worldcashboxvl.ru)
+Значение: <IP-адрес-вашего-сервера>
+TTL: 3600
+
+Тип: A
+Имя: www
+Значение: <IP-адрес-вашего-сервера>
+TTL: 3600
+```
+
+### 0.2 Проверка DNS записей
+После настройки DNS подождите несколько минут и проверьте:
+
+```bash
+# Проверка A-записи для основного домена
+dig worldcashboxvl.ru +short
+
+# Проверка A-записи для www поддомена
+dig www.worldcashboxvl.ru +short
+
+# Оба должны возвращать IP-адрес вашего сервера
+```
 
 ## Шаг 1: Подготовка сервера
 
@@ -47,8 +80,8 @@ cd /var/www
 # Клонируем репозиторий (или загружаем файлы через scp/sftp)
 # Если используете Git:
 sudo git clone <ваш-репозиторий> worldcashbox
-# Или загрузите файлы через scp:
-# scp -r ./WorldCashBox user@your-server:/var/www/worldcashbox
+# Или загрузите файлы через scp с вашего локального компьютера:
+# scp -r ./WorldCashBox user@worldcashboxvl.ru:/var/www/worldcashbox
 
 # Устанавливаем владельца
 sudo chown -R $USER:$USER /var/www/worldcashbox
@@ -77,7 +110,7 @@ nano .env.production
 Добавьте необходимые переменные окружения:
 ```env
 NODE_ENV=production
-NEXT_PUBLIC_API_URL=https://yourdomain.com
+NEXT_PUBLIC_API_URL=https://worldcashboxvl.ru
 # Добавьте другие необходимые переменные
 ```
 
@@ -155,7 +188,7 @@ sudo nano /etc/nginx/sites-available/worldcashbox
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    server_name worldcashboxvl.ru www.worldcashboxvl.ru;
 
     # Лимиты для загрузки файлов
     client_max_body_size 20M;
@@ -218,7 +251,7 @@ sudo apt install -y certbot python3-certbot-nginx
 
 ### 6.2 Получение SSL сертификата
 ```bash
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+sudo certbot --nginx -d worldcashboxvl.ru -d www.worldcashboxvl.ru
 ```
 
 Certbot автоматически настроит Nginx для использования HTTPS.
@@ -401,10 +434,59 @@ sudo chmod -R 755 /var/www/worldcashbox
    - Мониторьте использование ресурсов сервера
    - Регулярно проверяйте логи приложения
 
+## Шаг 11: Проверка работоспособности
+
+После завершения всех шагов проверьте:
+
+1. **Доступность сайта:**
+   ```bash
+   # Проверка HTTP (должен редиректить на HTTPS)
+   curl -I http://worldcashboxvl.ru
+   
+   # Проверка HTTPS
+   curl -I https://worldcashboxvl.ru
+   ```
+
+2. **Откройте в браузере:**
+   - https://worldcashboxvl.ru
+   - https://www.worldcashboxvl.ru
+   
+   Оба адреса должны работать и автоматически редиректить на HTTPS.
+
+3. **Проверка SSL сертификата:**
+   - Откройте сайт в браузере
+   - Нажмите на иконку замка в адресной строке
+   - Убедитесь, что сертификат выдан Let's Encrypt и действителен
+
 ## Контакты и поддержка
 
 При возникновении проблем проверьте:
 - Логи PM2: `pm2 logs worldcashbox`
 - Логи Nginx: `sudo tail -f /var/log/nginx/error.log`
 - Статус сервисов: `sudo systemctl status nginx`, `pm2 status`
+- DNS записи: `dig worldcashboxvl.ru +short`
+- Доступность портов: `sudo netstat -tulpn | grep -E '80|443|3000'`
+
+## Быстрая справка по командам
+
+```bash
+# Проверка статуса всех сервисов
+pm2 status
+sudo systemctl status nginx
+
+# Просмотр логов
+pm2 logs worldcashbox --lines 50
+sudo tail -n 50 /var/log/nginx/error.log
+
+# Перезапуск сервисов
+pm2 restart worldcashbox
+sudo systemctl restart nginx
+
+# Проверка конфигурации Nginx
+sudo nginx -t
+
+# Проверка DNS
+dig worldcashboxvl.ru +short
+dig www.worldcashboxvl.ru +short
+```
 
