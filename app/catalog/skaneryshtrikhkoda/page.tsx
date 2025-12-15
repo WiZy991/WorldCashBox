@@ -1,39 +1,56 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Scan } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
 import RequestForm from '@/components/RequestForm'
 import { formatPhoneNumber, getPhoneDigits } from '@/lib/phoneMask'
+import { Product } from '@/data/products'
 
 export default function BarcodeScannersPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [orderData, setOrderData] = useState({
     name: '',
     email: '',
     phone: '',
   })
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
 
-  const products = [
-    {
-      id: 'scanner-mertech-sunmi',
-      name: '2D Сканер Mertech SUNMI',
-      category: 'equipment',
-      price: 6700,
-      image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop',
-      description: 'Сканер Mertech Sunmi NS021 был разработан специально для торговли по ЕГАИС. Модель прошла проверку системы «Честный Знак».',
-      features: ['2D сканирование', 'Поддержка ЕГАИС', 'Честный Знак', 'Совместимость с онлайн-кассами'],
-    },
-  ]
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const filteredProducts = products.filter(product => {
+    // Фильтруем по категории equipment и подкатегории scanners, или по ключевым словам
+    const isScanner = product.category === 'equipment' && (
+      product.subcategory === 'scanners' ||
+      product.name.toLowerCase().includes('сканер') ||
+      product.description.toLowerCase().includes('сканер') ||
+      product.name.toLowerCase().includes('scanner') ||
+      product.description.toLowerCase().includes('scanner')
+    )
+    
     const matchesSearch = searchQuery === '' || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
+    
+    return isScanner && matchesSearch
   })
 
   const handleOrderSubmit = async (e: React.FormEvent) => {
@@ -163,7 +180,12 @@ export default function BarcodeScannersPage() {
           </div>
         </div>
 
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard

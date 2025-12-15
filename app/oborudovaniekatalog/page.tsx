@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Filter, ShoppingCart, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import { products } from '@/data/products'
+import { Product } from '@/data/products'
 import ProductCard from '@/components/ProductCard'
 import { useAssistant } from '@/contexts/AssistantContext'
 
@@ -31,9 +31,27 @@ const equipmentSubcategories = [
 ]
 
 export default function EquipmentCatalogPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('equipment')
   const [searchQuery, setSearchQuery] = useState('')
   const { openAssistant } = useAssistant()
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory
@@ -161,7 +179,12 @@ export default function EquipmentCatalogPage() {
         )}
 
         {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product, index) => (
               <motion.div

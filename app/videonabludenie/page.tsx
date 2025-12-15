@@ -1,15 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Camera, Video, HardDrive, Battery, Search, ShoppingCart } from 'lucide-react'
-import { products } from '@/data/products'
+import { Product } from '@/data/products'
 import ProductCard from '@/components/ProductCard'
 import RequestForm from '@/components/RequestForm'
 import { useAssistant } from '@/contexts/AssistantContext'
 import { formatPhoneNumber, getPhoneDigits } from '@/lib/phoneMask'
-
-const videoProducts = products.filter(p => p.category === 'video')
 
 const categories = [
   { id: 'all', name: 'Все', icon: Camera },
@@ -23,6 +21,8 @@ const categories = [
 ]
 
 export default function VideoSurveillancePage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [orderData, setOrderData] = useState({
@@ -30,10 +30,32 @@ export default function VideoSurveillancePage() {
     email: '',
     phone: '',
   })
-  const [selectedProduct, setSelectedProduct] = useState(products.find(p => p.category === 'video') || null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [showContactForm, setShowContactForm] = useState(false)
   const { openAssistant } = useAssistant()
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+        const videoProduct = (data.products || []).find((p: Product) => p.category === 'video')
+        if (videoProduct) {
+          setSelectedProduct(videoProduct)
+        }
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
+
+  const videoProducts = products.filter(p => p.category === 'video')
 
   const filteredProducts = videoProducts.filter(product => {
     let matchesCategory = selectedCategory === 'all'
@@ -164,7 +186,12 @@ export default function VideoSurveillancePage() {
               </div>
             </div>
 
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProducts.map((product, index) => (
                   <motion.div

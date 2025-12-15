@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ShoppingCart, Search, Filter } from 'lucide-react'
-import { products, categories, Product } from '@/data/products'
+import { categories, Product } from '@/data/products'
 import ProductCard from './ProductCard'
 import RequestForm from './RequestForm'
 
@@ -13,16 +13,34 @@ interface ProductsCatalogProps {
 }
 
 export default function ProductsCatalog({ showAll = false }: ProductsCatalogProps = {}) {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
+
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory
     const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (product.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (product.description?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
@@ -103,8 +121,14 @@ export default function ProductsCatalog({ showAll = false }: ProductsCatalogProp
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(showAll ? filteredProducts : filteredProducts.slice(0, 8)).map((product, index) => (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(showAll ? filteredProducts : filteredProducts.slice(0, 8)).map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
@@ -118,7 +142,8 @@ export default function ProductsCatalog({ showAll = false }: ProductsCatalogProp
               />
             </motion.div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Кнопка открыть каталог - только на главной странице */}
         {!showAll && filteredProducts.length > 8 && (

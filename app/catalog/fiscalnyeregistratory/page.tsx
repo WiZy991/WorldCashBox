@@ -1,41 +1,58 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Search, Printer } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
 import RequestForm from '@/components/RequestForm'
 import { useAssistant } from '@/contexts/AssistantContext'
 import { formatPhoneNumber, getPhoneDigits } from '@/lib/phoneMask'
+import { Product } from '@/data/products'
 
 export default function FiscalRegistrarsPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [orderData, setOrderData] = useState({
     name: '',
     email: '',
     phone: '',
   })
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
   const { openAssistant } = useAssistant()
 
-  const products = [
-    {
-      id: 'atol-sb2109',
-      name: 'АТОЛ SB2109 BT',
-      category: 'equipment',
-      price: 15000,
-      image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop',
-      description: 'Фискальный регистратор с Bluetooth',
-      features: ['Беспроводное подключение', 'Высокая скорость печати', 'Поддержка ОФД', 'Надежность'],
-    },
-  ]
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const filteredProducts = products.filter(product => {
+    // Фильтруем по категории equipment и подкатегории fiscal_registrars, или по ключевым словам
+    const isFiscalRegistrar = product.category === 'equipment' && (
+      product.subcategory === 'fiscal_registrars' ||
+      product.name.toLowerCase().includes('фискальный регистратор') ||
+      product.name.toLowerCase().includes('фискальные регистраторы') ||
+      product.description.toLowerCase().includes('фискальный регистратор') ||
+      product.description.toLowerCase().includes('фискальные регистраторы')
+    )
+    
     const matchesSearch = searchQuery === '' || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
+    
+    return isFiscalRegistrar && matchesSearch
   })
 
   const handleOrderSubmit = async (e: React.FormEvent) => {
@@ -168,7 +185,12 @@ export default function FiscalRegistrarsPage() {
           </div>
         </div>
 
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard

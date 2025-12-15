@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion'
 import { CheckCircle, Users, TrendingUp, Clock, Shield, Zap, ArrowRight } from 'lucide-react'
 import { useAssistant } from '@/contexts/AssistantContext'
-import { products } from '@/data/products'
 import Image from 'next/image'
 
 const businessTypes = [
@@ -32,8 +31,6 @@ const features = [
     description: 'Получайте информацию о выручке, прибыли, расходах, остатках, действиях сотрудников в режиме реального времени',
   },
 ]
-
-const iikoProducts = products.filter(p => p.id === 'iiko' || p.name.toLowerCase().includes('iiko'))
 
 export default function RestaurantAutomationPage() {
   const { openAssistant } = useAssistant()

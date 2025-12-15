@@ -76,7 +76,8 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
   const currentImage = product.image || (images.length > 0 ? (images[currentImageIndex] || images[0]) : '')
 
   // Проверяем наличие изображения - учитываем ошибки загрузки
-  const hasImage = !!(currentImage && currentImage.trim() && currentImage.startsWith('http') && !imageError)
+  // Поддерживаем как http/https URLs, так и локальные пути
+  const hasImage = !!(currentImage && currentImage.trim() && (currentImage.startsWith('http') || currentImage.startsWith('/')) && !imageError)
 
   // Обработка движения мыши для 3D эффекта
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {

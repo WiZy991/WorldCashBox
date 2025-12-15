@@ -38,6 +38,7 @@ next-env.d.ts
 # temporary files
 requests/
 *.log
+logs/
 
 # large files (опционально - раскомментируйте если нужно исключить)
 # Photo/

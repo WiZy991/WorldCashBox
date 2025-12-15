@@ -1,60 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Search, CreditCard } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
 import RequestForm from '@/components/RequestForm'
 import { useAssistant } from '@/contexts/AssistantContext'
 import { formatPhoneNumber, getPhoneDigits } from '@/lib/phoneMask'
+import { Product } from '@/data/products'
 
 export default function OnlineCashRegistersPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [orderData, setOrderData] = useState({
     name: '',
     email: '',
     phone: '',
   })
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
   const { openAssistant } = useAssistant()
 
-  // Примерные товары для онлайн-касс
-  const products = [
-    {
-      id: 'evotor-7-2',
-      name: 'Эвотор 7.2',
-      category: 'equipment',
-      price: 25000,
-      image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?w=400&h=300&fit=crop',
-      description: 'Популярная облачная онлайн-касса для малого бизнеса',
-      features: ['Мобильность', 'Облачная касса', 'Приложения для бизнеса', 'Простота использования'],
-    },
-    {
-      id: 'evotor-7-3',
-      name: 'Эвотор 7.3',
-      category: 'equipment',
-      price: 30000,
-      image: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?w=400&h=300&fit=crop',
-      description: 'Новое поколение облачных онлайн-касс Эвотор',
-      features: ['Улучшенная производительность', 'Больший экран', 'Расширенная функциональность', 'Облачные сервисы'],
-    },
-    {
-      id: 'pos-center-pos101',
-      name: 'POSCenter POS101',
-      category: 'equipment',
-      price: 35000,
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
-      description: 'Компактная онлайн-касса для малого бизнеса',
-      features: ['Компактный размер', 'Поддержка ОФД', 'Простое управление', 'Низкая цена'],
-    },
-  ]
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const filteredProducts = products.filter(product => {
+    // Фильтруем по категории equipment и подкатегории smart_cash_registers, или по ключевым словам
+    const isOnlineCashRegister = product.category === 'equipment' && (
+      product.subcategory === 'smart_cash_registers' ||
+      product.name.toLowerCase().includes('онлайн-касс') ||
+      product.name.toLowerCase().includes('онлайн касс') ||
+      product.name.toLowerCase().includes('эвотор') ||
+      product.description.toLowerCase().includes('онлайн-касс') ||
+      product.description.toLowerCase().includes('онлайн касс') ||
+      product.description.toLowerCase().includes('облачная касс')
+    )
+    
     const matchesSearch = searchQuery === '' || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
+    
+    return isOnlineCashRegister && matchesSearch
   })
 
   const handleOrderSubmit = async (e: React.FormEvent) => {
@@ -192,7 +192,12 @@ export default function OnlineCashRegistersPage() {
         </div>
 
         {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard

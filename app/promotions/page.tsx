@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, ArrowRight, Tag, Clock } from 'lucide-react'
 import RequestForm from '@/components/RequestForm'
-import { products } from '@/data/products'
+import { Product } from '@/data/products'
 
 interface Promotion {
   id: number
@@ -21,53 +21,80 @@ export default function PromotionsPage() {
   const [showForm, setShowForm] = useState(false)
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null)
   const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [products, setProducts] = useState<Product[]>([])
 
   useEffect(() => {
-    // Генерируем актуальные акции с текущими датами
-    const currentDate = new Date()
-    const nextMonth = new Date(currentDate)
-    nextMonth.setMonth(nextMonth.getMonth() + 1)
-    const nextQuarter = new Date(currentDate)
-    nextQuarter.setMonth(nextQuarter.getMonth() + 3)
-
-    const formatDate = (date: Date) => {
-      return date.toISOString().split('T')[0]
+    // Загружаем товары из API
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      }
     }
+    loadProducts()
 
-    const currentPromotions: Promotion[] = [
-      {
-        id: 1,
-        title: 'Эвотор 6 всего за 100 рублей!',
-        description: 'Специальное предложение на популярную кассу Эвотор 6. Идеальное решение для малого бизнеса.',
-        date: formatDate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000)),
-        validUntil: formatDate(nextMonth),
-        badge: 'НОВИНКА',
-        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
-        productName: 'Эвотор 6',
-      },
-      {
-        id: 2,
-        title: 'Фискальный накопитель на 15 месяцев за 6 000 рублей!',
-        description: 'Выгодное предложение на фискальный накопитель с увеличенным сроком службы.',
-        date: formatDate(new Date(currentDate.getTime() - 5 * 24 * 60 * 60 * 1000)),
-        validUntil: formatDate(nextQuarter),
-        badge: 'ВЫГОДА',
-        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop',
-        productName: 'Фискальный накопитель',
-      },
-      {
-        id: 3,
-        title: 'Эвотор 7.3 за 3 000 рублей!',
-        description: 'Новое поколение касс по специальной цене. Современные технологии по доступной стоимости.',
-        date: formatDate(new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000)),
-        validUntil: formatDate(nextMonth),
-        badge: 'ПОПУЛЯРНО',
-        image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=600&fit=crop',
-        productName: 'Эвотор 7.3',
-      },
-    ]
+    // Загружаем акции из API
+    const loadPromotions = async () => {
+      try {
+        const response = await fetch('/api/promotions')
+        const data = await response.json()
+        if (data.promotions && data.promotions.length > 0) {
+          setPromotions(data.promotions)
+        } else {
+          // Если акций нет, используем дефолтные
+          const currentDate = new Date()
+          const nextMonth = new Date(currentDate)
+          nextMonth.setMonth(nextMonth.getMonth() + 1)
+          const nextQuarter = new Date(currentDate)
+          nextQuarter.setMonth(nextQuarter.getMonth() + 3)
 
-    setPromotions(currentPromotions)
+          const formatDate = (date: Date) => {
+            return date.toISOString().split('T')[0]
+          }
+
+          const currentPromotions: Promotion[] = [
+            {
+              id: 1,
+              title: 'Эвотор 6 всего за 100 рублей!',
+              description: 'Специальное предложение на популярную кассу Эвотор 6. Идеальное решение для малого бизнеса.',
+              date: formatDate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000)),
+              validUntil: formatDate(nextMonth),
+              badge: 'НОВИНКА',
+              image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
+              productName: 'Эвотор 6',
+            },
+            {
+              id: 2,
+              title: 'Фискальный накопитель на 15 месяцев за 6 000 рублей!',
+              description: 'Выгодное предложение на фискальный накопитель с увеличенным сроком службы.',
+              date: formatDate(new Date(currentDate.getTime() - 5 * 24 * 60 * 60 * 1000)),
+              validUntil: formatDate(nextQuarter),
+              badge: 'ВЫГОДА',
+              image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop',
+              productName: 'Фискальный накопитель',
+            },
+            {
+              id: 3,
+              title: 'Эвотор 7.3 за 3 000 рублей!',
+              description: 'Новое поколение касс по специальной цене. Современные технологии по доступной стоимости.',
+              date: formatDate(new Date(currentDate.getTime() - 3 * 24 * 60 * 60 * 1000)),
+              validUntil: formatDate(nextMonth),
+              badge: 'ПОПУЛЯРНО',
+              image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=600&fit=crop',
+              productName: 'Эвотор 7.3',
+            },
+          ]
+          setPromotions(currentPromotions)
+        }
+      } catch (error) {
+        console.error('Error loading promotions:', error)
+      }
+    }
+    loadPromotions()
   }, [])
 
   const handleLearnMore = (promotion: Promotion) => {
@@ -141,13 +168,31 @@ export default function PromotionsPage() {
                   className="group relative bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100 hover:border-primary-300 transition-all"
                 >
                   {/* Image Section */}
-                  <div className="relative h-64 overflow-hidden">
-                    <img
-                      src={promo.image}
-                      alt={promo.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      style={{ objectFit: 'cover', display: 'block' }}
-                    />
+                  <div className="relative h-64 overflow-hidden bg-gray-200">
+                    {promo.image ? (
+                      <img
+                        src={promo.image}
+                        alt={promo.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        style={{ objectFit: 'cover', display: 'block' }}
+                        onError={(e) => {
+                          // Если изображение не загрузилось, показываем placeholder
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                          const parent = target.parentElement
+                          if (parent && !parent.querySelector('.image-placeholder')) {
+                            const placeholder = document.createElement('div')
+                            placeholder.className = 'image-placeholder w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-400 to-primary-600 text-white text-2xl font-bold'
+                            placeholder.textContent = '📷'
+                            parent.appendChild(placeholder)
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-400 to-primary-600 text-white text-4xl">
+                        📷
+                      </div>
+                    )}
                     
                     {/* Overlay Gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>

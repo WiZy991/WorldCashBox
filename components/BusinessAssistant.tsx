@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Sparkles, CheckCircle, ArrowRight, ShoppingCart, Settings, Code, Shield, Send } from 'lucide-react'
 import { businessSolutions } from '@/data/businessSolutions'
-import { products } from '@/data/products'
+import { Product } from '@/data/products'
 import RequestForm from './RequestForm'
 import { useAssistant } from '@/contexts/AssistantContext'
 import { faqData, findAnswer, quickQuestions, getContextualQuestions, FAQ } from '@/data/faq'
@@ -35,8 +35,24 @@ export default function BusinessAssistant() {
   const [qaMessages, setQaMessages] = useState<Array<{ role: 'user' | 'assistant', content: string, faq?: FAQ }>>([])
   const [qaInput, setQaInput] = useState('')
   const [isSearchingCompany, setIsSearchingCompany] = useState(false)
+  const [products, setProducts] = useState<Product[]>([])
   const companySearchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSearchedINNRef = useRef<string>('') // Храним последний найденный ИНН
+
+  // Загружаем товары из API
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      }
+    }
+    loadProducts()
+  }, [])
 
   // Открытие ассистента извне - пропускаем welcome и сразу начинаем работу менеджера
   useEffect(() => {

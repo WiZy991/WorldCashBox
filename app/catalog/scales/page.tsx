@@ -1,33 +1,53 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Scale } from 'lucide-react'
 import ProductCard from '@/components/ProductCard'
 import RequestForm from '@/components/RequestForm'
 import { formatPhoneNumber, getPhoneDigits } from '@/lib/phoneMask'
+import { Product } from '@/data/products'
 
 export default function ScalesPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [orderData, setOrderData] = useState({ name: '', email: '', phone: '' })
-  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
 
-  const products = [
-    {
-      id: 'atol-marta',
-      name: 'АТОЛ MARTA',
-      category: 'equipment',
-      price: 6700,
-      image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop',
-      description: 'Торговые весы, которые имеют все необходимые режимы и функции: взвешивание, расчет стоимости и сдачи, 4 клавиши быстрого вызова цены.',
-      features: ['Взвешивание', 'Расчет стоимости', '4 клавиши быстрого вызова', 'Автоматический расчет сдачи'],
-    },
-  ]
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await fetch('/api/products')
+        const data = await response.json()
+        setProducts(data.products || [])
+      } catch (error) {
+        console.error('Error loading products:', error)
+        setProducts([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
-  const filteredProducts = products.filter(product => 
-    searchQuery === '' || product.name.toLowerCase().includes(searchQuery.toLowerCase()) || product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredProducts = products.filter(product => {
+    // Фильтруем по категории equipment и подкатегории weights, или по ключевым словам
+    const isScale = product.category === 'equipment' && (
+      product.subcategory === 'weights' ||
+      product.name.toLowerCase().includes('вес') ||
+      product.description.toLowerCase().includes('вес') ||
+      product.name.toLowerCase().includes('scale') ||
+      product.description.toLowerCase().includes('scale')
+    )
+    
+    const matchesSearch = searchQuery === '' || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    return isScale && matchesSearch
+  })
 
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -99,7 +119,12 @@ export default function ScalesPage() {
             </form>
           </div>
         </div>
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Загрузка товаров...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <ProductCard key={product.id} product={product} onSelect={() => { setSelectedProduct(product); setShowForm(true) }} />
