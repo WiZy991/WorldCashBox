@@ -112,3 +112,4 @@ ADMIN_PASSWORD=your_secure_password
 - `smart` - Смарт-кассы
 - `tsd` - ТСД
 
+

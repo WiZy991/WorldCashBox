@@ -108,18 +108,21 @@ export default function PromotionForm({ promotion, onClose, onSave }: PromotionF
 
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('category', 'banners')
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('category', 'banners')
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
-        body: formData,
+        body: uploadFormData,
       })
 
       const data = await response.json()
-      if (data.success) {
-        setFormData({ ...formData, image: data.url })
+      if (data.success && data.url) {
+        // Используем функциональное обновление состояния для гарантии актуальности данных
+        setFormData(prev => ({ ...prev, image: data.url }))
+      } else {
+        alert(data.error || 'Ошибка при загрузке изображения')
       }
     } catch (error) {
       console.error('Error uploading image:', error)

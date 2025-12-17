@@ -23,6 +23,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    // Проверяем тип файла
+    if (!file.type.startsWith('image/')) {
+      return NextResponse.json({ error: 'File must be an image' }, { status: 400 })
+    }
+
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
@@ -36,9 +41,27 @@ export async function POST(request: NextRequest) {
     const fileName = `${timestamp}_${originalName}`
     const filePath = join(uploadDir, fileName)
 
+    // Записываем файл
     await writeFile(filePath, buffer)
 
+    // Проверяем, что файл действительно создан
+    const { access } = await import('fs/promises')
+    try {
+      await access(filePath)
+    } catch {
+      console.error('File was not created successfully:', filePath)
+      return NextResponse.json({ error: 'Failed to save file' }, { status: 500 })
+    }
+
     const url = `/images/products/${category}/${fileName}`
+    
+    console.log('File uploaded successfully:', {
+      url,
+      fileName,
+      filePath,
+      size: buffer.length,
+      category
+    })
     
     return NextResponse.json({ 
       success: true, 
@@ -47,8 +70,10 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error uploading file:', error)
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Failed to upload file'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
+
 
 

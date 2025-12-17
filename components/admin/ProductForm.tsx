@@ -68,6 +68,22 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Валидация обязательных полей
+    if (!formData.name || !formData.name.trim()) {
+      alert('Пожалуйста, укажите название товара')
+      return
+    }
+    
+    if (!formData.description || !formData.description.trim()) {
+      alert('Пожалуйста, укажите описание товара')
+      return
+    }
+    
+    if (!formData.category) {
+      alert('Пожалуйста, выберите категорию товара')
+      return
+    }
+    
     try {
       const url = product?.id 
         ? `/api/admin/products/${product.id}`
@@ -75,20 +91,41 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
       
       const method = product?.id ? 'PUT' : 'POST'
       
+      // Подготавливаем данные для отправки
+      const productData = {
+        ...formData,
+        name: formData.name?.trim() || '',
+        description: formData.description?.trim() || '',
+        category: formData.category || 'equipment',
+        subcategory: formData.subcategory && formData.subcategory.trim() !== '' 
+          ? formData.subcategory.trim() 
+          : undefined,
+        price: formData.price !== undefined && formData.price !== null && formData.price !== '' 
+          ? Number(formData.price) 
+          : undefined,
+        features: Array.isArray(formData.features) ? formData.features : [],
+        images: Array.isArray(formData.images) ? formData.images : [],
+        image: formData.image || undefined,
+      }
+      
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(productData),
       })
 
       if (response.ok) {
+        const result = await response.json()
+        console.log('Product saved successfully:', result)
         onSave()
       } else {
-        alert('Ошибка при сохранении товара')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Error response:', errorData)
+        alert(errorData.error || 'Ошибка при сохранении товара')
       }
     } catch (error) {
       console.error('Error saving product:', error)
-      alert('Ошибка при сохранении товара')
+      alert('Ошибка при сохранении товара: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'))
     }
   }
 
@@ -98,18 +135,21 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
 
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('category', 'misc')
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('category', 'misc')
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
-        body: formData,
+        body: uploadFormData,
       })
 
       const data = await response.json()
-      if (data.success) {
-        setFormData({ ...formData, image: data.url })
+      if (data.success && data.url) {
+        // Используем функциональное обновление состояния для гарантии актуальности данных
+        setFormData(prev => ({ ...prev, image: data.url }))
+      } else {
+        alert(data.error || 'Ошибка при загрузке изображения')
       }
     } catch (error) {
       console.error('Error uploading image:', error)

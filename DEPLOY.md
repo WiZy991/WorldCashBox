@@ -1,6 +1,7 @@
 # Инструкция по размещению сайта WorldCashBox на сервере Ubuntu
 
 ## Требования
+
 - Сервер Ubuntu 20.04 или выше
 - Доступ по SSH с правами sudo
 - Доменное имя: **worldcashboxvl.ru**
@@ -11,6 +12,7 @@
 Перед началом деплоя убедитесь, что DNS записи для домена настроены правильно:
 
 ### 0.1 Настройка A-записи
+
 В панели управления вашего доменного регистратора добавьте следующие DNS записи:
 
 ```
@@ -26,6 +28,7 @@ TTL: 3600
 ```
 
 ### 0.2 Проверка DNS записей
+
 После настройки DNS подождите несколько минут и проверьте:
 
 ```bash
@@ -41,12 +44,14 @@ dig www.worldcashboxvl.ru +short
 ## Шаг 1: Подготовка сервера
 
 ### 1.1 Обновление системы
+
 ```bash
 sudo apt update
 sudo apt upgrade -y
 ```
 
 ### 1.2 Установка Node.js и npm
+
 ```bash
 # Установка Node.js 20.x (LTS)
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
@@ -58,11 +63,13 @@ npm --version
 ```
 
 ### 1.3 Установка PM2 (менеджер процессов)
+
 ```bash
 sudo npm install -g pm2
 ```
 
 ### 1.4 Установка Nginx
+
 ```bash
 sudo apt install -y nginx
 sudo systemctl start nginx
@@ -72,6 +79,7 @@ sudo systemctl enable nginx
 ## Шаг 2: Подготовка проекта
 
 ### 2.1 Клонирование проекта на сервер
+
 ```bash
 # Создаем директорию для проектов
 sudo mkdir -p /var/www
@@ -89,6 +97,7 @@ cd /var/www/worldcashbox
 ```
 
 ### 2.2 Установка зависимостей
+
 ```bash
 npm install
 # или если используете yarn:
@@ -96,6 +105,7 @@ npm install
 ```
 
 ### 2.3 Создание production сборки
+
 ```bash
 npm run build
 ```
@@ -103,11 +113,13 @@ npm run build
 ## Шаг 3: Настройка переменных окружения
 
 ### 3.1 Создание файла .env.production
+
 ```bash
 nano .env.production
 ```
 
 Добавьте необходимые переменные окружения:
+
 ```env
 NODE_ENV=production
 NEXT_PUBLIC_API_URL=https://worldcashboxvl.ru
@@ -115,52 +127,70 @@ NEXT_PUBLIC_API_URL=https://worldcashboxvl.ru
 ```
 
 ### 3.2 Создание директорий для данных
+
 ```bash
 # Создаем директории для данных приложения
 mkdir -p data
 mkdir -p public/images/products/banners
+mkdir -p public/images/products/misc
 mkdir -p public/images/products/equipment
 mkdir -p public/images/products/consumables
 mkdir -p public/images/products/software
 mkdir -p public/images/products/video
+mkdir -p public/images/products/pos
+mkdir -p public/images/products/printers
+mkdir -p public/images/products/terminals
+mkdir -p public/images/products/cameras
+mkdir -p public/images/products/smart
+mkdir -p public/images/products/tsd
 
 # Устанавливаем права доступа
 chmod -R 755 data
 chmod -R 755 public/images
+
+# Убедитесь, что пользователь, под которым запускается приложение, имеет права на запись
+# Если приложение запускается от имени другого пользователя, установите владельца:
+# sudo chown -R $USER:$USER /var/www/worldcashbox/public/images
+# sudo chown -R $USER:$USER /var/www/worldcashbox/data
 ```
 
 ## Шаг 4: Настройка PM2
 
 ### 4.1 Создание конфигурационного файла PM2
+
 ```bash
 nano ecosystem.config.js
 ```
 
 Добавьте следующее содержимое:
+
 ```javascript
 module.exports = {
-  apps: [{
-    name: 'worldcashbox',
-    script: 'node_modules/next/dist/bin/next',
-    args: 'start',
-    cwd: '/var/www/worldcashbox',
-    instances: 1,
-    exec_mode: 'fork',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 3000
-    },
-    error_file: '/var/log/pm2/worldcashbox-error.log',
-    out_file: '/var/log/pm2/worldcashbox-out.log',
-    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    merge_logs: true,
-    autorestart: true,
-    max_memory_restart: '1G'
-  }]
+	apps: [
+		{
+			name: 'worldcashbox',
+			script: 'node_modules/next/dist/bin/next',
+			args: 'start',
+			cwd: '/var/www/worldcashbox',
+			instances: 1,
+			exec_mode: 'fork',
+			env: {
+				NODE_ENV: 'production',
+				PORT: 3000,
+			},
+			error_file: '/var/log/pm2/worldcashbox-error.log',
+			out_file: '/var/log/pm2/worldcashbox-out.log',
+			log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+			merge_logs: true,
+			autorestart: true,
+			max_memory_restart: '1G',
+		},
+	],
 }
 ```
 
 ### 4.2 Запуск приложения через PM2
+
 ```bash
 # Создаем директорию для логов
 sudo mkdir -p /var/log/pm2
@@ -180,11 +210,13 @@ pm2 startup
 ## Шаг 5: Настройка Nginx как Reverse Proxy
 
 ### 5.1 Создание конфигурации Nginx
+
 ```bash
 sudo nano /etc/nginx/sites-available/worldcashbox
 ```
 
 Добавьте следующую конфигурацию:
+
 ```nginx
 server {
     listen 80;
@@ -204,7 +236,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # Таймауты
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
@@ -218,16 +250,21 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    # Статические файлы из public
+    # Статические файлы из public (изображения)
     location /images {
         proxy_pass http://localhost:3000;
         proxy_cache_valid 200 1h;
         add_header Cache-Control "public";
+        # Увеличиваем таймауты для больших файлов
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
     }
 }
 ```
 
 ### 5.2 Активация конфигурации
+
 ```bash
 # Создаем символическую ссылку
 sudo ln -s /etc/nginx/sites-available/worldcashbox /etc/nginx/sites-enabled/
@@ -245,11 +282,13 @@ sudo systemctl restart nginx
 ## Шаг 6: Настройка SSL (Let's Encrypt)
 
 ### 6.1 Установка Certbot
+
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
 ```
 
 ### 6.2 Получение SSL сертификата
+
 ```bash
 sudo certbot --nginx -d worldcashboxvl.ru -d www.worldcashboxvl.ru
 ```
@@ -257,6 +296,7 @@ sudo certbot --nginx -d worldcashboxvl.ru -d www.worldcashboxvl.ru
 Certbot автоматически настроит Nginx для использования HTTPS.
 
 ### 6.3 Автоматическое обновление сертификата
+
 ```bash
 # Проверка автоматического обновления
 sudo certbot renew --dry-run
@@ -265,6 +305,7 @@ sudo certbot renew --dry-run
 ## Шаг 7: Настройка файрвола
 
 ### 7.1 Настройка UFW
+
 ```bash
 # Разрешаем SSH
 sudo ufw allow OpenSSH
@@ -282,6 +323,7 @@ sudo ufw status
 ## Шаг 8: Полезные команды для управления
 
 ### 8.1 Управление приложением через PM2
+
 ```bash
 # Просмотр статуса
 pm2 status
@@ -303,6 +345,7 @@ pm2 monit
 ```
 
 ### 8.2 Обновление приложения
+
 ```bash
 cd /var/www/worldcashbox
 
@@ -320,6 +363,7 @@ pm2 restart worldcashbox
 ```
 
 ### 8.3 Управление Nginx
+
 ```bash
 # Перезапуск
 sudo systemctl restart nginx
@@ -335,11 +379,13 @@ sudo tail -f /var/log/nginx/access.log
 ## Шаг 9: Настройка резервного копирования
 
 ### 9.1 Создание скрипта резервного копирования
+
 ```bash
 nano /var/www/backup.sh
 ```
 
 Добавьте:
+
 ```bash
 #!/bin/bash
 BACKUP_DIR="/var/backups/worldcashbox"
@@ -361,11 +407,13 @@ chmod +x /var/www/backup.sh
 ```
 
 ### 9.2 Настройка автоматического резервного копирования
+
 ```bash
 sudo crontab -e
 ```
 
 Добавьте строку для ежедневного бэкапа в 2:00 ночи:
+
 ```
 0 2 * * * /var/www/backup.sh
 ```
@@ -373,12 +421,14 @@ sudo crontab -e
 ## Шаг 10: Мониторинг и оптимизация
 
 ### 10.1 Установка мониторинга (опционально)
+
 ```bash
 # PM2 Plus (облачный мониторинг)
 pm2 link <secret-key> <public-key>
 ```
 
 ### 10.2 Оптимизация производительности
+
 - Убедитесь, что включен кеш Nginx
 - Настройте сжатие gzip в Nginx
 - Используйте CDN для статических файлов (опционально)
@@ -386,6 +436,7 @@ pm2 link <secret-key> <public-key>
 ## Решение проблем
 
 ### Приложение не запускается
+
 ```bash
 # Проверьте логи PM2
 pm2 logs worldcashbox
@@ -398,6 +449,7 @@ pm2 env 0
 ```
 
 ### Nginx возвращает 502 Bad Gateway
+
 ```bash
 # Проверьте, что приложение запущено
 pm2 status
@@ -410,6 +462,7 @@ sudo nginx -t
 ```
 
 ### Проблемы с правами доступа
+
 ```bash
 # Установите правильные права для директорий
 sudo chown -R $USER:$USER /var/www/worldcashbox
@@ -419,12 +472,14 @@ sudo chmod -R 755 /var/www/worldcashbox
 ## Дополнительные рекомендации
 
 1. **Безопасность:**
+
    - Регулярно обновляйте систему: `sudo apt update && sudo apt upgrade`
    - Используйте сильные пароли
    - Настройте fail2ban для защиты от брутфорса
    - Регулярно проверяйте логи на подозрительную активность
 
 2. **Производительность:**
+
    - Настройте кеширование в Next.js
    - Используйте CDN для статических ресурсов
    - Оптимизируйте изображения перед загрузкой
@@ -439,28 +494,58 @@ sudo chmod -R 755 /var/www/worldcashbox
 После завершения всех шагов проверьте:
 
 1. **Доступность сайта:**
+
    ```bash
    # Проверка HTTP (должен редиректить на HTTPS)
    curl -I http://worldcashboxvl.ru
-   
+
    # Проверка HTTPS
    curl -I https://worldcashboxvl.ru
    ```
 
 2. **Откройте в браузере:**
+
    - https://worldcashboxvl.ru
    - https://www.worldcashboxvl.ru
-   
+
    Оба адреса должны работать и автоматически редиректить на HTTPS.
 
 3. **Проверка SSL сертификата:**
+
    - Откройте сайт в браузере
    - Нажмите на иконку замка в адресной строке
    - Убедитесь, что сертификат выдан Let's Encrypt и действителен
 
+4. **Проверка загрузки изображений:**
+
+   ```bash
+   # Проверка существования директорий для изображений
+   ls -la /var/www/worldcashbox/public/images/products/
+
+   # Проверка прав доступа
+   stat /var/www/worldcashbox/public/images/products/
+
+   # Если нужно, установите права заново
+   chmod -R 755 /var/www/worldcashbox/public/images
+   chown -R $USER:$USER /var/www/worldcashbox/public/images
+   ```
+
+   - Откройте админ панель: `https://worldcashboxvl.ru/admin`
+   - Попробуйте загрузить изображение для товара или акции
+   - Проверьте логи PM2 на наличие ошибок: `pm2 logs worldcashbox --lines 50`
+
+   **Если изображения не загружаются (ошибка 404):**
+
+   - Проверьте логи PM2: `pm2 logs worldcashbox --lines 50`
+   - Проверьте логи Nginx: `sudo tail -f /var/log/nginx/error.log`
+   - Убедитесь, что файлы создаются: `ls -la /var/www/worldcashbox/public/images/products/misc/`
+   - Проверьте права на запись: `touch /var/www/worldcashbox/public/images/products/misc/test.txt && rm /var/www/worldcashbox/public/images/products/misc/test.txt`
+   - Перезапустите приложение: `pm2 restart worldcashbox && sudo systemctl restart nginx`
+
 ## Контакты и поддержка
 
 При возникновении проблем проверьте:
+
 - Логи PM2: `pm2 logs worldcashbox`
 - Логи Nginx: `sudo tail -f /var/log/nginx/error.log`
 - Статус сервисов: `sudo systemctl status nginx`, `pm2 status`
@@ -489,4 +574,3 @@ sudo nginx -t
 dig worldcashboxvl.ru +short
 dig www.worldcashboxvl.ru +short
 ```
-

@@ -53,49 +53,84 @@ export async function POST(request: NextRequest) {
   try {
     const productData: any = await request.json()
     
+    // Валидация обязательных полей
+    if (!productData.name || typeof productData.name !== 'string' || productData.name.trim() === '') {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
+    
+    if (!productData.description || typeof productData.description !== 'string' || productData.description.trim() === '') {
+      return NextResponse.json({ error: 'Description is required' }, { status: 400 })
+    }
+    
+    if (!productData.category || typeof productData.category !== 'string') {
+      return NextResponse.json({ error: 'Category is required' }, { status: 400 })
+    }
+    
     // Нормализуем данные товара
     const product: Product = {
       id: productData.id || `product-${Date.now()}`,
-      name: productData.name || '',
+      name: (productData.name || '').trim(),
       category: productData.category || 'equipment',
-      subcategory: productData.subcategory && productData.subcategory.trim() !== '' 
-        ? productData.subcategory 
+      subcategory: productData.subcategory && typeof productData.subcategory === 'string' && productData.subcategory.trim() !== '' 
+        ? productData.subcategory.trim() 
         : undefined,
       price: productData.price !== undefined && productData.price !== null && productData.price !== '' 
         ? Number(productData.price) 
         : undefined,
-      description: productData.description || '',
-      features: Array.isArray(productData.features) ? productData.features : [],
-      image: productData.image || undefined,
-      images: Array.isArray(productData.images) ? productData.images : [],
-      specifications: productData.specifications || undefined,
+      description: (productData.description || '').trim(),
+      features: Array.isArray(productData.features) ? productData.features.filter((f: any) => typeof f === 'string' && f.trim() !== '') : [],
+      image: productData.image && typeof productData.image === 'string' && productData.image.trim() !== '' 
+        ? productData.image.trim() 
+        : undefined,
+      images: Array.isArray(productData.images) ? productData.images.filter((img: any) => typeof img === 'string' && img.trim() !== '') : [],
+      specifications: productData.specifications && typeof productData.specifications === 'object' 
+        ? productData.specifications 
+        : undefined,
     }
+    
+    console.log('Creating product:', {
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      hasImage: !!product.image,
+      featuresCount: product.features.length
+    })
     
     // Читаем текущие товары
     let products: Product[] = []
     try {
       const content = await readFile(productsJsonPath, 'utf-8')
       products = JSON.parse(content)
-    } catch {
-      // Если JSON файла нет, импортируем из TypeScript
-      try {
-        const productsModule = await import('@/data/products')
-        products = productsModule.products
-        await writeFile(productsJsonPath, JSON.stringify(products, null, 2), 'utf-8')
-      } catch {
+      if (!Array.isArray(products)) {
         products = []
       }
+    } catch (error) {
+      console.log('Products file not found or invalid, creating new:', error)
+      products = []
     }
     
-    products.push(product)
+    // Проверяем, нет ли товара с таким же ID
+    const existingIndex = products.findIndex(p => p.id === product.id)
+    if (existingIndex >= 0) {
+      // Обновляем существующий товар
+      products[existingIndex] = product
+      console.log('Updated existing product:', product.id)
+    } else {
+      // Добавляем новый товар
+      products.push(product)
+      console.log('Added new product:', product.id)
+    }
 
     // Сохраняем в JSON
     await writeFile(productsJsonPath, JSON.stringify(products, null, 2), 'utf-8')
     
+    console.log('Product saved successfully. Total products:', products.length)
+    
     return NextResponse.json({ success: true, product })
   } catch (error) {
     console.error('Error creating product:', error)
-    return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create product'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

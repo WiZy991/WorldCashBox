@@ -11,10 +11,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Не перенаправляем на странице логина
-    if (pathname === '/admin/login') return
+    // Если пользователь аутентифицирован и находится на странице логина, редиректим на админку
+    if (pathname === '/admin/login' && !isLoading && isAuthenticated) {
+      router.replace('/admin')
+      return
+    }
     
-    if (!isLoading && !isAuthenticated) {
+    // Если пользователь не аутентифицирован и не на странице логина, редиректим на логин
+    if (pathname !== '/admin/login' && !isLoading && !isAuthenticated) {
       router.push('/admin/login')
     }
   }, [isAuthenticated, isLoading, router, pathname])

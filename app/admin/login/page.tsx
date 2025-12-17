@@ -22,12 +22,18 @@ function AdminLoginContent() {
 		const success = await login(username, password)
 
 		if (success) {
-			router.push('/admin')
+			// Используем replace вместо push, чтобы заменить текущую страницу в истории
+			router.replace('/admin')
+			// Layout автоматически обработает редирект, но для надежности добавляем принудительный редирект
+			setTimeout(() => {
+				if (window.location.pathname === '/admin/login') {
+					window.location.href = '/admin'
+				}
+			}, 200)
 		} else {
 			setError('Неверные учетные данные')
+			setLoading(false)
 		}
-
-		setLoading(false)
 	}
 
 	return (

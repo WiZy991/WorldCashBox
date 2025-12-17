@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "product-1765946902906",
+    "name": "123",
+    "category": "equipment",
+    "subcategory": "drawers",
+    "price": 123,
+    "description": "123",
+    "features": [],
+    "image": "/images/products/misc/1765946899649_PHOTO-2025-12-12-17-15-16.jpg",
+    "images": []
+  },
+  {
+    "id": "product-1765946949351",
+    "name": "",
+    "category": "equipment",
+    "description": "",
+    "features": [],
+    "image": "/images/products/misc/1765946947433_Image_2025-11-05_18-46-27_650.png",
+    "images": []
+  }
+]
