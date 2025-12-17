@@ -250,15 +250,13 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    # Статические файлы из public (изображения)
+    # Статические файлы из public (изображения) - обслуживаем напрямую через Nginx
     location /images {
-        proxy_pass http://localhost:3000;
-        proxy_cache_valid 200 1h;
-        add_header Cache-Control "public";
-        # Увеличиваем таймауты для больших файлов
-        proxy_connect_timeout 300s;
-        proxy_send_timeout 300s;
-        proxy_read_timeout 300s;
+        alias /var/www/worldcashbox/public/images;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+        try_files $uri =404;
     }
 }
 ```
@@ -536,11 +534,58 @@ sudo chmod -R 755 /var/www/worldcashbox
 
    **Если изображения не загружаются (ошибка 404):**
 
-   - Проверьте логи PM2: `pm2 logs worldcashbox --lines 50`
-   - Проверьте логи Nginx: `sudo tail -f /var/log/nginx/error.log`
-   - Убедитесь, что файлы создаются: `ls -la /var/www/worldcashbox/public/images/products/misc/`
-   - Проверьте права на запись: `touch /var/www/worldcashbox/public/images/products/misc/test.txt && rm /var/www/worldcashbox/public/images/products/misc/test.txt`
-   - Перезапустите приложение: `pm2 restart worldcashbox && sudo systemctl restart nginx`
+   1. **Обновите конфигурацию Nginx** для прямого обслуживания статических файлов:
+
+      ```bash
+      sudo nano /etc/nginx/sites-available/worldcashbox
+      ```
+
+      Найдите секцию `location /images` и замените её на:
+
+      ```nginx
+      # Статические файлы из public (изображения) - обслуживаем напрямую через Nginx
+      location /images {
+          alias /var/www/worldcashbox/public/images;
+          expires 1y;
+          add_header Cache-Control "public, immutable";
+          access_log off;
+          try_files $uri =404;
+      }
+      ```
+
+      Проверьте конфигурацию и перезапустите Nginx:
+
+      ```bash
+      sudo nginx -t
+      sudo systemctl restart nginx
+      ```
+
+   2. **Проверьте, что файлы создаются:**
+
+      ```bash
+      ls -la /var/www/worldcashbox/public/images/products/misc/
+      ```
+
+   3. **Проверьте права доступа:**
+
+      ```bash
+      # Убедитесь, что файлы доступны для чтения
+      chmod -R 755 /var/www/worldcashbox/public/images
+      chown -R $USER:$USER /var/www/worldcashbox/public/images
+      ```
+
+   4. **Проверьте логи:**
+
+      ```bash
+      pm2 logs worldcashbox --lines 50
+      sudo tail -f /var/log/nginx/error.log
+      ```
+
+   5. **Проверьте, что файл существует по полному пути:**
+      ```bash
+      # Замените имя файла на реальное из ошибки
+      ls -la /var/www/worldcashbox/public/images/products/misc/1765961257857_PHOTO-2025-12-12-17-15-16.jpg
+      ```
 
 ## Контакты и поддержка
 

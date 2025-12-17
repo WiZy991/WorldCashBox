@@ -36,12 +36,12 @@ export default function VideoSurveillancePage() {
   const { openAssistant } = useAssistant()
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadProductsData = async () => {
       try {
-        const response = await fetch('/api/products')
-        const data = await response.json()
-        setProducts(data.products || [])
-        const videoProduct = (data.products || []).find((p: Product) => p.category === 'video')
+        const { loadProducts } = await import('@/lib/products')
+        const productsData = await loadProducts()
+        setProducts(productsData)
+        const videoProduct = productsData.find((p: Product) => p.category === 'video')
         if (videoProduct) {
           setSelectedProduct(videoProduct)
         }
@@ -52,7 +52,7 @@ export default function VideoSurveillancePage() {
         setLoading(false)
       }
     }
-    loadProducts()
+    loadProductsData()
   }, [])
 
   const videoProducts = products.filter(p => p.category === 'video')

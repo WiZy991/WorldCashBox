@@ -21,11 +21,11 @@ export default function CashDrawersPage() {
 	const [showForm, setShowForm] = useState(false)
 
 	useEffect(() => {
-		const loadProducts = async () => {
+		const loadProductsData = async () => {
 			try {
-				const response = await fetch('/api/products')
-				const data = await response.json()
-				setProducts(data.products || [])
+				const { loadProducts } = await import('@/lib/products')
+				const productsData = await loadProducts()
+				setProducts(productsData)
 			} catch (error) {
 				console.error('Error loading products:', error)
 				setProducts([])
@@ -33,7 +33,7 @@ export default function CashDrawersPage() {
 				setLoading(false)
 			}
 		}
-		loadProducts()
+		loadProductsData()
 	}, [])
 
 	const filteredProducts = products.filter(product => {

@@ -18,10 +18,21 @@ export async function GET() {
       products = []
     }
     
-    return NextResponse.json({ products })
+    // Отключаем кеширование для актуальности данных
+    return NextResponse.json({ products }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error) {
     console.error('Error reading products:', error)
-    return NextResponse.json({ products: [] })
+    return NextResponse.json({ products: [] }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      },
+    })
   }
 }
 
