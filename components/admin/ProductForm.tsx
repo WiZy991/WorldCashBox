@@ -100,7 +100,7 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
         subcategory: formData.subcategory && formData.subcategory.trim() !== '' 
           ? formData.subcategory.trim() 
           : undefined,
-        price: formData.price !== undefined && formData.price !== null && formData.price !== '' 
+        price: formData.price !== undefined && formData.price !== null && !isNaN(Number(formData.price))
           ? Number(formData.price) 
           : undefined,
         features: Array.isArray(formData.features) ? formData.features : [],
