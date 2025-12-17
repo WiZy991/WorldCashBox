@@ -3,6 +3,10 @@ import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { Product } from '@/data/products'
 
+// Отключаем кеширование этого route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const productsJsonPath = join(process.cwd(), 'data', 'products.json')
 
 // Публичный endpoint для получения товаров
@@ -13,8 +17,17 @@ export async function GET() {
     try {
       const content = await readFile(productsJsonPath, 'utf-8')
       products = JSON.parse(content)
-    } catch {
+      
+      // Проверяем, что это массив
+      if (!Array.isArray(products)) {
+        console.warn('Products file does not contain an array, resetting to empty array')
+        products = []
+      }
+      
+      console.log(`Loaded ${products.length} products from file`)
+    } catch (error) {
       // JSON файла нет или пустой - возвращаем пустой массив
+      console.log('Products file not found or invalid, returning empty array:', error)
       products = []
     }
     

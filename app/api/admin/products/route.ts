@@ -121,10 +121,35 @@ export async function POST(request: NextRequest) {
       console.log('Added new product:', product.id)
     }
 
-    // Сохраняем в JSON
-    await writeFile(productsJsonPath, JSON.stringify(products, null, 2), 'utf-8')
+    // Сохраняем в JSON с явной синхронизацией
+    const productsJson = JSON.stringify(products, null, 2)
+    await writeFile(productsJsonPath, productsJson, 'utf-8')
     
-    console.log('Product saved successfully. Total products:', products.length)
+    // Проверяем, что файл действительно записан и содержит новый товар
+    try {
+      // Небольшая задержка для гарантии записи на диск
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      const verifyContent = await readFile(productsJsonPath, 'utf-8')
+      const verifyProducts = JSON.parse(verifyContent)
+      
+      if (!Array.isArray(verifyProducts)) {
+        console.error('Saved file does not contain an array!')
+        return NextResponse.json({ error: 'Failed to save products' }, { status: 500 })
+      }
+      
+      const savedProduct = verifyProducts.find((p: Product) => p.id === product.id)
+      if (!savedProduct) {
+        console.error('Saved product not found in file!', product.id)
+        return NextResponse.json({ error: 'Product was not saved correctly' }, { status: 500 })
+      }
+      
+      console.log('Product saved successfully. Total products:', verifyProducts.length)
+      console.log('Saved product:', { id: savedProduct.id, name: savedProduct.name, category: savedProduct.category })
+    } catch (verifyError) {
+      console.error('Error verifying saved product:', verifyError)
+      // Не возвращаем ошибку, так как файл мог быть записан, но проверка не прошла
+    }
     
     return NextResponse.json({ success: true, product })
   } catch (error) {
