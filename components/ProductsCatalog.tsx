@@ -69,7 +69,7 @@ export default function ProductsCatalog({ showAll = false }: ProductsCatalogProp
             transition={{ type: "spring", delay: 0.2 }}
             className="inline-block mb-4"
           >
-            <span className="text-6xl">🛍️</span>
+            <span className="text-6xl"></span>
           </motion.div>
           <h2 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-4 bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
             Каталог товаров

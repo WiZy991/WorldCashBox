@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ShoppingCart, Sparkles, ArrowRight, RotateCw } from 'lucide-react'
+import Link from 'next/link'
 import { Product } from '@/data/products'
 import { useState, useRef, useEffect } from 'react'
 import { useCart } from '@/contexts/CartContext'
@@ -113,10 +114,20 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
     setCurrentImageIndex(0) // Возвращаем к исходному изображению
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     addToCart(product, 1, (message) => {
       showToast(message, 3000)
     })
+  }
+
+  const handleOrderClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (onSelect) {
+      onSelect()
+    }
   }
 
   // Вычисляем 3D трансформацию
@@ -125,15 +136,16 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
   const scale = isHovered ? 1.05 : 1
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -10, scale: 1.02 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={handleMouseLeave}
-      className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100"
-    >
+    <Link href={`/products/${product.id}`} className="block">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        whileHover={{ y: -10, scale: 1.02 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={handleMouseLeave}
+        className="group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 cursor-pointer"
+      >
       {/* Градиентный фон при наведении */}
       <div className={`absolute inset-0 bg-gradient-to-br ${categoryGradients[product.category]} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
       
@@ -156,7 +168,7 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
       <div 
         ref={imageContainerRef}
         onMouseMove={handleMouseMove}
-        className={`relative aspect-square bg-gradient-to-br ${categoryGradients[product.category]} flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing`}
+        className={`relative aspect-square bg-gradient-to-br ${categoryGradients[product.category]} flex items-center justify-center overflow-hidden`}
       >
         {hasImage && currentImage && !imageError ? (
           <motion.div
@@ -303,10 +315,10 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
           ))}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           {onSelect && (
             <motion.button
-              onClick={onSelect}
+              onClick={handleOrderClick}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="flex-1 bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 rounded-xl font-bold hover:from-primary-700 hover:to-primary-600 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl group/btn"
@@ -332,5 +344,6 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
       <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-primary-500/20 rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
       <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-primary-500/20 rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
     </motion.div>
+    </Link>
   )
 }

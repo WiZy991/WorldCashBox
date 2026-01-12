@@ -8,35 +8,29 @@ export default function Hero() {
   const { openAssistant } = useAssistant()
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-800 via-primary-700 to-primary-900 text-white">
-      {/* Анимированный фон с градиентами */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
-        <motion.div
-          className="absolute w-96 h-96 bg-primary-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute w-96 h-96 bg-primary-400 rounded-full mix-blend-multiply filter blur-xl opacity-20"
-          animate={{
-            x: [0, -100, 0],
-            y: [0, -100, 0],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute w-96 h-96 bg-primary-600 rounded-full mix-blend-multiply filter blur-xl opacity-20"
-          animate={{
-            x: [0, 150, 0],
-            y: [0, -150, 0],
-          }}
-          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-        />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden text-white">
+      {/* Фоновые изображения */}
+      <div className="absolute inset-0 flex">
+        <div className="flex-1 relative">
+          <img 
+            src="/images/hero/WhatsApp Image 2025-11-24 at 15.39.06 (1).jpeg"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        <div className="flex-1 relative">
+          <img 
+            src="/images/hero/WhatsApp Image 2025-11-24 at 15.39.08 (2).jpeg"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
       </div>
+      
+      {/* Overlay для лучшей читаемости текста */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50"></div>
 
       {/* Плавающие элементы */}
       <div className="absolute inset-0 overflow-hidden">
@@ -97,9 +91,7 @@ export default function Hero() {
               бизнес-процессов
             </span>
             <br />
-            <span className="text-4xl md:text-6xl lg:text-7xl text-white/90">
-              для крупных компаний
-            </span>
+
           </motion.h1>
 
           <motion.p
@@ -150,9 +142,9 @@ export default function Hero() {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20"
           >
             {[
-              { text: 'Индивидуальный подбор оборудования', icon: '🎯' },
-              { text: 'Решаем все в режиме одного окна', icon: '⚡' },
-              { text: 'Настройка и интеграция под ключ', icon: '🔧' },
+              { text: 'Индивидуальный подбор оборудования',},
+              { text: 'Решаем все в режиме одного окна',},
+              { text: 'Настройка и интеграция под ключ'},
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -162,7 +154,6 @@ export default function Hero() {
                 whileHover={{ scale: 1.05, y: -5 }}
                 className="glass backdrop-blur-md border border-white/20 rounded-2xl p-6 hover:bg-white/10 transition-all"
               >
-                <div className="text-4xl mb-3">{item.icon}</div>
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-6 h-6 text-green-300 flex-shrink-0" />
                   <span className="text-left font-medium">{item.text}</span>

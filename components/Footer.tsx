@@ -55,7 +55,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">© 2024 WorldCashbox. Все права защищены.</p>
+          <p className="text-gray-400 text-sm">© 2026 WorldCashbox. Все права защищены.</p>
           <div className="flex flex-wrap gap-4 justify-center md:justify-end mt-4 md:mt-0">
             <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition">
               Политика конфиденциальности и обработки персональных данных

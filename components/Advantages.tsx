@@ -47,7 +47,7 @@ export default function Advantages() {
             transition={{ type: "spring", delay: 0.2 }}
             className="text-6xl inline-block mb-6"
           >
-            ⭐
+            
           </motion.span>
           <h2 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-4">
             <span className="bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
