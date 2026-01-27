@@ -34,6 +34,12 @@ const subcategoriesByCategory: Record<string, { value: string; label: string }[]
   software: [
     { value: 'software_ofd', label: 'ОФД / Фискальные сервисы' },
     { value: 'software_box', label: 'Коробочное ПО' },
+    { value: 'datamobile', label: 'DataMobile' },
+    { value: '1c', label: '1С' },
+    { value: 'kleverens', label: 'Клеверенс' },
+    { value: 'dalion', label: 'Далион' },
+    { value: 'frontol', label: 'Frontol' },
+    { value: 'electronic_delivery', label: 'Электронная поставка' },
   ],
   video: [
     { value: 'cameras', label: 'Камеры видеонаблюдения' },
@@ -146,8 +152,15 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
 
       const data = await response.json()
       if (data.success && data.url) {
-        // Используем функциональное обновление состояния для гарантии актуальности данных
-        setFormData(prev => ({ ...prev, image: data.url }))
+        // Добавляем изображение в массив images
+        setFormData(prev => {
+          const currentImages = prev.images || []
+          // Если это первое изображение, также устанавливаем его как основное
+          if (currentImages.length === 0) {
+            return { ...prev, image: data.url, images: [data.url] }
+          }
+          return { ...prev, images: [...currentImages, data.url] }
+        })
       } else {
         alert(data.error || 'Ошибка при загрузке изображения')
       }
@@ -156,7 +169,78 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
       alert('Ошибка при загрузке изображения')
     } finally {
       setUploading(false)
+      // Сбрасываем input для возможности загрузки того же файла снова
+      e.target.value = ''
     }
+  }
+
+  const handleMultipleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    const uploadPromises: Promise<string>[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('category', 'misc')
+
+      const promise = fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.url) {
+            return data.url
+          } else {
+            throw new Error(data.error || 'Ошибка при загрузке изображения')
+          }
+        })
+
+      uploadPromises.push(promise)
+    }
+
+    try {
+      const uploadedUrls = await Promise.all(uploadPromises)
+      setFormData(prev => {
+        const currentImages = prev.images || []
+        // Если это первое изображение, также устанавливаем его как основное
+        if (currentImages.length === 0 && uploadedUrls.length > 0) {
+          return { ...prev, image: uploadedUrls[0], images: uploadedUrls }
+        }
+        return { ...prev, images: [...currentImages, ...uploadedUrls] }
+      })
+    } catch (error) {
+      console.error('Error uploading images:', error)
+      alert('Ошибка при загрузке изображений: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'))
+    } finally {
+      setUploading(false)
+      // Сбрасываем input
+      e.target.value = ''
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setFormData(prev => {
+      const currentImages = prev.images || []
+      const newImages = currentImages.filter((_, i) => i !== index)
+      // Если удаляем основное изображение, устанавливаем первое из оставшихся
+      const newMainImage = index === 0 && newImages.length > 0 ? newImages[0] : (index !== 0 ? prev.image : undefined)
+      return { ...prev, images: newImages, image: newMainImage }
+    })
+  }
+
+  const setMainImage = (index: number) => {
+    setFormData(prev => {
+      const currentImages = prev.images || []
+      if (currentImages[index]) {
+        return { ...prev, image: currentImages[index] }
+      }
+      return prev
+    })
   }
 
   const addFeature = () => {
@@ -286,40 +370,111 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Изображение
+                Изображения товара
               </label>
-              <div className="flex items-center space-x-4">
+              
+              {/* Загрузка множественных изображений */}
+              <div className="mb-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleMultipleImageUpload}
+                  className="hidden"
+                  id="multiple-image-upload"
+                  disabled={uploading}
+                />
+                <label
+                  htmlFor="multiple-image-upload"
+                  className={`flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors inline-block ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Upload className="w-5 h-5" />
+                  <span>{uploading ? 'Загрузка...' : 'Загрузить несколько изображений'}</span>
+                </label>
+              </div>
+
+              {/* Загрузка одного изображения */}
+              <div className="mb-4">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
                   id="image-upload"
+                  disabled={uploading}
                 />
                 <label
                   htmlFor="image-upload"
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                  className={`flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors inline-block ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Upload className="w-5 h-5" />
-                  <span>{uploading ? 'Загрузка...' : 'Загрузить изображение'}</span>
+                  <ImageIcon className="w-5 h-5" />
+                  <span>{uploading ? 'Загрузка...' : 'Загрузить одно изображение'}</span>
                 </label>
-                {formData.image && (
-                  <div className="relative">
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
-                  </div>
-                )}
               </div>
+
+              {/* URL изображения */}
               <input
                 type="text"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                value={formData.image || ''}
+                onChange={(e) => {
+                  const url = e.target.value
+                  setFormData(prev => {
+                    const currentImages = prev.images || []
+                    // Если URL добавляется и его нет в массиве, добавляем
+                    if (url && !currentImages.includes(url)) {
+                      return { ...prev, image: url, images: currentImages.length === 0 ? [url] : [url, ...currentImages] }
+                    }
+                    return { ...prev, image: url }
+                  })
+                }}
                 placeholder="Или введите URL изображения"
-                className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
+
+              {/* Галерея загруженных изображений */}
+              {formData.images && formData.images.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Загруженные изображения ({formData.images.length}):
+                  </p>
+                  <div className="grid grid-cols-4 gap-4">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={img}
+                          alt={`Preview ${index + 1}`}
+                          className={`w-full h-24 object-cover rounded-lg border-2 ${
+                            formData.image === img ? 'border-primary-600' : 'border-gray-200'
+                          }`}
+                        />
+                        {formData.image === img && (
+                          <div className="absolute top-1 left-1 bg-primary-600 text-white text-xs px-2 py-1 rounded">
+                            Основное
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setMainImage(index)}
+                            className="opacity-0 group-hover:opacity-100 bg-white text-primary-600 px-2 py-1 rounded text-xs font-semibold hover:bg-primary-50 transition-opacity"
+                            title="Сделать основным"
+                          >
+                            Основное
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="opacity-0 group-hover:opacity-100 bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition-opacity"
+                            title="Удалить"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>

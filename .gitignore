@@ -40,6 +40,14 @@ requests/
 *.log
 logs/
 
-# large files (опционально - раскомментируйте если нужно исключить)
-# Photo/
+# large files and photos
+Photo/
+scripts/Photo
+scripts/phot
+scripts/photo
+
+# environment files
+.env.production
+.env.local
+.env*.local
 

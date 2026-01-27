@@ -76,13 +76,27 @@ export default function ProductPage() {
   }
 
   // Получаем все изображения товара
+  // Объединяем все изображения: сначала основное (image), затем остальные из массива images
   const allImages = product 
-    ? (product.images && product.images.length > 0 
-        ? product.images 
-        : (product.image ? [product.image] : []))
+    ? (() => {
+        const images: string[] = []
+        // Добавляем основное изображение первым, если оно есть
+        if (product.image) {
+          images.push(product.image)
+        }
+        // Добавляем остальные изображения из массива, исключая дубликаты
+        if (product.images && product.images.length > 0) {
+          product.images.forEach(img => {
+            if (img && !images.includes(img)) {
+              images.push(img)
+            }
+          })
+        }
+        return images
+      })()
     : []
 
-  const currentImage = allImages[selectedImageIndex] || product?.image || ''
+  const currentImage = allImages[selectedImageIndex] || allImages[0] || ''
 
   if (loading) {
     return (
@@ -171,26 +185,31 @@ export default function ProductPage() {
               )}
             </div>
 
-            {/* Thumbnails */}
-            {allImages.length > 1 && (
-              <div className="flex space-x-4 overflow-x-auto pb-2">
-                {allImages.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition ${
-                      selectedImageIndex === index
-                        ? 'border-primary-600 ring-2 ring-primary-200'
-                        : 'border-gray-200 hover:border-primary-300'
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt={`${product.name} - вид ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+            {/* Thumbnails - показываем всегда, если есть хотя бы одно изображение */}
+            {allImages.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-3">
+                  Всего изображений: {allImages.length}
+                </p>
+                <div className="flex space-x-4 overflow-x-auto pb-2">
+                  {allImages.map((img, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition ${
+                        selectedImageIndex === index
+                          ? 'border-primary-600 ring-2 ring-primary-200 scale-105'
+                          : 'border-gray-200 hover:border-primary-300 hover:scale-105'
+                      }`}
+                    >
+                      <img
+                        src={img}
+                        alt={`${product.name} - вид ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>

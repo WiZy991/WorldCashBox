@@ -13,6 +13,12 @@ const softwareCategories = [
   { id: 'crm', name: 'CRM системы' },
   { id: 'restaurant', name: 'Для ресторанов' },
   { id: 'cloud', name: 'Облачные решения' },
+  { id: 'datamobile', name: 'DataMobile' },
+  { id: '1c', name: '1С' },
+  { id: 'kleverens', name: 'Клеверенс' },
+  { id: 'dalion', name: 'Далион' },
+  { id: 'frontol', name: 'Frontol' },
+  { id: 'electronic_delivery', name: 'Электронная поставка' },
 ]
 
 const features = [
@@ -64,7 +70,7 @@ export default function SoftwarePage() {
   const softwareProducts = products.filter(p => p.category === 'software')
 
   const filteredProducts = softwareProducts.filter(product => {
-    const matchesCategory = selectedCategory === 'all'
+    const matchesCategory = selectedCategory === 'all' || product.subcategory === selectedCategory
     const matchesSearch = searchQuery === '' || 
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase())

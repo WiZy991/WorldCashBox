@@ -46,6 +46,12 @@ export const subcategories: Record<string, string[]> = {
     'crm',
     'restaurant',
     'cloud',
+    'datamobile',
+    '1c',
+    'kleverens',
+    'dalion',
+    'frontol',
+    'electronic_delivery',
   ],
   video: [
     'cameras',
