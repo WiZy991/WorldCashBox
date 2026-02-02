@@ -13,6 +13,10 @@ export interface Product {
   sbisId?: string | number // ID товара в СБИС (артикул или идентификатор)
   sbisPriceListId?: number // ID прайс-листа в СБИС
   priceUpdatedAt?: string // Дата последнего обновления цены из СБИС
+  stock?: number // Количество товара на складе
+  inStock?: boolean // Наличие товара (true если stock > 0)
+  stockUpdatedAt?: string // Дата последнего обновления остатков из СБИС
+  sbisWarehouseId?: string // ID склада в СБИС (UUID)
 }
 
 // Статические товары удалены - все товары теперь управляются через админ панель

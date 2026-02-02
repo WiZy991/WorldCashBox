@@ -28,7 +28,7 @@ export interface SBISPriceItem {
  * Получение токена доступа к СБИС API
  * Использует сервисный ключ как токен доступа
  */
-function getSBISAccessToken(): string {
+export function getSBISAccessToken(): string {
   // Сервисный ключ используется как токен доступа
   const SBIS_SERVICE_KEY = process.env.SBIS_SERVICE_KEY
   

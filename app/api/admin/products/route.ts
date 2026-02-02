@@ -96,6 +96,18 @@ export async function POST(request: NextRequest) {
       priceUpdatedAt: productData.priceUpdatedAt && typeof productData.priceUpdatedAt === 'string'
         ? productData.priceUpdatedAt
         : undefined,
+      stock: productData.stock !== undefined && productData.stock !== null && productData.stock !== '' 
+        ? Number(productData.stock) 
+        : undefined,
+      inStock: productData.inStock !== undefined && productData.inStock !== null
+        ? Boolean(productData.inStock)
+        : (productData.stock !== undefined && productData.stock !== null && Number(productData.stock) > 0),
+      stockUpdatedAt: productData.stockUpdatedAt && typeof productData.stockUpdatedAt === 'string'
+        ? productData.stockUpdatedAt
+        : undefined,
+      sbisWarehouseId: productData.sbisWarehouseId && typeof productData.sbisWarehouseId === 'string' && productData.sbisWarehouseId.trim() !== ''
+        ? productData.sbisWarehouseId.trim()
+        : undefined,
     }
     
     console.log('Creating product:', {

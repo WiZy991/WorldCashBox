@@ -373,7 +373,23 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Укажите ID или артикул товара из СБИС для автоматической синхронизации цен
+                Укажите ID или артикул товара из СБИС для автоматической синхронизации цен и остатков
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ID склада в СБИС (UUID, опционально)
+              </label>
+              <input
+                type="text"
+                value={formData.sbisWarehouseId || ''}
+                onChange={(e) => setFormData({ ...formData, sbisWarehouseId: e.target.value || undefined })}
+                placeholder="284a42ba-97cc-4d9c-98af-00000000100a"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Укажите ID склада в СБИС для синхронизации остатков. Если не указан, используется из настроек.
               </p>
             </div>
 

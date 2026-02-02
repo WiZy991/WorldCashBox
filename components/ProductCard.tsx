@@ -287,14 +287,34 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
           )}
         </p>
         
-        {product.price !== undefined && (
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="text-3xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4"
-          >
-            {product.id === 'bitrix24' ? 'От ' : ''}{product.price.toLocaleString('ru-RU')} ₽
-          </motion.div>
-        )}
+        <div className="flex items-center justify-between mb-4">
+          {product.price !== undefined && (
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="text-3xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent"
+            >
+              {product.id === 'bitrix24' ? 'От ' : ''}{product.price.toLocaleString('ru-RU')} ₽
+            </motion.div>
+          )}
+          {/* Индикатор наличия товара */}
+          {product.inStock !== undefined && (
+            <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+              product.inStock 
+                ? 'bg-green-100 text-green-700 border border-green-300' 
+                : 'bg-red-100 text-red-700 border border-red-300'
+            }`}>
+              {product.inStock ? (
+                product.stock !== undefined && product.stock > 0 ? (
+                  `✓ В наличии (${product.stock})`
+                ) : (
+                  '✓ В наличии'
+                )
+              ) : (
+                '✗ Нет в наличии'
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="space-y-2 mb-6">
           {product.features.slice(0, 2).map((feature, index) => (
