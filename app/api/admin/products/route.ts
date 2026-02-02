@@ -86,6 +86,16 @@ export async function POST(request: NextRequest) {
       specifications: productData.specifications && typeof productData.specifications === 'object' 
         ? productData.specifications 
         : undefined,
+      // Поля для интеграции с СБИС
+      sbisId: productData.sbisId && (typeof productData.sbisId === 'string' || typeof productData.sbisId === 'number')
+        ? (typeof productData.sbisId === 'string' && productData.sbisId.trim() !== '' ? productData.sbisId.trim() : productData.sbisId)
+        : undefined,
+      sbisPriceListId: productData.sbisPriceListId && typeof productData.sbisPriceListId === 'number'
+        ? productData.sbisPriceListId
+        : undefined,
+      priceUpdatedAt: productData.priceUpdatedAt && typeof productData.priceUpdatedAt === 'string'
+        ? productData.priceUpdatedAt
+        : undefined,
     }
     
     console.log('Creating product:', {

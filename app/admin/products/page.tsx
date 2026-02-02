@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Plus, Edit, Trash2, Search } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, RefreshCw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Product } from '@/data/products'
 import ProductForm from '@/components/admin/ProductForm'
@@ -13,6 +13,7 @@ export default function AdminProducts() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     loadProducts()
@@ -56,6 +57,35 @@ export default function AdminProducts() {
     loadProducts()
   }
 
+  const handleSyncPrices = async () => {
+    if (!confirm('Синхронизировать цены из СБИС? Это может занять некоторое время.')) {
+      return
+    }
+
+    setSyncing(true)
+    try {
+      const response = await fetch('/api/sbis/prices/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: false }),
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        alert(`Синхронизация завершена!\nОбновлено товаров: ${data.stats.updated}\nНе найдено: ${data.stats.notFound}`)
+        loadProducts()
+      } else {
+        alert(`Ошибка синхронизации: ${data.error || 'Неизвестная ошибка'}`)
+      }
+    } catch (error) {
+      console.error('Error syncing prices:', error)
+      alert('Ошибка при синхронизации цен')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   const filteredProducts = products.filter(
     (p) =>
       (p.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
@@ -71,16 +101,26 @@ export default function AdminProducts() {
             <h1 className="text-3xl font-bold text-gray-900">Товары</h1>
             <p className="text-gray-600 mt-2">Управление каталогом товаров</p>
           </div>
-          <button
-            onClick={() => {
-              setEditingProduct(null)
-              setShowForm(true)
-            }}
-            className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center space-x-2"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Добавить товар</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleSyncPrices}
+              disabled={syncing}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+              <span>{syncing ? 'Синхронизация...' : 'Синхронизировать цены'}</span>
+            </button>
+            <button
+              onClick={() => {
+                setEditingProduct(null)
+                setShowForm(true)
+              }}
+              className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Добавить товар</span>
+            </button>
+          </div>
         </div>
 
         <div className="mb-6">

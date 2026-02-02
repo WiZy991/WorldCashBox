@@ -1,0 +1,67 @@
+1. Получить прайс-лист по API
+Запрос возвращает информацию о действующих прайс-листах и колонках цен.
+
+Структура запроса 
+Метод запроса: GET
+
+Адрес запроса: https://api.sbis.ru/retail/nomenclature/price-list?
+
+Параметр
+* — обязательный
+
+Тип
+
+Описание
+
+pointId*	число	идентификатор точки продаж, который возвращается в результате запроса «Получить точку продаж»
+actualDate *	строка
+«ДД.ММ.ГГГГ ЧЧ:ММ:СС»	дата и время, на которые запрашивается прайс-лист или колонка цен
+searchString	строка	название прайса или колонки цен
+page	число	номер страницы
+pageSize	число	количество записей на странице
+Результат 
+Параметр
+
+Тип
+
+Описание
+
+id	строка
+целое число	идентификаторы меню и колонки цен. Они будут передаваться в других вопросах как параметр priceListId
+name	строка	названия прайса и колонки цен
+outcome	массив	признак наличия записей на следующей странице. Возможные значения: «Да», «Нет»
+ 	hasMore	логический	признак наличия записей на следующей странице. Возможные значения: «Да», «Нет»
+Примеры 
+*.php
+ *.py
+Запрос прайса с помощью библиотеки «Requests»
+
+﻿import requests
+parameters = {
+    'pointId': 206,
+    'actualDate': '2020-09-07 00:00:00'
+}
+url = 'https://api.sbis.ru/retail/nomenclature/price-list?'  
+headers = {
+"X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZUA4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}  
+response = requests.get(url, params=parameters, headers=headers)
+print(response.text)
+Ответ
+
+{
+    "priceLists": [
+        {
+            "id": 15,
+            "name": "Прайс для интернет магазина"
+        },
+        {
+            "id": 10,
+            "name": "Оптовый прайс"
+        }
+    ],
+    "outcome": {
+        "hasMore": false
+    }
+}
+

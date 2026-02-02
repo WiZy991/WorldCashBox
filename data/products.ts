@@ -9,6 +9,10 @@ export interface Product {
   description: string
   features: string[]
   specifications?: Record<string, string>
+  // Поля для интеграции с СБИС
+  sbisId?: string | number // ID товара в СБИС (артикул или идентификатор)
+  sbisPriceListId?: number // ID прайс-листа в СБИС
+  priceUpdatedAt?: string // Дата последнего обновления цены из СБИС
 }
 
 // Статические товары удалены - все товары теперь управляются через админ панель

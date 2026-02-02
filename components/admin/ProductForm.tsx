@@ -57,6 +57,7 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
     features: [],
     image: '',
     images: [],
+    sbisId: undefined,
   })
   const [featureInput, setFeatureInput] = useState('')
   const [uploading, setUploading] = useState(false)
@@ -353,6 +354,27 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
                 onChange={(e) => setFormData({ ...formData, price: e.target.value ? parseFloat(e.target.value) : undefined })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
+              {formData.priceUpdatedAt && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Обновлено: {new Date(formData.priceUpdatedAt).toLocaleString('ru-RU')}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ID товара в СБИС (артикул)
+              </label>
+              <input
+                type="text"
+                value={formData.sbisId || ''}
+                onChange={(e) => setFormData({ ...formData, sbisId: e.target.value || undefined })}
+                placeholder="Введите ID или артикул товара из СБИС"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Укажите ID или артикул товара из СБИС для автоматической синхронизации цен
+              </p>
             </div>
 
             <div>
