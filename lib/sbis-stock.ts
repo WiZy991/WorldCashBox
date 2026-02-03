@@ -28,6 +28,8 @@ export async function getSBISCompanies(): Promise<Array<{ id: number; name: stri
   const accessToken = getSBISAccessToken()
   const url = `https://api.sbis.ru/retail/company/list`
 
+  console.log(`[SBIS] Запрос списка компаний: ${url}`)
+
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -39,11 +41,47 @@ export async function getSBISCompanies(): Promise<Array<{ id: number; name: stri
 
     if (!response.ok) {
       const errorText = await response.text()
+      console.error(`[SBIS] Ошибка API (${response.status}):`, errorText)
       throw new Error(`СБИС API вернул ошибку (${response.status}): ${errorText}`)
     }
 
     const data = await response.json()
-    return data.companies || data || []
+    console.log(`[SBIS] Ответ API (список компаний):`, JSON.stringify(data, null, 2))
+    
+    // Структура ответа может быть разной, пробуем разные варианты
+    let companies: Array<{ id: number; name: string }> = []
+    
+    if (Array.isArray(data)) {
+      // Если ответ - массив
+      companies = data.map((item: any) => ({
+        id: item.id || item.Id || item.ID || item.companyId || item.company_id,
+        name: item.name || item.Name || item.companyName || item.company_name || '',
+      }))
+    } else if (data.companies && Array.isArray(data.companies)) {
+      // Если ответ содержит поле companies
+      companies = data.companies.map((item: any) => ({
+        id: item.id || item.Id || item.ID || item.companyId || item.company_id,
+        name: item.name || item.Name || item.companyName || item.company_name || '',
+      }))
+    } else if (data.result && Array.isArray(data.result)) {
+      // Если ответ содержит поле result
+      companies = data.result.map((item: any) => ({
+        id: item.id || item.Id || item.ID || item.companyId || item.company_id,
+        name: item.name || item.Name || item.companyName || item.company_name || '',
+      }))
+    } else {
+      console.warn('[SBIS] Неожиданная структура ответа для списка компаний:', Object.keys(data))
+    }
+    
+    // Фильтруем компании с валидным ID
+    companies = companies.filter(c => c.id !== undefined && c.id !== null && !isNaN(Number(c.id)))
+    
+    console.log(`[SBIS] Найдено компаний: ${companies.length}`)
+    if (companies.length > 0) {
+      console.log(`[SBIS] Первая компания:`, companies[0])
+    }
+    
+    return companies
   } catch (error) {
     console.error('Ошибка получения списка компаний из СБИС:', error)
     throw error
@@ -61,6 +99,8 @@ export async function getSBISCompanyWarehouses(companyId: number): Promise<Array
   const accessToken = getSBISAccessToken()
   const url = `https://api.sbis.ru/retail/company/warehouses?companyId=${companyId}`
 
+  console.log(`[SBIS] Запрос списка складов компании ${companyId}: ${url}`)
+
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -72,11 +112,50 @@ export async function getSBISCompanyWarehouses(companyId: number): Promise<Array
 
     if (!response.ok) {
       const errorText = await response.text()
+      console.error(`[SBIS] Ошибка API (${response.status}):`, errorText)
       throw new Error(`СБИС API вернул ошибку (${response.status}): ${errorText}`)
     }
 
     const data = await response.json()
-    return data.warehouses || data || []
+    console.log(`[SBIS] Ответ API (список складов):`, JSON.stringify(data, null, 2))
+    
+    // Структура ответа может быть разной, пробуем разные варианты
+    let warehouses: Array<{ id: number; name: string; uuid?: string }> = []
+    
+    if (Array.isArray(data)) {
+      // Если ответ - массив
+      warehouses = data.map((item: any) => ({
+        id: item.id || item.Id || item.ID || item.warehouseId || item.warehouse_id,
+        name: item.name || item.Name || item.warehouseName || item.warehouse_name || '',
+        uuid: item.uuid || item.UUID || item.uuid || item.externalId || item.external_id,
+      }))
+    } else if (data.warehouses && Array.isArray(data.warehouses)) {
+      // Если ответ содержит поле warehouses
+      warehouses = data.warehouses.map((item: any) => ({
+        id: item.id || item.Id || item.ID || item.warehouseId || item.warehouse_id,
+        name: item.name || item.Name || item.warehouseName || item.warehouse_name || '',
+        uuid: item.uuid || item.UUID || item.uuid || item.externalId || item.external_id,
+      }))
+    } else if (data.result && Array.isArray(data.result)) {
+      // Если ответ содержит поле result
+      warehouses = data.result.map((item: any) => ({
+        id: item.id || item.Id || item.ID || item.warehouseId || item.warehouse_id,
+        name: item.name || item.Name || item.warehouseName || item.warehouse_name || '',
+        uuid: item.uuid || item.UUID || item.uuid || item.externalId || item.external_id,
+      }))
+    } else {
+      console.warn('[SBIS] Неожиданная структура ответа для списка складов:', Object.keys(data))
+    }
+    
+    // Фильтруем склады с валидным ID
+    warehouses = warehouses.filter(w => w.id !== undefined && w.id !== null && !isNaN(Number(w.id)))
+    
+    console.log(`[SBIS] Найдено складов: ${warehouses.length}`)
+    if (warehouses.length > 0) {
+      console.log(`[SBIS] Первый склад:`, warehouses[0])
+    }
+    
+    return warehouses
   } catch (error) {
     console.error('Ошибка получения списка складов компании из СБИС:', error)
     throw error

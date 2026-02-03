@@ -234,6 +234,12 @@ export async function POST(request: NextRequest) {
         }
         
         // Используем первую компанию (или можно добавить переменную окружения SBIS_COMPANY_ID)
+        if (!companies[0] || companies[0].id === undefined || companies[0].id === null) {
+          console.error('[SBIS] ОШИБКА: Не удалось получить ID компании из ответа API')
+          console.error('[SBIS] Структура ответа:', JSON.stringify(companies, null, 2))
+          throw new Error('Не удалось получить ID компании из СБИС API. Проверьте структуру ответа.')
+        }
+        
         companyId = companies[0].id
         console.log(`[SBIS] Используется компания: ${companies[0].name} (ID: ${companyId})`)
         
