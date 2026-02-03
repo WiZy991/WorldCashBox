@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Plus, Edit, Trash2, Search, RefreshCw, Warehouse } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, RefreshCw } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Product } from '@/data/products'
 import ProductForm from '@/components/admin/ProductForm'
@@ -100,15 +100,6 @@ export default function AdminProducts() {
     }
   }
 
-  const handleCheckWarehouse = async () => {
-    // Метод получения списка складов не поддерживается в СБИС API
-    // Показываем информацию о текущей настройке
-    alert('Метод получения списка складов не поддерживается в СБИС API.\n\n' +
-      'Используйте переменную SBIS_WAREHOUSE_ID в ecosystem.config.js на сервере для указания склада.\n\n' +
-      'Текущий склад указан в переменных окружения PM2.\n\n' +
-      'Для проверки выполните на сервере: pm2 env 0 | grep SBIS_WAREHOUSE_ID')
-  }
-
   const filteredProducts = products.filter(
     (p) =>
       (p.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
@@ -126,12 +117,41 @@ export default function AdminProducts() {
           </div>
           <div className="flex items-center space-x-3">
             <button
-              onClick={handleCheckWarehouse}
-              className="bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
-              title="Проверить склад в СБИС"
+              onClick={async () => {
+                if (!confirm('Импортировать все товары со склада "Толстого 32А"? Это может занять некоторое время.')) {
+                  return
+                }
+                setSyncing(true)
+                try {
+                  const response = await fetch('/api/sbis/products/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ force: false }),
+                  })
+                  const data = await response.json()
+                  if (response.ok) {
+                    const message = `Импорт завершен!\n` +
+                      `Создано товаров: ${data.stats.created || 0}\n` +
+                      `Обновлено товаров: ${data.stats.updated || 0}\n` +
+                      `Всего обработано: ${data.stats.total || 0}\n\n` +
+                      `Категории:\n${Object.entries(data.stats.categories || {}).map(([cat, count]) => `  ${cat}: ${count}`).join('\n')}`
+                    alert(message)
+                    loadProducts()
+                  } else {
+                    alert(`Ошибка импорта: ${data.error || 'Неизвестная ошибка'}\n\n${data.details || ''}`)
+                  }
+                } catch (error) {
+                  console.error('Error importing products:', error)
+                  alert('Ошибка при импорте товаров')
+                } finally {
+                  setSyncing(false)
+                }
+              }}
+              disabled={syncing}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Warehouse className="w-5 h-5" />
-              <span>Проверить склад</span>
+              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+              <span>{syncing ? 'Импорт...' : 'Импорт товаров'}</span>
             </button>
             <button
               onClick={handleSyncPrices}

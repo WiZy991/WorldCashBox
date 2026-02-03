@@ -250,6 +250,19 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
           </motion.div>
         )}
         
+        {/* Бейдж наличия товара в верхней части */}
+        {product.inStock !== undefined && (
+          <div className="absolute top-4 left-4 z-10">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-md ${
+                product.inStock ? 'bg-green-500' : 'bg-red-500'
+              }`}
+            >
+              {product.inStock ? 'В наличии' : 'Нет в наличии'}
+            </span>
+          </div>
+        )}
+
         {/* Декоративные элементы */}
         <div className="absolute top-4 right-4">
           <motion.div
