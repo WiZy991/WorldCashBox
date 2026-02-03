@@ -154,12 +154,13 @@ export async function getSBISPrices(
     // onlyPublished: false - не указываем, чтобы получить все товары
   })
   
-  // ВАЖНО: Передаем pointId (ID склада/точки продаж) для получения товаров и остатков по этому складу
-  // Согласно документации, pointId - это идентификатор точки продаж
-  // В нашем случае используем ID склада как pointId
-  if (pointId && pointId > 0) {
-    params.append('pointId', pointId.toString())
-  }
+  // ВАЖНО: pointId - это идентификатор точки продаж, а не склада!
+  // Если передать ID склада как pointId, API вернет ошибку "Точка продаж не найдена"
+  // Поэтому не передаем pointId, если он не является валидной точкой продаж
+  // Для получения остатков используем ID складов в отдельном запросе
+  // if (pointId && pointId > 0) {
+  //   params.append('pointId', pointId.toString())
+  // }
 
   if (searchString) {
     params.append('searchString', searchString)
