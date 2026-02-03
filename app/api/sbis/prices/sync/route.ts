@@ -148,6 +148,19 @@ export async function POST(request: NextRequest) {
           break
         }
       }
+      console.log(`Загружено ${allPrices.length} товаров из прайс-листа СБИС`)
+      // Логируем структуру первых товаров для отладки
+      if (allPrices.length > 0) {
+        console.log('Пример структуры товара из СБИС (первые 3):', 
+          allPrices.slice(0, 3).map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            // Показываем все доступные поля
+            allFields: Object.keys(p)
+          }))
+        )
+      }
     } catch (error) {
       console.error('Ошибка получения цен из СБИС:', error)
       // Если не удалось получить цены через API цен, пробуем получить по каждому товару
@@ -206,14 +219,47 @@ export async function POST(request: NextRequest) {
 
       if (product.sbisId && allPrices.length > 0) {
         // Ищем цену в загруженных данных
-        const priceItem = allPrices.find(item => 
-          String(item.id) === String(product.sbisId) ||
-          item.name.toLowerCase().includes(product.name.toLowerCase()) ||
-          product.name.toLowerCase().includes(item.name.toLowerCase())
-        )
+        // Пробуем разные варианты сопоставления:
+        // 1. Точное совпадение ID
+        // 2. Совпадение кода товара (если есть поле code)
+        // 3. Частичное совпадение по названию
+        const priceItem = allPrices.find(item => {
+          // Точное совпадение ID
+          if (String(item.id) === String(product.sbisId)) {
+            console.log(`Товар ${product.name} найден по ID: ${item.id}`)
+            return true
+          }
+          // Совпадение кода (если есть поле code в ответе API)
+          if ((item as any).code && String((item as any).code) === String(product.sbisId)) {
+            console.log(`Товар ${product.name} найден по коду: ${(item as any).code}`)
+            return true
+          }
+          // Совпадение артикула (если есть поле article или sku)
+          if ((item as any).article && String((item as any).article) === String(product.sbisId)) {
+            console.log(`Товар ${product.name} найден по артикулу: ${(item as any).article}`)
+            return true
+          }
+          // Частичное совпадение по названию (как запасной вариант)
+          if (item.name && product.name) {
+            const itemNameLower = item.name.toLowerCase()
+            const productNameLower = product.name.toLowerCase()
+            if (itemNameLower.includes(productNameLower) || productNameLower.includes(itemNameLower)) {
+              console.log(`Товар ${product.name} найден по названию: ${item.name}`)
+              return true
+            }
+          }
+          return false
+        })
         
         if (priceItem) {
           newPrice = priceItem.price
+          console.log(`Цена для товара ${product.name} (sbisId: ${product.sbisId}): ${newPrice}`)
+        } else {
+          console.warn(`Товар ${product.name} (sbisId: ${product.sbisId}) не найден в прайс-листе. Доступно товаров: ${allPrices.length}`)
+          // Логируем первые несколько товаров для отладки
+          if (allPrices.length > 0 && allPrices.length <= 10) {
+            console.log('Примеры товаров из прайс-листа:', allPrices.map(p => ({ id: p.id, name: p.name, code: (p as any).code })))
+          }
         }
       }
 
@@ -289,12 +335,14 @@ export async function POST(request: NextRequest) {
       message: 'Цены и остатки успешно синхронизированы',
       stats: {
         total: products.length,
+        withSBISId: products.filter(p => p.sbisId).length,
         pricesUpdated: updatedCount,
         stockUpdated: updatedStockCount,
         notFound: notFoundCount,
         priceListId: priceListId,
         warehouseId: warehouseId || null,
         warehouseName: warehouseInfo?.name || null,
+        totalPricesInSBIS: allPrices.length,
         syncedAt: now,
       },
     })
