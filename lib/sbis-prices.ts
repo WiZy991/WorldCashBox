@@ -24,7 +24,7 @@ export interface SBISPriceItem {
   unit?: string
   code?: string // Код товара (nomNumber)
   article?: string // Артикул (nomNumber)
-  balance?: string // Остаток товара
+  balance?: string | number // Остаток товара (может быть string или number в зависимости от API)
 }
 
 /**

@@ -435,7 +435,10 @@ export async function POST(request: NextRequest) {
             
             // Если в найденном товаре есть остаток, используем его
             if (foundProduct.balance !== undefined && foundProduct.balance !== null) {
-              newStock = foundProduct.balance
+              // Преобразуем balance в число (может быть string или number)
+              newStock = typeof foundProduct.balance === 'string' 
+                ? parseFloat(foundProduct.balance) || 0 
+                : Number(foundProduct.balance) || 0
               console.log(`✓ Остаток для товара ${product.name} из searchString: ${newStock}`)
             }
           } else {
