@@ -247,8 +247,9 @@ export async function getSBISPrices(
         hierarchicalId: item.hierarchicalId, // Сохраняем для пагинации
       }))
     
-    // Получаем hierarchicalId последнего элемента для следующей страницы
-    const lastPosition = items.length > 0 && nomenclatures.length > 0
+    // Получаем hierarchicalId последнего элемента ВСЕГО массива (включая папки) для следующей страницы
+    // Это важно для правильной пагинации - нужно использовать последний hierarchicalId из всего ответа
+    const lastPosition = nomenclatures.length > 0
       ? (nomenclatures[nomenclatures.length - 1] as any)?.hierarchicalId
       : undefined
     

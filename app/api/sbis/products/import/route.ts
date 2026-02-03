@@ -84,12 +84,12 @@ export async function POST(request: NextRequest) {
     // Загружаем товары порциями по 1000 (максимум для API v2)
     // Используем position для пагинации (иерархический идентификатор)
     let allProducts: Array<{ id: string | number; name: string; price: number; code?: string; article?: string; balance?: string | number }> = []
-    let hasMore = true
     let pageCount = 0
     let lastPosition: number | undefined = undefined
     const maxPages = 200 // Ограничение на 200 страниц (200,000 товаров максимум)
     
-    while (hasMore && pageCount < maxPages) {
+    // Продолжаем загрузку пока есть lastPosition или hasMore
+    while (pageCount < maxPages) {
       const pricesResponse = await getSBISPrices(
         SBIS_PRICE_LIST_ID,
         0, // pointId не используется
@@ -101,11 +101,10 @@ export async function POST(request: NextRequest) {
       )
       
       allProducts = [...allProducts, ...pricesResponse.items]
-      hasMore = pricesResponse.hasMore
-      lastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
+      const newLastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
       pageCount++
       
-      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${hasMore}, position: ${lastPosition}`)
+      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${pricesResponse.hasMore}, lastPosition: ${newLastPosition}`)
       
       // Если не получили товаров, прекращаем загрузку
       if (pricesResponse.items.length === 0) {
@@ -113,10 +112,23 @@ export async function POST(request: NextRequest) {
         break
       }
       
-      // Небольшая задержка между запросами, чтобы не перегружать API
-      if (hasMore) {
-        await new Promise(resolve => setTimeout(resolve, 500))
+      // Обновляем lastPosition для следующей итерации
+      lastPosition = newLastPosition
+      
+      // Продолжаем загрузку если есть lastPosition (даже если hasMore: false)
+      // API v2 может возвращать hasMore: false, но при этом есть еще товары через position
+      if (!lastPosition && !pricesResponse.hasMore) {
+        console.log(`[SBIS Import] Нет больше товаров (hasMore: ${pricesResponse.hasMore}, lastPosition: ${lastPosition}), прекращаем загрузку`)
+        break
       }
+      
+      // Если есть lastPosition, продолжаем загрузку
+      if (lastPosition) {
+        console.log(`[SBIS Import] Продолжаем загрузку с position: ${lastPosition}`)
+      }
+      
+      // Небольшая задержка между запросами, чтобы не перегружать API
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
     
     console.log(`[SBIS Import] Всего загружено товаров: ${allProducts.length}`)
