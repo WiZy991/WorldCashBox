@@ -12,6 +12,8 @@ interface ProductsCatalogProps {
   showAll?: boolean
 }
 
+const ITEMS_PER_PAGE = 50 // Количество товаров на странице
+
 export default function ProductsCatalog({ showAll = false }: ProductsCatalogProps = {}) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -19,6 +21,7 @@ export default function ProductsCatalog({ showAll = false }: ProductsCatalogProp
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
 
   useEffect(() => {
     const loadProductsData = async () => {
@@ -43,6 +46,18 @@ export default function ProductsCatalog({ showAll = false }: ProductsCatalogProp
       (product.description?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
+
+  // Сбрасываем счетчик при изменении фильтров
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_PAGE)
+  }, [selectedCategory, searchQuery])
+
+  // Товары для отображения
+  const displayedProducts = showAll 
+    ? filteredProducts.slice(0, displayedCount)
+    : filteredProducts.slice(0, 8)
+  
+  const hasMore = showAll && displayedCount < filteredProducts.length
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product)
@@ -127,22 +142,50 @@ export default function ProductsCatalog({ showAll = false }: ProductsCatalogProp
             <p className="mt-4 text-gray-600">Загрузка товаров...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(showAll ? filteredProducts : filteredProducts.slice(0, 8)).map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <ProductCard
-                product={product}
-                onSelect={() => handleProductSelect(product)}
-              />
-            </motion.div>
-          ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: Math.min(index * 0.05, 1) }}
+                >
+                  <ProductCard
+                    product={product}
+                    onSelect={() => handleProductSelect(product)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Кнопка "Показать еще" */}
+            {hasMore && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-center mt-12"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setDisplayedCount(prev => prev + ITEMS_PER_PAGE)}
+                  className="bg-gradient-to-r from-primary-600 to-primary-500 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transition"
+                >
+                  Показать еще ({filteredProducts.length - displayedCount} товаров)
+                </motion.button>
+              </motion.div>
+            )}
+
+            {/* Информация о количестве товаров */}
+            {showAll && filteredProducts.length > 0 && (
+              <div className="text-center mt-6 text-gray-600">
+                Показано {Math.min(displayedCount, filteredProducts.length)} из {filteredProducts.length} товаров
+              </div>
+            )}
+          </>
         )}
 
         {/* Кнопка открыть каталог - только на главной странице */}

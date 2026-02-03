@@ -205,7 +205,6 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
                 // Изображение успешно загружено
                 setImageLoaded(true)
                 setImageError(false)
-                console.log('✓ Изображение загружено:', product.name, currentImage)
               }}
               loading="lazy"
               decoding="async"

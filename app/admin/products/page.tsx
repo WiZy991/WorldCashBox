@@ -107,15 +107,15 @@ export default function AdminProducts() {
   )
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
       <AdminSidebar />
-      <div className="flex-1 p-8">
-        <div className="mb-8 flex justify-between items-center">
+      <div className="flex-1 p-8 min-w-0 overflow-x-hidden">
+        <div className="mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Товары</h1>
             <p className="text-gray-600 mt-2">Управление каталогом товаров</p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={async () => {
                 if (!confirm('Импортировать все товары со склада "Толстого 32А"? Это может занять некоторое время.')) {
@@ -148,34 +148,37 @@ export default function AdminProducts() {
                 }
               }}
               disabled={syncing}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-purple-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
             >
-              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
-              <span>{syncing ? 'Импорт...' : 'Импорт товаров'}</span>
+              <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${syncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{syncing ? 'Импорт...' : 'Импорт товаров'}</span>
+              <span className="sm:hidden">{syncing ? '...' : 'Импорт'}</span>
             </button>
             <button
               onClick={handleSyncPrices}
               disabled={syncing}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-green-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base whitespace-nowrap"
             >
-              <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
-              <span>{syncing ? 'Синхронизация...' : 'Синхронизировать цены'}</span>
+              <RefreshCw className={`w-4 h-4 sm:w-5 sm:h-5 ${syncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{syncing ? 'Синхронизация...' : 'Синхронизировать цены'}</span>
+              <span className="sm:hidden">{syncing ? '...' : 'Синхронизация'}</span>
             </button>
             <button
               onClick={() => {
                 setEditingProduct(null)
                 setShowForm(true)
               }}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center space-x-2"
+              className="bg-primary-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors flex items-center space-x-2 text-sm sm:text-base whitespace-nowrap"
             >
-              <Plus className="w-5 h-5" />
-              <span>Добавить товар</span>
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Добавить товар</span>
+              <span className="sm:hidden">Добавить</span>
             </button>
           </div>
         </div>
 
         <div className="mb-6">
-          <div className="relative max-w-md">
+          <div className="relative max-w-md w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
@@ -192,9 +195,9 @@ export default function AdminProducts() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full">
+            <div className="overflow-x-auto max-w-full">
+              <table className="w-full min-w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -220,18 +223,18 @@ export default function AdminProducts() {
                       transition={{ delay: index * 0.05 }}
                       className="hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center min-w-0">
                           {product.image && (
                             <img
                               src={product.image}
                               alt={product.name}
-                              className="w-12 h-12 object-cover rounded-lg mr-3"
+                              className="w-12 h-12 object-cover rounded-lg mr-3 flex-shrink-0"
                             />
                           )}
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{product.name || 'Без названия'}</div>
-                            <div className="text-sm text-gray-500 truncate max-w-xs">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium text-gray-900 truncate">{product.name || 'Без названия'}</div>
+                            <div className="text-sm text-gray-500 truncate">
                               {product.description ? `${product.description.substring(0, 50)}...` : 'Нет описания'}
                             </div>
                           </div>
