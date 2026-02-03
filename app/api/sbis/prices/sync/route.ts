@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const SBIS_WAREHOUSE_ID = process.env.SBIS_WAREHOUSE_ID || body.warehouseId
     const SBIS_WAREHOUSE_NAME = process.env.SBIS_WAREHOUSE_NAME || body.warehouseName // Предпочтительное название склада
     const force = body.force || false
-    const syncStock = body.syncStock !== false // По умолчанию синхронизируем остатки
+    let syncStock = body.syncStock !== false // По умолчанию синхронизируем остатки
 
     if (!SBIS_POINT_ID || SBIS_POINT_ID === 0) {
       // Логируем для отладки
@@ -79,22 +79,26 @@ export async function POST(request: NextRequest) {
             console.log(`Автоматически выбран склад: ${warehouse.name} (${warehouse.id})`)
           } else {
             console.warn('Не удалось автоматически получить склад из СБИС. Синхронизация остатков будет пропущена.')
+            console.warn('Подсказка: Укажите SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
             // Продолжаем работу без синхронизации остатков
+            syncStock = false // Отключаем синхронизацию остатков
           }
         } catch (error) {
           console.error('Ошибка автоматического получения склада:', error)
           console.warn('Синхронизация остатков будет пропущена.')
+          console.warn('Подсказка: Укажите SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
+          syncStock = false // Отключаем синхронизацию остатков
         }
       } else {
-        // Проверяем существование указанного склада
+        // Проверяем существование указанного склада (опционально, не критично)
         try {
           const warehouse = await getSBISWarehouseById(warehouseId)
           warehouseInfo = { id: warehouse.id, name: warehouse.name }
           console.log(`Склад найден: ${warehouse.name} (${warehouse.id})`)
         } catch (error) {
-          console.warn(`Склад с ID ${warehouseId} не найден или недоступен:`, error)
-          // Продолжаем работу, но без синхронизации остатков
-          warehouseId = undefined
+          console.warn(`Не удалось проверить склад с ID ${warehouseId}:`, error)
+          console.warn('Продолжаем работу с указанным ID склада.')
+          // Продолжаем работу с указанным ID, даже если проверка не удалась
         }
       }
     }

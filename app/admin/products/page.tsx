@@ -105,7 +105,8 @@ export default function AdminProducts() {
       
       if (response.ok && data.success) {
         if (data.warehouses.length === 0) {
-          alert('Склады не найдены в СБИС')
+          alert('Склады не найдены в СБИС.\n\n' +
+            'Используйте переменную SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
           return
         }
 
@@ -115,13 +116,22 @@ export default function AdminProducts() {
         ).join('\n')
 
         alert(`Найдено складов: ${data.count}\n\n${warehousesList}\n\n` +
-          `Система автоматически использует первый склад при синхронизации.`)
+          `Система автоматически использует первый склад при синхронизации.\n\n` +
+          `Или укажите SBIS_WAREHOUSE_ID в .env.local для выбора конкретного склада.`)
       } else {
-        alert(`Ошибка: ${data.error || 'Не удалось получить список складов'}`)
+        let errorMsg = `Ошибка: ${data.error || 'Не удалось получить список складов'}`
+        if (data.details) {
+          errorMsg += `\n\nДетали: ${data.details}`
+        }
+        if (data.hint) {
+          errorMsg += `\n\nПодсказка: ${data.hint}`
+        }
+        alert(errorMsg)
       }
     } catch (error) {
       console.error('Error checking warehouses:', error)
-      alert('Ошибка при получении списка складов')
+      alert('Ошибка при получении списка складов.\n\n' +
+        'Используйте переменную SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
     }
   }
 
