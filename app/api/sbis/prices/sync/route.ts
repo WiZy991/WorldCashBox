@@ -84,11 +84,11 @@ export async function POST(request: NextRequest) {
             warehouseId = SBIS_WAREHOUSE_ID
             // Пробуем проверить склад по ID
             try {
-              const warehouse = await getSBISWarehouseById(warehouseId)
+              const warehouse = await getSBISWarehouseById(SBIS_WAREHOUSE_ID)
               warehouseInfo = { id: warehouse.id, name: warehouse.name }
               console.log(`✓ Склад найден по ID: ${warehouse.name} (${warehouse.id})`)
             } catch (idError) {
-              console.warn(`Не удалось проверить склад с ID ${warehouseId}:`, idError)
+              console.warn(`Не удалось проверить склад с ID ${SBIS_WAREHOUSE_ID}:`, idError)
               console.warn('Продолжаем работу с указанным ID склада.')
             }
           } else {
@@ -100,11 +100,11 @@ export async function POST(request: NextRequest) {
         // Если название не указано, используем ID
         warehouseId = SBIS_WAREHOUSE_ID
         try {
-          const warehouse = await getSBISWarehouseById(warehouseId)
+          const warehouse = await getSBISWarehouseById(SBIS_WAREHOUSE_ID)
           warehouseInfo = { id: warehouse.id, name: warehouse.name }
           console.log(`✓ Склад найден по ID: ${warehouse.name} (${warehouse.id})`)
         } catch (error) {
-          console.warn(`Не удалось проверить склад с ID ${warehouseId}:`, error)
+          console.warn(`Не удалось проверить склад с ID ${SBIS_WAREHOUSE_ID}:`, error)
           console.warn('Продолжаем работу с указанным ID склада.')
         }
       } else {
