@@ -328,13 +328,20 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Обновляем цену
-      if (newPrice !== null && newPrice !== product.price) {
+      // Обновляем цену (обновляем всегда, если найдена новая цена)
+      if (newPrice !== null) {
+        const oldPrice = product.price
         product.price = newPrice
         product.priceUpdatedAt = now
         product.sbisPriceListId = priceListId
-        updatedCount++
+        if (oldPrice !== newPrice) {
+          console.log(`✓ Цена обновлена для товара ${product.name}: ${oldPrice || 'не было'} -> ${newPrice}`)
+          updatedCount++
+        } else {
+          console.log(`Цена для товара ${product.name} не изменилась: ${newPrice}`)
+        }
       } else if (newPrice === null && product.sbisId) {
+        console.warn(`✗ Цена не найдена для товара ${product.name} (sbisId: ${product.sbisId})`)
         notFoundCount++
       }
 

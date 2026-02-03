@@ -142,9 +142,13 @@ export async function getSBISPrices(
     params.append('pageSize', pageSize.toString())
   }
 
-  // Примечание: URL может отличаться в зависимости от версии API СБИС
-  // Возможно, нужно использовать другой endpoint для получения цен товаров
+  // ВАЖНО: В документации нет метода получения цен товаров из прайс-листа!
+  // Есть только метод получения списка прайс-листов.
+  // Возможно, нужно использовать другой endpoint или метод.
   const url = `https://api.sbis.ru/retail/nomenclature/prices?${params.toString()}`
+  
+  console.log(`[SBIS] Запрос цен товаров: ${url}`)
+  console.log(`[SBIS] Параметры: priceListId=${priceListId}, pointId=${pointId}, actualDate=${actualDate}`)
 
   try {
     const response = await fetch(url, {
@@ -154,19 +158,39 @@ export async function getSBISPrices(
         'Content-Type': 'application/json',
       },
     })
+    
+    console.log(`[SBIS] Ответ API: статус ${response.status}, статус-текст: ${response.statusText}`)
 
     if (!response.ok) {
       const errorText = await response.text()
+      console.error(`[SBIS] Ошибка API (${response.status}):`, errorText)
+      console.error(`[SBIS] URL запроса: ${url}`)
       throw new Error(`СБИС API вернул ошибку (${response.status}): ${errorText}`)
     }
 
     const data = await response.json()
     
+    // Логируем полный ответ для отладки
+    console.log('[SBIS] Полный ответ API:', JSON.stringify(data, null, 2))
+    
     // Структура ответа может отличаться в зависимости от API
     // Адаптируйте под реальную структуру ответа СБИС
+    const items = data.items || data.prices || data.nomenclature || data.data || []
+    const hasMore = data.outcome?.hasMore || data.hasMore || false
+    
+    console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}`)
+    
+    if (items.length === 0) {
+      console.warn('[SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:')
+      console.warn('[SBIS] 1. Правильность priceListId и pointId')
+      console.warn('[SBIS] 2. Формат даты actualDate')
+      console.warn('[SBIS] 3. Возможно, endpoint /retail/nomenclature/prices не существует')
+      console.warn('[SBIS] 4. Структура ответа:', Object.keys(data))
+    }
+    
     return {
-      items: data.items || data.prices || [],
-      hasMore: data.outcome?.hasMore || data.hasMore || false,
+      items: items,
+      hasMore: hasMore,
     }
   } catch (error) {
     console.error('Ошибка получения цен из СБИС:', error)
@@ -176,7 +200,11 @@ export async function getSBISPrices(
 
 /**
  * Форматирование даты для СБИС API
- * Формат: "ДД.ММ.ГГГГ ЧЧ:ММ:СС"
+ * Поддерживает два формата:
+ * 1. "ДД.ММ.ГГГГ ЧЧ:ММ:СС" (из документации)
+ * 2. "ГГГГ-ММ-ДД ЧЧ:ММ:СС" (из примера в документации)
+ * 
+ * По умолчанию используем формат из примера, так как он проще
  */
 export function formatSBISDate(date: Date = new Date()): string {
   const day = String(date.getDate()).padStart(2, '0')
@@ -186,7 +214,9 @@ export function formatSBISDate(date: Date = new Date()): string {
   const minutes = String(date.getMinutes()).padStart(2, '0')
   const seconds = String(date.getSeconds()).padStart(2, '0')
   
-  return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`
+  // В документации указан формат "ДД.ММ.ГГГГ ЧЧ:ММ:СС", но в примере используется "ГГГГ-ММ-ДД ЧЧ:ММ:СС"
+  // Используем формат из примера, так как он работает
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
 /**
