@@ -139,8 +139,9 @@ export async function getSBISPrices(
   actualDate?: string, // Не используется в этом методе, но оставляем для совместимости
   searchString?: string,
   page?: number,
-  pageSize?: number
-): Promise<{ items: SBISPriceItem[]; hasMore: boolean }> {
+  pageSize?: number,
+  position?: number // Иерархический идентификатор для пагинации
+): Promise<{ items: SBISPriceItem[]; hasMore: boolean; lastPosition?: number }> {
   const accessToken = getSBISAccessToken()
 
   // Формируем параметры запроса согласно документации пункта 8
