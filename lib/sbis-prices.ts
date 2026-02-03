@@ -258,6 +258,108 @@ export async function getSBISPrices(
 }
 
 /**
+ * Поиск товара по коду/артикулу через searchString в API v2
+ * 
+ * @param searchCode - Код товара для поиска (например, "ST520-5000П")
+ * @param priceListId - ID прайс-листа
+ * @param pointId - ID точки продаж (опционально)
+ */
+export async function searchSBISProductByCode(
+  searchCode: string,
+  priceListId: number,
+  pointId?: number
+): Promise<SBISPriceItem | null> {
+  const accessToken = getSBISAccessToken()
+
+  // Формируем параметры запроса для API v2 с searchString
+  const params = new URLSearchParams({
+    priceListId: priceListId.toString(),
+    withBalance: 'true',
+    searchString: searchCode.trim(), // Ищем по коду товара
+    pageSize: '100', // Ограничиваем результаты
+  })
+
+  // pointId может быть необязательным
+  if (pointId) {
+    params.append('pointId', pointId.toString())
+  }
+
+  const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
+  
+  console.log(`[SBIS] Поиск товара по коду "${searchCode}": ${url}`)
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-SBISAccessToken': accessToken,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[SBIS] Ошибка поиска товара (${response.status}):`, errorText)
+      return null
+    }
+
+    const data = await response.json()
+    const nomenclatures = data.nomenclatures || []
+    
+    console.log(`[SBIS] Найдено товаров по коду "${searchCode}": ${nomenclatures.length}`)
+    
+    if (nomenclatures.length === 0) {
+      return null
+    }
+
+    // Фильтруем только товары (не папки) и ищем точное совпадение по коду
+    const normalizedSearchCode = searchCode.trim().toUpperCase()
+    
+    for (const item of nomenclatures) {
+      // Пропускаем папки
+      if (item.isParent === true) {
+        continue
+      }
+
+      // Проверяем точное совпадение по коду
+      const itemCode = item.nomNumber ? String(item.nomNumber).trim().toUpperCase() : ''
+      const itemArticle = item.article ? String(item.article).trim().toUpperCase() : ''
+      
+      if (itemCode === normalizedSearchCode || itemArticle === normalizedSearchCode) {
+        console.log(`[SBIS] Товар найден по коду: ${item.name} (код: ${item.nomNumber}, артикул: ${item.article})`)
+        return {
+          id: item.id,
+          name: item.name,
+          price: typeof item.cost === 'number' ? item.cost : parseFloat(item.cost) || 0,
+          code: item.nomNumber ? String(item.nomNumber).trim() : undefined,
+          article: item.article ? String(item.article).trim() : undefined,
+          balance: item.balance !== null && item.balance !== undefined ? Number(item.balance) : undefined,
+        }
+      }
+    }
+
+    // Если точного совпадения нет, возвращаем первый найденный товар (возможно, поиск по части кода сработал)
+    const firstProduct = nomenclatures.find((item: any) => !item.isParent)
+    if (firstProduct) {
+      console.log(`[SBIS] Возвращаем первый найденный товар: ${firstProduct.name} (код: ${firstProduct.nomNumber})`)
+      return {
+        id: firstProduct.id,
+        name: firstProduct.name,
+        price: typeof firstProduct.cost === 'number' ? firstProduct.cost : parseFloat(firstProduct.cost) || 0,
+        code: firstProduct.nomNumber ? String(firstProduct.nomNumber).trim() : undefined,
+        article: firstProduct.article ? String(firstProduct.article).trim() : undefined,
+        balance: firstProduct.balance !== null && firstProduct.balance !== undefined ? Number(firstProduct.balance) : undefined,
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.error(`Ошибка поиска товара по коду "${searchCode}":`, error)
+    return null
+  }
+}
+
+/**
  * Форматирование даты для СБИС API
  * Поддерживает два формата:
  * 1. "ДД.ММ.ГГГГ ЧЧ:ММ:СС" (из документации)
