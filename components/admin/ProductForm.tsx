@@ -113,6 +113,13 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
         features: Array.isArray(formData.features) ? formData.features : [],
         images: Array.isArray(formData.images) ? formData.images : [],
         image: formData.image || undefined,
+        // Поля для интеграции с СБИС
+        sbisId: formData.sbisId && (typeof formData.sbisId === 'string' || typeof formData.sbisId === 'number')
+          ? (typeof formData.sbisId === 'string' && formData.sbisId.trim() !== '' ? formData.sbisId.trim() : formData.sbisId)
+          : undefined,
+        sbisWarehouseId: formData.sbisWarehouseId && typeof formData.sbisWarehouseId === 'string' && formData.sbisWarehouseId.trim() !== ''
+          ? formData.sbisWarehouseId.trim()
+          : undefined,
       }
       
       const response = await fetch(url, {

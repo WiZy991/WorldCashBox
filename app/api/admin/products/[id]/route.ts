@@ -40,6 +40,28 @@ export async function PUT(
       image: productData.image || undefined,
       images: Array.isArray(productData.images) ? productData.images : [],
       specifications: productData.specifications || undefined,
+      // Поля для интеграции с СБИС
+      sbisId: productData.sbisId && (typeof productData.sbisId === 'string' || typeof productData.sbisId === 'number')
+        ? (typeof productData.sbisId === 'string' && productData.sbisId.trim() !== '' ? productData.sbisId.trim() : productData.sbisId)
+        : undefined,
+      sbisPriceListId: productData.sbisPriceListId && typeof productData.sbisPriceListId === 'number'
+        ? productData.sbisPriceListId
+        : undefined,
+      priceUpdatedAt: productData.priceUpdatedAt && typeof productData.priceUpdatedAt === 'string'
+        ? productData.priceUpdatedAt
+        : undefined,
+      stock: productData.stock !== undefined && productData.stock !== null && productData.stock !== '' 
+        ? Number(productData.stock) 
+        : undefined,
+      inStock: productData.inStock !== undefined && productData.inStock !== null
+        ? Boolean(productData.inStock)
+        : (productData.stock !== undefined && productData.stock !== null && Number(productData.stock) > 0),
+      stockUpdatedAt: productData.stockUpdatedAt && typeof productData.stockUpdatedAt === 'string'
+        ? productData.stockUpdatedAt
+        : undefined,
+      sbisWarehouseId: productData.sbisWarehouseId && typeof productData.sbisWarehouseId === 'string' && productData.sbisWarehouseId.trim() !== ''
+        ? productData.sbisWarehouseId.trim()
+        : undefined,
     }
     
     let products: Product[] = []

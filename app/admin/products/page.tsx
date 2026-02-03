@@ -74,9 +74,12 @@ export default function AdminProducts() {
       
       if (response.ok) {
         const message = `Синхронизация завершена!\n` +
+          `Всего товаров: ${data.stats.total || 0}\n` +
+          `С sbisId: ${data.stats.withSBISId || 0}\n` +
           `Обновлено цен: ${data.stats.pricesUpdated || 0}\n` +
           `Обновлено остатков: ${data.stats.stockUpdated || 0}\n` +
-          `Не найдено: ${data.stats.notFound || 0}`
+          `Не найдено: ${data.stats.notFound || 0}\n` +
+          `Товаров в СБИС: ${data.stats.totalPricesInSBIS || 0}`
         alert(message)
         loadProducts()
       } else {
