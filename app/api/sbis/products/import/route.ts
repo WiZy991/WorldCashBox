@@ -162,9 +162,9 @@ export async function POST(request: NextRequest) {
     
     // 4. Получаем остатки товаров со всех складов "Толстого 32А"
     console.log(`[SBIS Import] Получение остатков товаров со складов: ${targetWarehouses.map(w => w.name).join(', ')}...`)
+    console.log(`[SBIS Import] ID складов для остатков: ${warehouseIds.join(', ')}`)
     
-    // Получаем остатки со всех целевых складов
-    const warehouseIds = targetWarehouses.map(w => w.id)
+    // Получаем остатки со всех целевых складов (warehouseIds уже определен выше на строке 81)
     const stockResponse = await getSBISStock(
       [SBIS_PRICE_LIST_ID], // priceListIds
       undefined, // nomenclatures
