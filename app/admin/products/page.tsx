@@ -98,41 +98,12 @@ export default function AdminProducts() {
   }
 
   const handleCheckWarehouse = async () => {
-    try {
-      // Получаем список всех складов
-      const response = await fetch('/api/sbis/warehouse/list')
-      const data = await response.json()
-      
-      if (response.ok && data.success) {
-        if (data.warehouses.length === 0) {
-          alert('Склады не найдены в СБИС.\n\n' +
-            'Используйте переменную SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
-          return
-        }
-
-        // Формируем список складов для отображения
-        const warehousesList = data.warehouses.map((w: any, index: number) => 
-          `${index + 1}. ${w.name} (ID: ${w.id})`
-        ).join('\n')
-
-        alert(`Найдено складов: ${data.count}\n\n${warehousesList}\n\n` +
-          `Система автоматически использует первый склад при синхронизации.\n\n` +
-          `Или укажите SBIS_WAREHOUSE_ID в .env.local для выбора конкретного склада.`)
-      } else {
-        let errorMsg = `Ошибка: ${data.error || 'Не удалось получить список складов'}`
-        if (data.details) {
-          errorMsg += `\n\nДетали: ${data.details}`
-        }
-        if (data.hint) {
-          errorMsg += `\n\nПодсказка: ${data.hint}`
-        }
-        alert(errorMsg)
-      }
-    } catch (error) {
-      console.error('Error checking warehouses:', error)
-      alert('Ошибка при получении списка складов.\n\n' +
-        'Используйте переменную SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
-    }
+    // Метод получения списка складов не поддерживается в СБИС API
+    // Показываем информацию о текущей настройке
+    alert('Метод получения списка складов не поддерживается в СБИС API.\n\n' +
+      'Используйте переменную SBIS_WAREHOUSE_ID в ecosystem.config.js на сервере для указания склада.\n\n' +
+      'Текущий склад указан в переменных окружения PM2.\n\n' +
+      'Для проверки выполните на сервере: pm2 env 0 | grep SBIS_WAREHOUSE_ID')
   }
 
   const filteredProducts = products.filter(

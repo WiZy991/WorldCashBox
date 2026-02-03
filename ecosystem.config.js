@@ -8,7 +8,13 @@ module.exports = {
     exec_mode: 'fork',
     env: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 3000,
+      // Переменные для интеграции с СБИС
+      SBIS_SERVICE_KEY: 'JT1lnlaqTJ9ImP7Lhu6SnrDJFO7gQk5mO0tv83wsok4nbzS9ri4VbbvCKVeQIHDoMkwGnSCjMAF04M8pIL5tcH4BzaPsLiNuCijBx8Hp44w13YBWo7I6ID',
+      SBIS_POINT_ID: '206',
+      SBIS_PRICE_LIST_ID: '15',
+      SBIS_WAREHOUSE_ID: '284a42ba-97cc-4d9c-98af-00000000100a',
+      SBIS_WAREHOUSE_NAME: 'Склад32'
     },
     error_file: './logs/pm2-error.log',
     out_file: './logs/pm2-out.log',

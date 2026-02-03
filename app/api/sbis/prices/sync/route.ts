@@ -68,27 +68,10 @@ export async function POST(request: NextRequest) {
 
     if (syncStock) {
       if (!warehouseId) {
-        // Пытаемся автоматически получить склад из СБИС
-        try {
-          const { getFirstSBISWarehouse } = await import('@/lib/sbis-stock')
-          const warehouse = await getFirstSBISWarehouse(SBIS_WAREHOUSE_NAME)
-          
-          if (warehouse) {
-            warehouseId = warehouse.id
-            warehouseInfo = { id: warehouse.id, name: warehouse.name }
-            console.log(`Автоматически выбран склад: ${warehouse.name} (${warehouse.id})`)
-          } else {
-            console.warn('Не удалось автоматически получить склад из СБИС. Синхронизация остатков будет пропущена.')
-            console.warn('Подсказка: Укажите SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
-            // Продолжаем работу без синхронизации остатков
-            syncStock = false // Отключаем синхронизацию остатков
-          }
-        } catch (error) {
-          console.error('Ошибка автоматического получения склада:', error)
-          console.warn('Синхронизация остатков будет пропущена.')
-          console.warn('Подсказка: Укажите SBIS_WAREHOUSE_ID в .env.local для прямого указания склада.')
-          syncStock = false // Отключаем синхронизацию остатков
-        }
+        // Если склад не указан, отключаем синхронизацию остатков
+        console.warn('SBIS_WAREHOUSE_ID не указан. Синхронизация остатков будет пропущена.')
+        console.warn('Подсказка: Укажите SBIS_WAREHOUSE_ID в ecosystem.config.js или .env.production для синхронизации остатков.')
+        syncStock = false
       } else {
         // Проверяем существование указанного склада (опционально, не критично)
         try {

@@ -32,13 +32,25 @@ export async function GET(request: NextRequest) {
     console.error('Ошибка получения списка складов:', error)
     const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
     
-    // Если это ошибка авторизации или метод не поддерживается, возвращаем более понятное сообщение
+    // Метод sabyWarehouse.List не поддерживается в СБИС API
+    if (errorMessage.includes('not found') || errorMessage.includes('404') || errorMessage.includes('sabyWarehouse.List')) {
+      return NextResponse.json(
+        { 
+          error: 'Метод получения списка складов не поддерживается',
+          details: 'Метод sabyWarehouse.List недоступен в СБИС API. Используйте переменную SBIS_WAREHOUSE_ID для указания склада напрямую.',
+          hint: 'Укажите SBIS_WAREHOUSE_ID=284a42ba-97cc-4d9c-98af-00000000100a в ecosystem.config.js или .env.production на сервере.'
+        },
+        { status: 500 }
+      )
+    }
+    
+    // Если это ошибка авторизации
     if (errorMessage.includes('401') || errorMessage.includes('403') || errorMessage.includes('Unauthorized')) {
       return NextResponse.json(
         { 
           error: 'Ошибка авторизации при получении списка складов',
-          details: 'Метод sabyWarehouse.List может требовать авторизацию через сессию. Используйте переменную SBIS_WAREHOUSE_ID в .env.local для указания склада напрямую.',
-          hint: 'Укажите SBIS_WAREHOUSE_ID=284a42ba-97cc-4d9c-98af-00000000100a в файле .env.local'
+          details: 'Метод может требовать авторизацию через сессию. Используйте переменную SBIS_WAREHOUSE_ID для указания склада напрямую.',
+          hint: 'Укажите SBIS_WAREHOUSE_ID в ecosystem.config.js на сервере.'
         },
         { status: 500 }
       )
@@ -48,7 +60,7 @@ export async function GET(request: NextRequest) {
       { 
         error: 'Произошла ошибка при получении списка складов',
         details: errorMessage,
-        hint: 'Проверьте настройки SBIS_SERVICE_KEY и SBIS_POINT_ID в файле .env.local. Убедитесь, что сервер перезапущен после изменения переменных окружения.'
+        hint: 'Используйте переменную SBIS_WAREHOUSE_ID в ecosystem.config.js для указания склада напрямую.'
       },
       { status: 500 }
     )
