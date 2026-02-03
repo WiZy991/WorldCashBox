@@ -219,14 +219,24 @@ export async function getSBISPrices(
     const hasMore = data.outcome?.hasMore || false
     
     // Преобразуем в формат SBISPriceItem
-    const items: SBISPriceItem[] = nomenclatures.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      price: typeof item.cost === 'number' ? item.cost : parseFloat(item.cost) || 0, // cost - integer в v2
-      code: item.nomNumber || item.article || undefined, // Код товара (приоритет nomNumber)
-      article: item.article || item.nomNumber || undefined, // Артикул (приоритет article)
-      balance: item.balance || undefined, // Остаток товара
-    }))
+    // Фильтруем только товары (не папки/категории) - у товаров есть цена или они опубликованы
+    const items: SBISPriceItem[] = nomenclatures
+      .filter((item: any) => {
+        // Пропускаем папки/категории (isParent === true)
+        if (item.isParent === true) {
+          return false
+        }
+        // Включаем товары с ценой или опубликованные товары
+        return (item.cost !== null && item.cost !== undefined && item.cost > 0) || item.published === true
+      })
+      .map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: typeof item.cost === 'number' ? item.cost : parseFloat(item.cost) || 0, // cost - integer в v2
+        code: item.nomNumber ? String(item.nomNumber).trim() : undefined, // Код товара (убираем пробелы)
+        article: item.article ? String(item.article).trim() : undefined, // Артикул (убираем пробелы)
+        balance: item.balance !== null && item.balance !== undefined ? Number(item.balance) : undefined, // Остаток товара
+      }))
     
     console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}`)
     

@@ -6,7 +6,8 @@ import {
   getSBISPriceLists, 
   getSBISPrices, 
   formatSBISDate,
-  getSBISProductPrice 
+  getSBISProductPrice,
+  searchSBISProductByCode 
 } from '@/lib/sbis-prices'
 import {
   getSBISStock,
@@ -352,24 +353,40 @@ export async function POST(request: NextRequest) {
       let newStock: number | null = null
 
       if (product.sbisId && allPrices.length > 0) {
+        // Нормализуем sbisId для поиска (убираем пробелы, приводим к строке)
+        const normalizedSbisId = String(product.sbisId).trim().toUpperCase()
+        
         // Ищем цену в загруженных данных
         // Пробуем разные варианты сопоставления (в порядке приоритета):
-        // 1. Точное совпадение кода товара (nomNumber) - самый надежный способ
-        // 2. Точное совпадение ID
-        // 3. Частичное совпадение по названию (как запасной вариант)
         const priceItem = allPrices.find(item => {
-          // Приоритет 1: Совпадение кода товара (nomNumber) - это то, что указано в поле "Код" в СБИС
-          if (item.code && String(item.code) === String(product.sbisId)) {
-            console.log(`✓ Товар ${product.name} найден по коду (nomNumber): ${item.code}`)
-            return true
+          // Приоритет 1: Точное совпадение кода товара (nomNumber) - с нормализацией
+          if (item.code) {
+            const normalizedCode = String(item.code).trim().toUpperCase()
+            if (normalizedCode === normalizedSbisId) {
+              console.log(`✓ Товар ${product.name} найден по коду (nomNumber): ${item.code} === ${product.sbisId}`)
+              return true
+            }
+            // Частичное совпадение (если код содержит sbisId или наоборот)
+            if (normalizedCode.includes(normalizedSbisId) || normalizedSbisId.includes(normalizedCode)) {
+              console.log(`⚠ Товар ${product.name} найден по частичному совпадению кода: ${item.code} ~ ${product.sbisId}`)
+              return true
+            }
           }
-          // Приоритет 2: Совпадение артикула (article, тот же nomNumber)
-          if (item.article && String(item.article) === String(product.sbisId)) {
-            console.log(`✓ Товар ${product.name} найден по артикулу: ${item.article}`)
-            return true
+          // Приоритет 2: Точное совпадение артикула (article) - с нормализацией
+          if (item.article) {
+            const normalizedArticle = String(item.article).trim().toUpperCase()
+            if (normalizedArticle === normalizedSbisId) {
+              console.log(`✓ Товар ${product.name} найден по артикулу: ${item.article} === ${product.sbisId}`)
+              return true
+            }
+            // Частичное совпадение
+            if (normalizedArticle.includes(normalizedSbisId) || normalizedSbisId.includes(normalizedArticle)) {
+              console.log(`⚠ Товар ${product.name} найден по частичному совпадению артикула: ${item.article} ~ ${product.sbisId}`)
+              return true
+            }
           }
           // Приоритет 3: Точное совпадение ID
-          if (String(item.id) === String(product.sbisId)) {
+          if (String(item.id) === normalizedSbisId) {
             console.log(`✓ Товар ${product.name} найден по ID: ${item.id}`)
             return true
           }
@@ -392,18 +409,47 @@ export async function POST(request: NextRequest) {
           newPrice = priceItem.price
           console.log(`Цена для товара ${product.name} (sbisId: ${product.sbisId}): ${newPrice}`)
         } else {
+          // Показываем примеры кодов из СБИС для отладки
+          const sampleCodes = allPrices
+            .filter(p => p.code || p.article)
+            .slice(0, 10)
+            .map(p => ({ code: p.code, article: p.article, name: p.name, id: p.id }))
           console.warn(`Товар ${product.name} (sbisId: ${product.sbisId}) не найден в прайс-листе. Доступно товаров: ${allPrices.length}`)
-          // Логируем первые несколько товаров для отладки
-          if (allPrices.length > 0 && allPrices.length <= 10) {
-            console.log('Примеры товаров из прайс-листа:', allPrices.map(p => ({ id: p.id, name: p.name, code: (p as any).code })))
-          }
+          console.warn(`Примеры кодов из СБИС:`, JSON.stringify(sampleCodes, null, 2))
         }
       }
 
-      // Если не нашли в общем списке, пробуем получить индивидуально
+      // Если не нашли в общем списке, пробуем поиск по коду через searchString
       if (newPrice === null && product.sbisId && priceListId) {
         try {
-          newPrice = await getSBISProductPrice(product.sbisId, priceListId, SBIS_POINT_ID)
+          console.log(`[SBIS] Пробуем найти товар по коду "${product.sbisId}" через searchString...`)
+          const foundProduct = await searchSBISProductByCode(
+            String(product.sbisId),
+            priceListId,
+            SBIS_POINT_ID || undefined
+          )
+          
+          if (foundProduct) {
+            newPrice = foundProduct.price
+            console.log(`✓ Товар ${product.name} найден по коду через searchString: цена = ${newPrice}`)
+            
+            // Если в найденном товаре есть остаток, используем его
+            if (foundProduct.balance !== undefined && foundProduct.balance !== null) {
+              newStock = foundProduct.balance
+              console.log(`✓ Остаток для товара ${product.name} из searchString: ${newStock}`)
+            }
+          } else {
+            console.warn(`Товар с кодом "${product.sbisId}" не найден через searchString`)
+          }
+        } catch (error) {
+          console.error(`Ошибка поиска товара по коду ${product.sbisId}:`, error)
+        }
+      }
+      
+      // Если все еще не нашли и sbisId - числовой ID, пробуем получить индивидуально
+      if (newPrice === null && product.sbisId && priceListId && !isNaN(Number(product.sbisId))) {
+        try {
+          newPrice = await getSBISProductPrice(Number(product.sbisId), priceListId, SBIS_POINT_ID)
         } catch (error) {
           console.error(`Ошибка получения цены для товара ${product.id} (sbisId: ${product.sbisId}):`, error)
         }
