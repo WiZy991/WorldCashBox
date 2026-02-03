@@ -250,9 +250,19 @@ export async function POST(request: NextRequest) {
     const updatedProducts: Product[] = []
     const skippedProducts: string[] = []
     
+    console.log(`[SBIS Import] Начинаем обработку ${allProducts.length} товаров из СБИС...`)
+    let processedCount = 0
+    let skippedNoPrice = 0
+    
     for (const sbisProduct of allProducts) {
+      processedCount++
+      
       // Пропускаем папки/категории (товары без цены)
       if (!sbisProduct.price || sbisProduct.price <= 0) {
+        skippedNoPrice++
+        if (processedCount <= 10 || processedCount % 50 === 0) {
+          console.log(`[SBIS Import] Пропущен товар без цены: ${sbisProduct.name} (${processedCount}/${allProducts.length})`)
+        }
         continue
       }
       
@@ -296,36 +306,59 @@ export async function POST(request: NextRequest) {
       }
       
       if (existingProduct) {
-        if (force) {
-          // Обновляем существующий товар
-          const index = existingProducts.findIndex(p => p.id === productId)
-          existingProducts[index] = productData
-          updatedProducts.push(productData)
+        // Обновляем существующий товар
+        const index = existingProducts.findIndex(p => p.id === productId)
+        if (index === -1) {
+          console.error(`[SBIS Import] ОШИБКА: Товар найден, но индекс не найден: ${productId}`)
+          // Если индекс не найден, создаем новый товар
+          existingProducts.push(productData)
+          createdProducts.push(productData)
         } else {
-          // Обновляем только цены и остатки
-          const index = existingProducts.findIndex(p => p.id === productId)
-          existingProducts[index] = {
-            ...existingProducts[index],
-            price: productData.price,
-            stock: productData.stock,
-            inStock: productData.inStock,
-            priceUpdatedAt: productData.priceUpdatedAt,
-            stockUpdatedAt: productData.stockUpdatedAt,
-            sbisId: productData.sbisId,
-            sbisPriceListId: productData.sbisPriceListId,
-            sbisWarehouseId: productData.sbisWarehouseId
+          if (force) {
+            // Обновляем существующий товар полностью
+            existingProducts[index] = productData
+            updatedProducts.push(productData)
+          } else {
+            // Обновляем только цены и остатки
+            existingProducts[index] = {
+              ...existingProducts[index],
+              price: productData.price,
+              stock: productData.stock,
+              inStock: productData.inStock,
+              priceUpdatedAt: productData.priceUpdatedAt,
+              stockUpdatedAt: productData.stockUpdatedAt,
+              sbisId: productData.sbisId,
+              sbisPriceListId: productData.sbisPriceListId,
+              sbisWarehouseId: productData.sbisWarehouseId
+            }
+            updatedProducts.push(existingProducts[index])
           }
-          updatedProducts.push(existingProducts[index])
         }
       } else {
         // Создаем новый товар
         existingProducts.push(productData)
         createdProducts.push(productData)
+        if (createdProducts.length <= 5 || createdProducts.length % 10 === 0) {
+          console.log(`[SBIS Import] Создан новый товар #${createdProducts.length}: ${productData.name} (ID: ${productId})`)
+        }
       }
     }
     
     // 7. Сохраняем товары
-    await writeFile(productsJsonPath, JSON.stringify(existingProducts, null, 2), 'utf-8')
+    console.log(`[SBIS Import] Сохранение товаров в файл: ${productsJsonPath}`)
+    console.log(`[SBIS Import] Всего товаров для сохранения: ${existingProducts.length}`)
+    console.log(`[SBIS Import] - Создано новых: ${createdProducts.length}`)
+    console.log(`[SBIS Import] - Обновлено существующих: ${updatedProducts.length}`)
+    console.log(`[SBIS Import] - Пропущено без цены: ${skippedNoPrice}`)
+    
+    try {
+      await writeFile(productsJsonPath, JSON.stringify(existingProducts, null, 2), 'utf-8')
+      console.log(`[SBIS Import] Файл успешно сохранен: ${productsJsonPath}`)
+      console.log(`[SBIS Import] Размер файла: ${JSON.stringify(existingProducts).length} байт`)
+    } catch (error) {
+      console.error(`[SBIS Import] ОШИБКА при сохранении файла:`, error)
+      throw error
+    }
     
     console.log(`[SBIS Import] Импорт завершен:`)
     console.log(`[SBIS Import] - Создано товаров: ${createdProducts.length}`)
@@ -344,7 +377,8 @@ export async function POST(request: NextRequest) {
         total: allProducts.length,
         created: createdProducts.length,
         updated: updatedProducts.length,
-        skipped: skippedProducts.length,
+        skipped: skippedNoPrice,
+        skippedNoPrice: skippedNoPrice,
         categories: categoryStats,
         warehouses: targetWarehouses.map(w => ({
           id: w.id,
