@@ -253,18 +253,35 @@ export async function POST(request: NextRequest) {
         // Если не нашли по UUID, пробуем найти по названию из SBIS_WAREHOUSE_NAME
         if (!foundWarehouse && SBIS_WAREHOUSE_NAME) {
           console.log(`[SBIS] Поиск склада по названию: "${SBIS_WAREHOUSE_NAME}"`)
+          // Ищем склад, название или адрес которого содержит "Толстого" или "32"
+          foundWarehouse = warehouses.find(w => {
+            const nameLower = (w.name || '').toLowerCase()
+            const addressLower = ((w as any).address || '').toLowerCase()
+            const searchLower = SBIS_WAREHOUSE_NAME.toLowerCase()
+            
+            return nameLower.includes(searchLower) || 
+                   searchLower.includes(nameLower) ||
+                   addressLower.includes('толстого') ||
+                   addressLower.includes('32')
+          })
+          if (foundWarehouse) {
+            console.log(`[SBIS] Склад найден по названию/адресу: ${foundWarehouse.name} (ID: ${foundWarehouse.id}, адрес: ${(foundWarehouse as any).address || 'не указан'})`)
+          }
+        }
+        
+        // Если все еще не нашли, пробуем найти склад "WorldCashbox" (похоже на нужный)
+        if (!foundWarehouse) {
           foundWarehouse = warehouses.find(w => 
-            w.name && w.name.toLowerCase().includes(SBIS_WAREHOUSE_NAME.toLowerCase()) ||
-            SBIS_WAREHOUSE_NAME.toLowerCase().includes(w.name.toLowerCase())
+            w.name && (w.name.toLowerCase().includes('worldcashbox') || w.name.toLowerCase().includes('world cashbox'))
           )
           if (foundWarehouse) {
-            console.log(`[SBIS] Склад найден по названию: ${foundWarehouse.name} (ID: ${foundWarehouse.id})`)
+            console.log(`[SBIS] Найден склад WorldCashbox: ${foundWarehouse.name} (ID: ${foundWarehouse.id})`)
           }
         }
         
         if (!foundWarehouse) {
           console.warn(`[SBIS] Склад с UUID ${warehouseId} или названием "${SBIS_WAREHOUSE_NAME}" не найден в списке складов компании.`)
-          console.warn(`[SBIS] Доступные склады:`, warehouses.map(w => `${w.name} (ID: ${w.id})`).join(', '))
+          console.warn(`[SBIS] Доступные склады:`, warehouses.map(w => `${w.name} (ID: ${w.id}, адрес: ${(w as any).address || 'не указан'})`).join(', '))
           if (warehouses.length === 0) {
             throw new Error(`Не найдено складов для компании ${companyId}`)
           }
