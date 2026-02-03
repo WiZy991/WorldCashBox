@@ -88,28 +88,29 @@ export async function POST(request: NextRequest) {
     console.log(`[SBIS Import] Загрузка товаров из прайс-листа ${SBIS_PRICE_LIST_ID}...`)
     
     // Загружаем товары порциями по 1000 (максимум для API v2)
-    // Используем position для пагинации (иерархический идентификатор)
+    // ВАЖНО: Используем комбинированный подход - сначала пробуем position (иерархический),
+    // если position не работает (возвращает пустой объект), переключаемся на page
     let allProducts: Array<{ id: string | number; name: string; price: number; code?: string; article?: string; balance?: string | number }> = []
     let pageCount = 0
     let lastPosition: number | undefined = undefined
     const maxPages = 200 // Ограничение на 200 страниц (200,000 товаров максимум)
+    let currentPage = 0 // Для пагинации по page, если position не работает
+    let usePositionPagination = true // Флаг: использовать position или page
     
-            // Продолжаем загрузку пока есть lastPosition или hasMore
-            // Пробуем использовать page для пагинации (как в примере документации)
-            let currentPage = 0
-            while (pageCount < maxPages) {
-              // ВАЖНО: pointId - это ID точки продаж, а не склада!
-              // Не передаем pointId, так как ID склада не является точкой продаж
-              // Товары получаем без pointId, остатки получаем отдельно по ID складов
-              const pricesResponse = await getSBISPrices(
-                SBIS_PRICE_LIST_ID,
-                0, // pointId не используется (ID склада не является точкой продаж)
-                undefined, // actualDate
-                undefined, // searchString - получаем все товары
-                lastPosition ? undefined : currentPage, // page для пагинации (если нет position)
-                1000, // pageSize - максимум
-                lastPosition // position для пагинации (приоритет над page)
-              )
+    // Продолжаем загрузку пока есть lastPosition или hasMore
+    while (pageCount < maxPages) {
+      // ВАЖНО: pointId - это ID точки продаж, а не склада!
+      // Не передаем pointId, так как ID склада не является точкой продаж
+      // Товары получаем без pointId, остатки получаем отдельно по ID складов
+      const pricesResponse = await getSBISPrices(
+        SBIS_PRICE_LIST_ID,
+        0, // pointId не используется (ID склада не является точкой продаж)
+        undefined, // actualDate
+        undefined, // searchString - получаем все товары
+        usePositionPagination ? undefined : currentPage, // page для пагинации (если не используем position)
+        1000, // pageSize - максимум
+        usePositionPagination ? lastPosition : undefined // position для пагинации (приоритет над page)
+      )
       
       allProducts = [...allProducts, ...pricesResponse.items]
       const newLastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
