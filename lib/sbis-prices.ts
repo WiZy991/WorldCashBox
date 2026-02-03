@@ -26,6 +26,8 @@ export interface SBISPriceItem {
   article?: string // Артикул (nomNumber)
   balance?: string | number // Остаток товара (может быть string или number в зависимости от API)
   hierarchicalId?: number // Иерархический идентификатор для пагинации
+  hierarchicalParent?: number // Идентификатор родителя в иерархии
+  isParent?: boolean // Признак, является ли это папкой
 }
 
 /**
@@ -141,7 +143,7 @@ export async function getSBISPrices(
   page?: number,
   pageSize?: number,
   position?: number // Иерархический идентификатор для пагинации
-): Promise<{ items: SBISPriceItem[]; hasMore: boolean; lastPosition?: number; currentPage?: number }> {
+): Promise<{ items: SBISPriceItem[]; folders?: Array<{ id: number; name: string; hierarchicalId: number; hierarchicalParent?: number }>; hasMore: boolean; lastPosition?: number; currentPage?: number }> {
   const accessToken = getSBISAccessToken()
 
   // Формируем параметры запроса согласно документации пункта 8
@@ -342,8 +344,20 @@ export async function getSBISPrices(
       console.warn('[SBIS] 3. Структура ответа:', Object.keys(data))
     }
     
+    // Также возвращаем папки для рекурсивного обхода
+    const folders = nomenclatures
+      .filter((item: any) => item.isParent === true)
+      .map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        hierarchicalId: item.hierarchicalId,
+        hierarchicalParent: item.hierarchicalParent,
+        isParent: true
+      }))
+    
     return {
       items: items,
+      folders: folders, // Папки для рекурсивного обхода
       hasMore: hasMore,
       lastPosition: lastPosition,
       currentPage: page,

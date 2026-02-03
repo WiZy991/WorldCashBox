@@ -131,34 +131,30 @@ export async function POST(request: NextRequest) {
         continue // Повторяем запрос с page вместо position
       }
       
-      // Если использовали page, увеличиваем его для следующей страницы
-      if (!usePositionPagination && pricesResponse.currentPage !== undefined) {
-        currentPage = (pricesResponse.currentPage || 0) + 1
-      } else if (usePositionPagination) {
-        lastPosition = newLastPosition // Обновляем position для следующей итерации
-      }
-      
-      // ВАЖНО: Продолжаем загрузку если есть newLastPosition (при использовании position) или hasMore (при использовании page)
-      // API v2 может возвращать hasMore: false, но при этом есть еще товары через position или page
+      // ВАЖНО: Продолжаем загрузку если есть newLastPosition (при использовании position)
+      // API v2 может возвращать hasMore: false, но при этом есть еще товары через position
       // Это особенно важно для иерархических структур с папками - нужно пройти по всем папкам
       if (usePositionPagination) {
         // При использовании position продолжаем, пока есть newLastPosition
         if (!newLastPosition && !pricesResponse.hasMore) {
-          console.log(`[SBIS Import] Нет больше товаров при использовании position (hasMore: ${pricesResponse.hasMore}, newLastPosition: ${newLastPosition}), переключаемся на page...`)
-          usePositionPagination = false
-          lastPosition = undefined
-          currentPage = 0
-          continue
+          console.log(`[SBIS Import] Нет больше товаров при использовании position (hasMore: ${pricesResponse.hasMore}, newLastPosition: ${newLastPosition})`)
+          console.log(`[SBIS Import] ВАЖНО: API не возвращает товары из вложенных папок через position.`)
+          console.log(`[SBIS Import] Всего загружено товаров: ${allProducts.length}`)
+          break
         }
+        lastPosition = newLastPosition // Обновляем position для следующей итерации
         if (newLastPosition) {
           console.log(`[SBIS Import] Продолжаем загрузку с position: ${newLastPosition} (всего загружено товаров: ${allProducts.length})`)
         }
       } else {
-        // При использовании page продолжаем, пока есть hasMore
-        if (!pricesResponse.hasMore) {
-          console.log(`[SBIS Import] Нет больше товаров при использовании page (hasMore: ${pricesResponse.hasMore}), прекращаем загрузку`)
+        // При использовании page продолжаем, пока получаем товары
+        // ВАЖНО: Игнорируем hasMore, так как API может неправильно его возвращать
+        if (pricesResponse.items.length === 0) {
+          console.log(`[SBIS Import] Получено 0 товаров на странице ${currentPage}, прекращаем загрузку`)
           break
         }
+        // Если получили товары, продолжаем на следующей странице
+        currentPage++
         console.log(`[SBIS Import] Продолжаем загрузку через page: ${currentPage} (всего загружено товаров: ${allProducts.length})`)
       }
       
