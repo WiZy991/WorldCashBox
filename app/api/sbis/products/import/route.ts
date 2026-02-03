@@ -106,25 +106,34 @@ export async function POST(request: NextRequest) {
       
       console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${pricesResponse.hasMore}, lastPosition: ${newLastPosition}`)
       
-      // Если не получили товаров, прекращаем загрузку
-      if (pricesResponse.items.length === 0) {
-        console.warn(`[SBIS Import] Получено 0 товаров на странице ${pageCount}, прекращаем загрузку`)
-        break
-      }
-      
       // Обновляем lastPosition для следующей итерации
       lastPosition = newLastPosition
       
+      // ВАЖНО: Товары находятся в папках, поэтому на странице могут быть только папки (0 отфильтрованных товаров)
+      // Продолжаем загрузку, если есть lastPosition, даже если отфильтрованных товаров 0
+      if (pricesResponse.items.length === 0) {
+        if (lastPosition) {
+          // Продолжаем загрузку, если есть position (на странице были только папки, товары идут дальше)
+          console.log(`[SBIS Import] Получено 0 отфильтрованных товаров на странице ${pageCount} (возможно, только папки), но есть position: ${lastPosition}, продолжаем загрузку...`)
+        } else {
+          // Нет position и нет товаров - значит, достигли конца
+          console.log(`[SBIS Import] Получено 0 товаров на странице ${pageCount} и нет position, прекращаем загрузку`)
+          break
+        }
+      }
+      
       // Продолжаем загрузку если есть lastPosition (даже если hasMore: false)
       // API v2 может возвращать hasMore: false, но при этом есть еще товары через position
+      // Это особенно важно для иерархических структур с папками
       if (!lastPosition && !pricesResponse.hasMore) {
         console.log(`[SBIS Import] Нет больше товаров (hasMore: ${pricesResponse.hasMore}, lastPosition: ${lastPosition}), прекращаем загрузку`)
         break
       }
       
-      // Если есть lastPosition, продолжаем загрузку
+      // Если есть lastPosition, продолжаем загрузку (даже если hasMore: false)
+      // Это позволяет пройти по всем папкам и извлечь все товары
       if (lastPosition) {
-        console.log(`[SBIS Import] Продолжаем загрузку с position: ${lastPosition}`)
+        console.log(`[SBIS Import] Продолжаем загрузку с position: ${lastPosition} (всего загружено товаров: ${allProducts.length})`)
       }
       
       // Небольшая задержка между запросами, чтобы не перегружать API

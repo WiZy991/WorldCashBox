@@ -200,8 +200,17 @@ export async function getSBISPrices(
 
     const data = await response.json()
     
-    // Логируем структуру ответа для отладки (первые 3 товара)
-    if (data.nomenclatures && data.nomenclatures.length > 0) {
+    // Логируем структуру ответа для отладки
+    console.log(`[SBIS] Структура ответа API:`, {
+      hasNomenclatures: !!data.nomenclatures,
+      nomenclaturesType: Array.isArray(data.nomenclatures) ? 'array' : typeof data.nomenclatures,
+      nomenclaturesLength: Array.isArray(data.nomenclatures) ? data.nomenclatures.length : 'N/A',
+      hasOutcome: !!data.outcome,
+      outcome: data.outcome
+    })
+    
+    // Логируем структуру первого товара для отладки
+    if (data.nomenclatures && Array.isArray(data.nomenclatures) && data.nomenclatures.length > 0) {
       console.log('[SBIS] Пример структуры товара (API v2):', JSON.stringify(data.nomenclatures[0], null, 2))
     }
     
@@ -235,13 +244,24 @@ export async function getSBISPrices(
       nomenclatures = []
     }
     
-    const hasMore = data.outcome?.hasMore || false
+    // Проверяем наличие outcome и hasMore
+    // В API v2 outcome может быть boolean или объектом с hasMore
+    let hasMore = false
+    if (typeof data.outcome === 'boolean') {
+      hasMore = data.outcome
+    } else if (data.outcome && typeof data.outcome === 'object') {
+      hasMore = data.outcome.hasMore || false
+    }
+    
+    console.log(`[SBIS] outcome:`, data.outcome, `hasMore:`, hasMore)
     
     // Преобразуем в формат SBISPriceItem
     // Фильтруем только товары (не папки/категории) - у товаров есть цена или они опубликованы
+    // ВАЖНО: Папки (isParent === true) пропускаем, но они нужны для правильной пагинации через lastPosition
     const items: SBISPriceItem[] = nomenclatures
       .filter((item: any) => {
-        // Пропускаем папки/категории (isParent === true)
+        // Пропускаем папки/категории (isParent === true) - они не являются товарами
+        // Но они важны для пагинации, так как товары находятся внутри папок
         if (item.isParent === true) {
           return false
         }
@@ -260,9 +280,24 @@ export async function getSBISPrices(
     
     // Получаем hierarchicalId последнего элемента ВСЕГО массива (включая папки) для следующей страницы
     // Это важно для правильной пагинации - нужно использовать последний hierarchicalId из всего ответа
-    const lastPosition = nomenclatures.length > 0
-      ? (nomenclatures[nomenclatures.length - 1] as any)?.hierarchicalId
-      : undefined
+    let lastPosition: number | undefined = undefined
+    if (nomenclatures.length > 0) {
+      // Используем последний элемент из всего массива (включая папки)
+      // Это важно, так как API использует hierarchicalId для пагинации
+      const lastItem = nomenclatures[nomenclatures.length - 1] as any
+      lastPosition = lastItem?.hierarchicalId
+      
+      // Логируем для отладки
+      if (lastPosition) {
+        console.log(`[SBIS] lastPosition из последнего элемента: ${lastPosition} (всего элементов в ответе: ${nomenclatures.length})`)
+      } else {
+        console.warn(`[SBIS] Не удалось получить lastPosition из последнего элемента. Структура:`, {
+          hasHierarchicalId: !!lastItem?.hierarchicalId,
+          itemId: lastItem?.id,
+          itemName: lastItem?.name
+        })
+      }
+    }
     
     console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}, lastPosition: ${lastPosition}`)
     
