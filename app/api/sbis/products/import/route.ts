@@ -96,26 +96,72 @@ export async function POST(request: NextRequest) {
     const maxPages = 200 // Ограничение на 200 страниц (200,000 товаров максимум)
     let currentPage = 0 // Для пагинации по page, если position не работает
     let usePositionPagination = true // Флаг: использовать position или page
+    let duplicatePageCount = 0 // Счетчик дублирующихся страниц
+    let lastPageItemsCount = 0 // Количество товаров на предыдущей странице
+    let lastPagePosition: number | undefined = undefined // lastPosition предыдущей страницы
     
     // Продолжаем загрузку пока есть lastPosition или hasMore
     while (pageCount < maxPages) {
       // ВАЖНО: pointId - это ID точки продаж, а не склада!
       // Не передаем pointId, так как ID склада не является точкой продаж
       // Товары получаем без pointId, остатки получаем отдельно по ID складов
-      const pricesResponse = await getSBISPrices(
-        SBIS_PRICE_LIST_ID,
-        0, // pointId не используется (ID склада не является точкой продаж)
-        undefined, // actualDate
-        undefined, // searchString - получаем все товары
-        usePositionPagination ? undefined : currentPage, // page для пагинации (если не используем position)
-        1000, // pageSize - максимум
-        usePositionPagination ? lastPosition : undefined // position для пагинации (приоритет над page)
-      )
+      let pricesResponse
+      let retryCount = 0
+      const maxRetries = 3
+      
+      // Повторяем запрос при ошибках с экспоненциальной задержкой
+      while (retryCount < maxRetries) {
+        try {
+          pricesResponse = await getSBISPrices(
+            SBIS_PRICE_LIST_ID,
+            0, // pointId не используется (ID склада не является точкой продаж)
+            undefined, // actualDate
+            undefined, // searchString - получаем все товары
+            usePositionPagination ? undefined : currentPage, // page для пагинации (если не используем position)
+            1000, // pageSize - максимум
+            usePositionPagination ? lastPosition : undefined // position для пагинации (приоритет над page)
+          )
+          break // Успешно получили ответ
+        } catch (error: any) {
+          retryCount++
+          if (retryCount >= maxRetries) {
+            console.error(`[SBIS Import] Ошибка после ${maxRetries} попыток:`, error)
+            throw error
+          }
+          // Экспоненциальная задержка: 2s, 4s, 8s
+          const delay = Math.pow(2, retryCount) * 1000
+          console.warn(`[SBIS Import] Ошибка при запросе (попытка ${retryCount}/${maxRetries}), повтор через ${delay}ms:`, error.message || error)
+          await new Promise(resolve => setTimeout(resolve, delay))
+        }
+      }
+      
+      if (!pricesResponse) {
+        throw new Error('Не удалось получить ответ от API после всех попыток')
+      }
       
       allProducts = [...allProducts, ...pricesResponse.items]
       const newLastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
       
       pageCount++
+      
+      // Проверяем, не получаем ли мы одни и те же данные (дубликаты)
+      if (!usePositionPagination && pricesResponse.items.length === lastPageItemsCount && newLastPosition === lastPagePosition) {
+        duplicatePageCount++
+        console.warn(`[SBIS Import] ВНИМАНИЕ: Получены одинаковые данные на странице ${pageCount} (товаров: ${pricesResponse.items.length}, lastPosition: ${newLastPosition}). Дубликат #${duplicatePageCount}`)
+        
+        // Если получили одинаковые данные 3 раза подряд, прекращаем загрузку
+        if (duplicatePageCount >= 3) {
+          console.error(`[SBIS Import] Получены одинаковые данные ${duplicatePageCount} раз подряд. API не возвращает новые товары. Прекращаем загрузку.`)
+          console.log(`[SBIS Import] Всего загружено уникальных товаров: ${allProducts.length}`)
+          break
+        }
+      } else {
+        // Если получили новые данные, сбрасываем счетчик дубликатов
+        duplicatePageCount = 0
+      }
+      
+      lastPageItemsCount = pricesResponse.items.length
+      lastPagePosition = newLastPosition
       
       console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${pricesResponse.hasMore}, lastPosition: ${newLastPosition}, page: ${currentPage}, usePosition: ${usePositionPagination}`)
       
@@ -158,8 +204,9 @@ export async function POST(request: NextRequest) {
         console.log(`[SBIS Import] Продолжаем загрузку через page: ${currentPage} (всего загружено товаров: ${allProducts.length})`)
       }
       
-      // Небольшая задержка между запросами, чтобы не перегружать API
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Задержка между запросами, чтобы не перегружать API
+      // Увеличена до 2 секунд для избежания ошибок таймаута
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
     
     console.log(`[SBIS Import] Всего загружено товаров: ${allProducts.length}`)
