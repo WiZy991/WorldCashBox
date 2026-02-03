@@ -62,27 +62,56 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Автоматически получаем склад, если не указан warehouseId
-    let warehouseId = SBIS_WAREHOUSE_ID
+    // Автоматически получаем склад по названию через sabyWarehouse.Read
+    let warehouseId: string | undefined = undefined
     let warehouseInfo: { id: string; name: string } | null = null
 
     if (syncStock) {
-      if (!warehouseId) {
-        // Если склад не указан, отключаем синхронизацию остатков
-        console.warn('SBIS_WAREHOUSE_ID не указан. Синхронизация остатков будет пропущена.')
-        console.warn('Подсказка: Укажите SBIS_WAREHOUSE_ID в ecosystem.config.js или .env.production для синхронизации остатков.')
-        syncStock = false
-      } else {
-        // Проверяем существование указанного склада (опционально, не критично)
+      // Приоритет: сначала ищем по названию (если указано), затем по ID
+      if (SBIS_WAREHOUSE_NAME) {
+        try {
+          console.log(`Автоматический поиск склада по названию: ${SBIS_WAREHOUSE_NAME}`)
+          const { getSBISWarehouseByName } = await import('@/lib/sbis-stock')
+          const warehouse = await getSBISWarehouseByName(SBIS_WAREHOUSE_NAME)
+          warehouseId = warehouse.id
+          warehouseInfo = { id: warehouse.id, name: warehouse.name }
+          console.log(`✓ Склад автоматически найден по названию: ${warehouse.name} (${warehouse.id})`)
+        } catch (error) {
+          console.error(`Ошибка поиска склада по названию "${SBIS_WAREHOUSE_NAME}":`, error)
+          // Если поиск по названию не удался, пробуем использовать ID (если указан)
+          if (SBIS_WAREHOUSE_ID) {
+            console.log(`Используем указанный SBIS_WAREHOUSE_ID: ${SBIS_WAREHOUSE_ID}`)
+            warehouseId = SBIS_WAREHOUSE_ID
+            // Пробуем проверить склад по ID
+            try {
+              const warehouse = await getSBISWarehouseById(warehouseId)
+              warehouseInfo = { id: warehouse.id, name: warehouse.name }
+              console.log(`✓ Склад найден по ID: ${warehouse.name} (${warehouse.id})`)
+            } catch (idError) {
+              console.warn(`Не удалось проверить склад с ID ${warehouseId}:`, idError)
+              console.warn('Продолжаем работу с указанным ID склада.')
+            }
+          } else {
+            console.warn('Синхронизация остатков будет пропущена - склад не найден.')
+            syncStock = false
+          }
+        }
+      } else if (SBIS_WAREHOUSE_ID) {
+        // Если название не указано, используем ID
+        warehouseId = SBIS_WAREHOUSE_ID
         try {
           const warehouse = await getSBISWarehouseById(warehouseId)
           warehouseInfo = { id: warehouse.id, name: warehouse.name }
-          console.log(`Склад найден: ${warehouse.name} (${warehouse.id})`)
+          console.log(`✓ Склад найден по ID: ${warehouse.name} (${warehouse.id})`)
         } catch (error) {
           console.warn(`Не удалось проверить склад с ID ${warehouseId}:`, error)
           console.warn('Продолжаем работу с указанным ID склада.')
-          // Продолжаем работу с указанным ID, даже если проверка не удалась
         }
+      } else {
+        // Если не указано ни название, ни ID, отключаем синхронизацию остатков
+        console.warn('SBIS_WAREHOUSE_ID и SBIS_WAREHOUSE_NAME не указаны. Синхронизация остатков будет пропущена.')
+        console.warn('Подсказка: Укажите SBIS_WAREHOUSE_NAME в ecosystem.config.js для автоматического поиска склада.')
+        syncStock = false
       }
     }
 
