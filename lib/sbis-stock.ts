@@ -240,12 +240,22 @@ export async function getSBISStock(
     //     }
     //   ]
     // }
-    const balances = data.balances || []
+    // НО! API может вернуть объект вместо массива, если остатков нет
+    let balances: any[] = []
+    
+    if (Array.isArray(data.balances)) {
+      // Если balances - массив
+      balances = data.balances
+    } else if (data.balances && typeof data.balances === 'object') {
+      // Если balances - объект, преобразуем в массив
+      // Структура может быть: { "123": { balance: 10, nomenclature: 123 }, ... }
+      balances = Object.values(data.balances)
+    }
     
     // Преобразуем в формат SBISStockItem
     const items: SBISStockItem[] = balances.map((item: any) => ({
-      id: item.nomenclature,
-      stock: item.balance,
+      id: item.nomenclature || item.nomenclatureId || item.id,
+      stock: typeof item.balance === 'number' ? item.balance : parseFloat(item.balance) || 0,
     }))
     
     return {

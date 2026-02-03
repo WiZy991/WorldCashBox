@@ -247,16 +247,30 @@ export async function POST(request: NextRequest) {
         console.log(`[SBIS] Получение списка складов компании ${companyId}...`)
         const warehouses = await getSBISCompanyWarehouses(companyId)
         
-        // Ищем склад по UUID
-        const foundWarehouse = warehouses.find(w => w.uuid === warehouseId || String(w.id) === warehouseId)
+        // Ищем склад по UUID или по названию
+        let foundWarehouse = warehouses.find(w => w.uuid === warehouseId || String(w.id) === warehouseId)
+        
+        // Если не нашли по UUID, пробуем найти по названию из SBIS_WAREHOUSE_NAME
+        if (!foundWarehouse && SBIS_WAREHOUSE_NAME) {
+          console.log(`[SBIS] Поиск склада по названию: "${SBIS_WAREHOUSE_NAME}"`)
+          foundWarehouse = warehouses.find(w => 
+            w.name && w.name.toLowerCase().includes(SBIS_WAREHOUSE_NAME.toLowerCase()) ||
+            SBIS_WAREHOUSE_NAME.toLowerCase().includes(w.name.toLowerCase())
+          )
+          if (foundWarehouse) {
+            console.log(`[SBIS] Склад найден по названию: ${foundWarehouse.name} (ID: ${foundWarehouse.id})`)
+          }
+        }
+        
         if (!foundWarehouse) {
-          console.warn(`[SBIS] Склад с UUID ${warehouseId} не найден в списке складов компании. Пробуем использовать первый склад.`)
+          console.warn(`[SBIS] Склад с UUID ${warehouseId} или названием "${SBIS_WAREHOUSE_NAME}" не найден в списке складов компании.`)
+          console.warn(`[SBIS] Доступные склады:`, warehouses.map(w => `${w.name} (ID: ${w.id})`).join(', '))
           if (warehouses.length === 0) {
             throw new Error(`Не найдено складов для компании ${companyId}`)
           }
           // Используем первый склад
           warehouse = warehouses[0]
-          console.log(`[SBIS] Используется склад: ${warehouse.name} (ID: ${warehouse.id})`)
+          console.log(`[SBIS] Используется первый склад: ${warehouse.name} (ID: ${warehouse.id})`)
           
           // 3. Получаем остатки по прайс-листу
           if (priceListId) {

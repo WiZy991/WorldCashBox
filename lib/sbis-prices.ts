@@ -143,11 +143,16 @@ export async function getSBISPrices(
   const accessToken = getSBISAccessToken()
 
   // Формируем параметры запроса согласно документации пункта 8
+  // ВАЖНО: pointId может быть необязательным для API v2, пробуем без него если не указан
   const params = new URLSearchParams({
     priceListId: priceListId.toString(),
-    pointId: pointId.toString(),
     withBalance: 'true', // Получаем остатки вместе с ценами
   })
+  
+  // pointId может быть необязательным для API v2
+  if (pointId) {
+    params.append('pointId', pointId.toString())
+  }
 
   if (searchString) {
     params.append('searchString', searchString)
