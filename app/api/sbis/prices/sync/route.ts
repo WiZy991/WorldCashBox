@@ -420,14 +420,28 @@ export async function POST(request: NextRequest) {
       }
 
       // Если не нашли в общем списке, пробуем поиск по коду через searchString
-      if (newPrice === null && product.sbisId && priceListId) {
+      if (newPrice === null && product.sbisId) {
         try {
           console.log(`[SBIS] Пробуем найти товар по коду "${product.sbisId}" через searchString...`)
-          const foundProduct = await searchSBISProductByCode(
-            String(product.sbisId),
-            priceListId,
-            SBIS_POINT_ID || undefined
-          )
+          
+          // Сначала пробуем поиск в указанном прайс-листе
+          let foundProduct = priceListId 
+            ? await searchSBISProductByCode(
+                String(product.sbisId),
+                priceListId,
+                undefined // Не передаем pointId, так как он вызывает ошибку
+              )
+            : null
+          
+          // Если не нашли в прайс-листе, пробуем поиск по всему каталогу (без priceListId)
+          if (!foundProduct) {
+            console.log(`[SBIS] Товар не найден в прайс-листе ${priceListId}, пробуем поиск по всему каталогу...`)
+            foundProduct = await searchSBISProductByCode(
+              String(product.sbisId),
+              0, // 0 означает поиск по всему каталогу
+              undefined
+            )
+          }
           
           if (foundProduct) {
             newPrice = foundProduct.price
@@ -442,7 +456,7 @@ export async function POST(request: NextRequest) {
               console.log(`✓ Остаток для товара ${product.name} из searchString: ${newStock}`)
             }
           } else {
-            console.warn(`Товар с кодом "${product.sbisId}" не найден через searchString`)
+            console.warn(`Товар с кодом "${product.sbisId}" не найден через searchString ни в прайс-листе, ни в каталоге`)
           }
         } catch (error) {
           console.error(`Ошибка поиска товара по коду ${product.sbisId}:`, error)

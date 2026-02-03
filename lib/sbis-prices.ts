@@ -266,23 +266,28 @@ export async function getSBISPrices(
  */
 export async function searchSBISProductByCode(
   searchCode: string,
-  priceListId: number,
+  priceListId: number | 0, // 0 означает поиск по всему каталогу
   pointId?: number
 ): Promise<SBISPriceItem | null> {
   const accessToken = getSBISAccessToken()
 
   // Формируем параметры запроса для API v2 с searchString
   const params = new URLSearchParams({
-    priceListId: priceListId.toString(),
     withBalance: 'true',
     searchString: searchCode.trim(), // Ищем по коду товара
     pageSize: '100', // Ограничиваем результаты
   })
 
-  // pointId может быть необязательным
-  if (pointId) {
-    params.append('pointId', pointId.toString())
+  // priceListId может быть необязательным - если 0 или не указан, ищем по всему каталогу
+  if (priceListId && priceListId > 0) {
+    params.append('priceListId', priceListId.toString())
   }
+
+  // pointId может быть необязательным и вызывает ошибку, если неверный
+  // Не добавляем pointId, если он вызывает ошибку "Точка продаж не найдена"
+  // if (pointId) {
+  //   params.append('pointId', pointId.toString())
+  // }
 
   const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
   
