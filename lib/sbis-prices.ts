@@ -237,10 +237,19 @@ export async function getSBISPrices(
     if (Array.isArray(data.nomenclatures)) {
       nomenclatures = data.nomenclatures
     } else if (data.nomenclatures && typeof data.nomenclatures === 'object') {
-      // Если это объект, преобразуем в массив
-      nomenclatures = Object.values(data.nomenclatures)
+      // Если это объект, проверяем, не пустой ли он
+      const objKeys = Object.keys(data.nomenclatures)
+      if (objKeys.length === 0) {
+        // Пустой объект {} - значит, больше нет данных
+        console.log('[SBIS] nomenclatures - пустой объект {}, больше нет данных')
+        nomenclatures = []
+      } else {
+        // Если объект не пустой, преобразуем в массив
+        console.log(`[SBIS] nomenclatures - объект с ${objKeys.length} ключами, преобразуем в массив`)
+        nomenclatures = Object.values(data.nomenclatures)
+      }
     } else {
-      console.warn('[SBIS] nomenclatures не является массивом:', typeof data.nomenclatures, data.nomenclatures)
+      console.warn('[SBIS] nomenclatures не является массивом или объектом:', typeof data.nomenclatures, data.nomenclatures)
       nomenclatures = []
     }
     
@@ -258,6 +267,7 @@ export async function getSBISPrices(
     // Преобразуем в формат SBISPriceItem
     // Фильтруем только товары (не папки/категории) - у товаров есть цена или они опубликованы
     // ВАЖНО: Папки (isParent === true) пропускаем, но они нужны для правильной пагинации через lastPosition
+    // ВАЖНО: Товары находятся внутри папок, поэтому мы должны проходить по всем элементам (включая папки) для пагинации
     const items: SBISPriceItem[] = nomenclatures
       .filter((item: any) => {
         // Пропускаем папки/категории (isParent === true) - они не являются товарами
@@ -265,8 +275,15 @@ export async function getSBISPrices(
         if (item.isParent === true) {
           return false
         }
-        // Включаем товары с ценой или опубликованные товары
-        return (item.cost !== null && item.cost !== undefined && item.cost > 0) || item.published === true
+        // Включаем товары с ценой ИЛИ без цены (может быть 0 или null, но это все равно товар)
+        // Исключаем только те, у которых явно нет цены И они не опубликованы
+        // Это позволяет получить все товары, включая те, у которых цена = 0
+        if (item.cost === null || item.cost === undefined) {
+          // Если нет цены, включаем только если опубликован
+          return item.published === true
+        }
+        // Если есть цена (даже 0), включаем товар
+        return true
       })
       .map((item: any) => ({
         id: item.id,
@@ -294,9 +311,13 @@ export async function getSBISPrices(
         console.warn(`[SBIS] Не удалось получить lastPosition из последнего элемента. Структура:`, {
           hasHierarchicalId: !!lastItem?.hierarchicalId,
           itemId: lastItem?.id,
-          itemName: lastItem?.name
+          itemName: lastItem?.name,
+          isParent: lastItem?.isParent
         })
       }
+    } else {
+      // Если массив пустой, значит больше нет данных
+      console.log('[SBIS] nomenclatures пустой, больше нет данных для загрузки')
     }
     
     console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}, lastPosition: ${lastPosition}`)
