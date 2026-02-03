@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Plus, Edit, Trash2, Search, RefreshCw } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, RefreshCw, Warehouse } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Product } from '@/data/products'
 import ProductForm from '@/components/admin/ProductForm'
@@ -58,7 +58,7 @@ export default function AdminProducts() {
   }
 
   const handleSyncPrices = async () => {
-    if (!confirm('Синхронизировать цены из СБИС? Это может занять некоторое время.')) {
+    if (!confirm('Синхронизировать цены и остатки из СБИС? Это может занять некоторое время.')) {
       return
     }
 
@@ -67,22 +67,61 @@ export default function AdminProducts() {
       const response = await fetch('/api/sbis/prices/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force: false }),
+        body: JSON.stringify({ force: false, syncStock: true }),
       })
 
       const data = await response.json()
       
       if (response.ok) {
-        alert(`Синхронизация завершена!\nОбновлено товаров: ${data.stats.updated}\nНе найдено: ${data.stats.notFound}`)
+        const message = `Синхронизация завершена!\n` +
+          `Обновлено цен: ${data.stats.pricesUpdated || 0}\n` +
+          `Обновлено остатков: ${data.stats.stockUpdated || 0}\n` +
+          `Не найдено: ${data.stats.notFound || 0}`
+        alert(message)
         loadProducts()
       } else {
-        alert(`Ошибка синхронизации: ${data.error || 'Неизвестная ошибка'}`)
+        let errorMessage = `Ошибка синхронизации: ${data.error || 'Неизвестная ошибка'}`
+        if (data.details) {
+          errorMessage += `\n\nДетали: ${data.details}`
+        }
+        if (data.hint) {
+          errorMessage += `\n\nПодсказка: ${data.hint}`
+        }
+        alert(errorMessage)
       }
     } catch (error) {
       console.error('Error syncing prices:', error)
-      alert('Ошибка при синхронизации цен')
+      alert('Ошибка при синхронизации цен и остатков')
     } finally {
       setSyncing(false)
+    }
+  }
+
+  const handleCheckWarehouse = async () => {
+    try {
+      // Получаем список всех складов
+      const response = await fetch('/api/sbis/warehouse/list')
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        if (data.warehouses.length === 0) {
+          alert('Склады не найдены в СБИС')
+          return
+        }
+
+        // Формируем список складов для отображения
+        const warehousesList = data.warehouses.map((w: any, index: number) => 
+          `${index + 1}. ${w.name} (ID: ${w.id})`
+        ).join('\n')
+
+        alert(`Найдено складов: ${data.count}\n\n${warehousesList}\n\n` +
+          `Система автоматически использует первый склад при синхронизации.`)
+      } else {
+        alert(`Ошибка: ${data.error || 'Не удалось получить список складов'}`)
+      }
+    } catch (error) {
+      console.error('Error checking warehouses:', error)
+      alert('Ошибка при получении списка складов')
     }
   }
 
@@ -102,6 +141,14 @@ export default function AdminProducts() {
             <p className="text-gray-600 mt-2">Управление каталогом товаров</p>
           </div>
           <div className="flex items-center space-x-3">
+            <button
+              onClick={handleCheckWarehouse}
+              className="bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              title="Проверить склад в СБИС"
+            >
+              <Warehouse className="w-5 h-5" />
+              <span>Проверить склад</span>
+            </button>
             <button
               onClick={handleSyncPrices}
               disabled={syncing}

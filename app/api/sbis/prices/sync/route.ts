@@ -10,7 +10,8 @@ import {
 } from '@/lib/sbis-prices'
 import {
   getSBISStock,
-  getSBISProductStock
+  getSBISProductStock,
+  getSBISWarehouseById
 } from '@/lib/sbis-stock'
 
 const productsJsonPath = join(process.cwd(), 'data', 'products.json')
@@ -41,14 +42,61 @@ export async function POST(request: NextRequest) {
     const SBIS_POINT_ID = parseInt(process.env.SBIS_POINT_ID || body.pointId || '0')
     const SBIS_PRICE_LIST_ID = parseInt(process.env.SBIS_PRICE_LIST_ID || body.priceListId || '0')
     const SBIS_WAREHOUSE_ID = process.env.SBIS_WAREHOUSE_ID || body.warehouseId
+    const SBIS_WAREHOUSE_NAME = process.env.SBIS_WAREHOUSE_NAME || body.warehouseName // Предпочтительное название склада
     const force = body.force || false
     const syncStock = body.syncStock !== false // По умолчанию синхронизируем остатки
 
-    if (!SBIS_POINT_ID) {
+    if (!SBIS_POINT_ID || SBIS_POINT_ID === 0) {
+      // Логируем для отладки
+      console.error('SBIS_POINT_ID не настроен. Проверьте переменные окружения:')
+      console.error('- process.env.SBIS_POINT_ID:', process.env.SBIS_POINT_ID)
+      console.error('- body.pointId:', body.pointId)
+      
       return NextResponse.json(
-        { error: 'SBIS_POINT_ID не настроен. Укажите pointId в запросе или в переменных окружения.' },
+        { 
+          error: 'SBIS_POINT_ID не настроен',
+          details: 'Укажите pointId в запросе или создайте файл .env.local с переменной SBIS_POINT_ID=206',
+          hint: 'Переменные окружения должны быть в файле .env.local (для разработки) или .env.production (для продакшена). После изменения переменных окружения необходимо перезапустить сервер.'
+        },
         { status: 400 }
       )
+    }
+
+    // Автоматически получаем склад, если не указан warehouseId
+    let warehouseId = SBIS_WAREHOUSE_ID
+    let warehouseInfo: { id: string; name: string } | null = null
+
+    if (syncStock) {
+      if (!warehouseId) {
+        // Пытаемся автоматически получить склад из СБИС
+        try {
+          const { getFirstSBISWarehouse } = await import('@/lib/sbis-stock')
+          const warehouse = await getFirstSBISWarehouse(SBIS_WAREHOUSE_NAME)
+          
+          if (warehouse) {
+            warehouseId = warehouse.id
+            warehouseInfo = { id: warehouse.id, name: warehouse.name }
+            console.log(`Автоматически выбран склад: ${warehouse.name} (${warehouse.id})`)
+          } else {
+            console.warn('Не удалось автоматически получить склад из СБИС. Синхронизация остатков будет пропущена.')
+            // Продолжаем работу без синхронизации остатков
+          }
+        } catch (error) {
+          console.error('Ошибка автоматического получения склада:', error)
+          console.warn('Синхронизация остатков будет пропущена.')
+        }
+      } else {
+        // Проверяем существование указанного склада
+        try {
+          const warehouse = await getSBISWarehouseById(warehouseId)
+          warehouseInfo = { id: warehouse.id, name: warehouse.name }
+          console.log(`Склад найден: ${warehouse.name} (${warehouse.id})`)
+        } catch (error) {
+          console.warn(`Склад с ID ${warehouseId} не найден или недоступен:`, error)
+          // Продолжаем работу, но без синхронизации остатков
+          warehouseId = undefined
+        }
+      }
     }
 
     // Загружаем товары
@@ -119,9 +167,9 @@ export async function POST(request: NextRequest) {
       console.log('Пробуем получить цены по каждому товару индивидуально...')
     }
 
-    // Получаем остатки товаров из СБИС (если включена синхронизация остатков)
+    // Получаем остатки товаров из СБИС (если включена синхронизация остатков и найден склад)
     let allStock: Array<{ id: string | number; stock: number }> = []
-    if (syncStock && SBIS_WAREHOUSE_ID) {
+    if (syncStock && warehouseId) {
       try {
         const actualDate = formatSBISDate()
         let hasMoreStock = true
@@ -130,7 +178,7 @@ export async function POST(request: NextRequest) {
 
         while (hasMoreStock) {
           const stockResponse = await getSBISStock(
-            SBIS_WAREHOUSE_ID,
+            warehouseId,
             SBIS_POINT_ID,
             actualDate,
             undefined,
@@ -192,7 +240,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Получаем остатки товара
-      if (syncStock && SBIS_WAREHOUSE_ID && product.sbisId) {
+      if (syncStock && warehouseId && product.sbisId) {
         if (allStock.length > 0) {
           // Ищем остатки в загруженных данных
           const stockItem = allStock.find(item => 
@@ -207,7 +255,7 @@ export async function POST(request: NextRequest) {
         // Если не нашли в общем списке, пробуем получить индивидуально
         if (newStock === null) {
           try {
-            newStock = await getSBISProductStock(product.sbisId, SBIS_WAREHOUSE_ID, SBIS_POINT_ID)
+            newStock = await getSBISProductStock(product.sbisId, warehouseId, SBIS_POINT_ID)
           } catch (error) {
             console.error(`Ошибка получения остатков для товара ${product.id} (sbisId: ${product.sbisId}):`, error)
           }
@@ -230,7 +278,7 @@ export async function POST(request: NextRequest) {
         product.stock = newStock
         product.inStock = newStock > 0
         product.stockUpdatedAt = now
-        product.sbisWarehouseId = SBIS_WAREHOUSE_ID
+        product.sbisWarehouseId = warehouseId
         
         if (oldStock !== newStock) {
           updatedStockCount++
@@ -258,7 +306,8 @@ export async function POST(request: NextRequest) {
         stockUpdated: updatedStockCount,
         notFound: notFoundCount,
         priceListId: priceListId,
-        warehouseId: SBIS_WAREHOUSE_ID || null,
+        warehouseId: warehouseId || null,
+        warehouseName: warehouseInfo?.name || null,
         syncedAt: now,
       },
     })
