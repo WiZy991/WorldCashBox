@@ -240,23 +240,38 @@ export async function getSBISProductStockRPC(
 /**
  * Получение остатков товара по его ID через REST API СБИС
  * 
- * @param productId - ID товара в СБИС
- * @param warehouseId - ID склада в СБИС (UUID)
- * @param pointId - Идентификатор точки продаж
+ * ВАЖНО: Для использования этого метода нужно получить числовые ID компании и склада.
+ * Рекомендуется использовать основной метод получения остатков через getSBISStock
+ * с параметром priceListIds, который получает остатки для всех товаров из прайс-листа.
+ * 
+ * @param productId - ID товара в СБИС (числовой ID номенклатуры)
+ * @param warehouseId - ID склада в СБИС (числовой ID, не UUID!)
+ * @param companyId - ID компании (числовой ID)
  */
 export async function getSBISProductStock(
   productId: string | number,
-  warehouseId: string,
-  pointId: number
+  warehouseId: number, // Теперь числовой ID, не UUID
+  companyId: number
 ): Promise<number | null> {
   try {
-    const { formatSBISDate } = await import('./sbis-prices')
-    const actualDate = formatSBISDate()
-    const stock = await getSBISStock(warehouseId, pointId, actualDate)
+    // Преобразуем productId в число, если это строка
+    const nomenclatureId = typeof productId === 'string' ? parseInt(productId, 10) : productId
+    if (isNaN(nomenclatureId)) {
+      console.warn(`[SBIS] Невозможно преобразовать productId в число: ${productId}`)
+      return null
+    }
+
+    // Используем новый метод getSBISStock с параметром nomenclatures
+    const stock = await getSBISStock(
+      undefined, // priceListIds
+      [nomenclatureId], // nomenclatures - массив ID товаров
+      [warehouseId], // warehouses - массив числовых ID складов
+      [companyId] // companies - массив числовых ID компаний
+    )
     
     // Ищем товар по ID
     const product = stock.items.find(item => 
-      String(item.id) === String(productId)
+      Number(item.id) === Number(nomenclatureId)
     )
     
     return product?.stock ?? null

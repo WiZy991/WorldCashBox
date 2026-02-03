@@ -220,6 +220,9 @@ export async function POST(request: NextRequest) {
 
     // Получаем остатки товаров из СБИС (если включена синхронизация остатков и найден склад)
     let allStock: Array<{ id: string | number; stock: number }> = []
+    let warehouse: { id: number; name: string; uuid?: string } | null = null
+    let companyId: number | null = null
+    
     if (syncStock && warehouseId) {
       try {
         // Согласно документации, нужно получить числовые ID компании и склада
@@ -231,7 +234,7 @@ export async function POST(request: NextRequest) {
         }
         
         // Используем первую компанию (или можно добавить переменную окружения SBIS_COMPANY_ID)
-        const companyId = companies[0].id
+        companyId = companies[0].id
         console.log(`[SBIS] Используется компания: ${companies[0].name} (ID: ${companyId})`)
         
         // 2. Получаем список складов компании
@@ -239,15 +242,15 @@ export async function POST(request: NextRequest) {
         const warehouses = await getSBISCompanyWarehouses(companyId)
         
         // Ищем склад по UUID
-        const warehouse = warehouses.find(w => w.uuid === warehouseId || String(w.id) === warehouseId)
-        if (!warehouse) {
+        const foundWarehouse = warehouses.find(w => w.uuid === warehouseId || String(w.id) === warehouseId)
+        if (!foundWarehouse) {
           console.warn(`[SBIS] Склад с UUID ${warehouseId} не найден в списке складов компании. Пробуем использовать первый склад.`)
           if (warehouses.length === 0) {
             throw new Error(`Не найдено складов для компании ${companyId}`)
           }
           // Используем первый склад
-          const firstWarehouse = warehouses[0]
-          console.log(`[SBIS] Используется склад: ${firstWarehouse.name} (ID: ${firstWarehouse.id})`)
+          warehouse = warehouses[0]
+          console.log(`[SBIS] Используется склад: ${warehouse.name} (ID: ${warehouse.id})`)
           
           // 3. Получаем остатки по прайс-листу
           if (priceListId) {
@@ -255,7 +258,7 @@ export async function POST(request: NextRequest) {
             const stockResponse = await getSBISStock(
               [priceListId], // priceListIds
               undefined, // nomenclatures
-              [firstWarehouse.id], // warehouses (числовые ID)
+              [warehouse.id], // warehouses (числовые ID)
               [companyId] // companies
             )
             allStock = stockResponse.items
@@ -264,6 +267,7 @@ export async function POST(request: NextRequest) {
             console.warn('[SBIS] priceListId не указан, остатки не будут загружены')
           }
         } else {
+          warehouse = foundWarehouse
           console.log(`[SBIS] Найден склад: ${warehouse.name} (ID: ${warehouse.id}, UUID: ${warehouse.uuid})`)
           
           // 3. Получаем остатки по прайс-листу
@@ -382,9 +386,19 @@ export async function POST(request: NextRequest) {
         }
 
         // Если не нашли в общем списке, пробуем получить индивидуально
-        if (newStock === null) {
+        // Для этого нужны числовые ID склада и компании, которые уже получены выше
+        if (newStock === null && warehouse && companyId !== null) {
           try {
-            newStock = await getSBISProductStock(product.sbisId, warehouseId, SBIS_POINT_ID)
+            // Преобразуем sbisId в число (если это числовой ID, а не код)
+            const productIdNum = typeof product.sbisId === 'string' 
+              ? parseInt(product.sbisId, 10) 
+              : product.sbisId
+            
+            if (!isNaN(Number(productIdNum))) {
+              newStock = await getSBISProductStock(productIdNum, warehouse.id, companyId)
+            } else {
+              console.log(`[SBIS] sbisId "${product.sbisId}" не является числовым ID, пропускаем индивидуальный запрос остатков`)
+            }
           } catch (error) {
             console.error(`Ошибка получения остатков для товара ${product.id} (sbisId: ${product.sbisId}):`, error)
           }
