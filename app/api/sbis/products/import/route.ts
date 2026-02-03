@@ -114,45 +114,50 @@ export async function POST(request: NextRequest) {
       allProducts = [...allProducts, ...pricesResponse.items]
       const newLastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
       
-      // Если использовали page, увеличиваем его для следующей страницы
-      if (!lastPosition && pricesResponse.currentPage !== undefined) {
-        currentPage = (pricesResponse.currentPage || 0) + 1
-      }
-      
-      lastPosition = newLastPosition // Обновляем position для следующей итерации
       pageCount++
       
-      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${pricesResponse.hasMore}, lastPosition: ${newLastPosition}, page: ${currentPage}`)
+      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${pricesResponse.hasMore}, lastPosition: ${newLastPosition}, page: ${currentPage}, usePosition: ${usePositionPagination}`)
       
-      // ВАЖНО: Товары находятся в папках, поэтому на странице могут быть только папки (0 отфильтрованных товаров)
-      // Продолжаем загрузку, если есть lastPosition или currentPage, даже если отфильтрованных товаров 0
-      if (pricesResponse.items.length === 0) {
-        if (lastPosition) {
-          // Продолжаем загрузку, если есть position (на странице были только папки, товары идут дальше)
-          console.log(`[SBIS Import] Получено 0 отфильтрованных товаров на странице ${pageCount} (возможно, только папки), но есть position: ${lastPosition}, продолжаем загрузку...`)
-        } else if (currentPage > 0 && pricesResponse.hasMore) {
-          // Продолжаем загрузку через page, если hasMore: true
-          console.log(`[SBIS Import] Получено 0 отфильтрованных товаров на странице ${pageCount}, но hasMore: true, продолжаем через page: ${currentPage}...`)
-        } else {
-          // Нет position, нет hasMore и нет товаров - значит, достигли конца
-          console.log(`[SBIS Import] Получено 0 товаров на странице ${pageCount} и нет position/hasMore, прекращаем загрузку`)
+      // ВАЖНО: Если получили 0 товаров и пустой объект {}, это может означать:
+      // 1. Конец иерархии при использовании position (но могут быть товары в других папках через page)
+      // 2. Конец данных при использовании page
+      // Если используем position и получили 0 товаров без newLastPosition, переключаемся на page
+      if (pricesResponse.items.length === 0 && !newLastPosition && usePositionPagination) {
+        console.log(`[SBIS Import] Получено 0 товаров при использовании position, переключаемся на page для получения товаров из всех папок...`)
+        usePositionPagination = false
+        lastPosition = undefined
+        currentPage = 0 // Начинаем с первой страницы при использовании page
+        continue // Повторяем запрос с page вместо position
+      }
+      
+      // Если использовали page, увеличиваем его для следующей страницы
+      if (!usePositionPagination && pricesResponse.currentPage !== undefined) {
+        currentPage = (pricesResponse.currentPage || 0) + 1
+      } else if (usePositionPagination) {
+        lastPosition = newLastPosition // Обновляем position для следующей итерации
+      }
+      
+      // ВАЖНО: Продолжаем загрузку если есть newLastPosition (при использовании position) или hasMore (при использовании page)
+      // API v2 может возвращать hasMore: false, но при этом есть еще товары через position или page
+      // Это особенно важно для иерархических структур с папками - нужно пройти по всем папкам
+      if (usePositionPagination) {
+        // При использовании position продолжаем, пока есть newLastPosition
+        if (!newLastPosition && !pricesResponse.hasMore) {
+          console.log(`[SBIS Import] Нет больше товаров при использовании position (hasMore: ${pricesResponse.hasMore}, newLastPosition: ${newLastPosition}), переключаемся на page...`)
+          usePositionPagination = false
+          lastPosition = undefined
+          currentPage = 0
+          continue
+        }
+        if (newLastPosition) {
+          console.log(`[SBIS Import] Продолжаем загрузку с position: ${newLastPosition} (всего загружено товаров: ${allProducts.length})`)
+        }
+      } else {
+        // При использовании page продолжаем, пока есть hasMore
+        if (!pricesResponse.hasMore) {
+          console.log(`[SBIS Import] Нет больше товаров при использовании page (hasMore: ${pricesResponse.hasMore}), прекращаем загрузку`)
           break
         }
-      }
-      
-      // Продолжаем загрузку если есть lastPosition или hasMore (даже если hasMore: false, но есть position)
-      // API v2 может возвращать hasMore: false, но при этом есть еще товары через position или page
-      // Это особенно важно для иерархических структур с папками
-      if (!lastPosition && !pricesResponse.hasMore && currentPage === 0) {
-        console.log(`[SBIS Import] Нет больше товаров (hasMore: ${pricesResponse.hasMore}, lastPosition: ${lastPosition}, page: ${currentPage}), прекращаем загрузку`)
-        break
-      }
-      
-      // Если есть lastPosition, продолжаем загрузку (даже если hasMore: false)
-      // Если нет lastPosition, но есть hasMore, продолжаем через page
-      if (lastPosition) {
-        console.log(`[SBIS Import] Продолжаем загрузку с position: ${lastPosition} (всего загружено товаров: ${allProducts.length})`)
-      } else if (pricesResponse.hasMore) {
         console.log(`[SBIS Import] Продолжаем загрузку через page: ${currentPage} (всего загружено товаров: ${allProducts.length})`)
       }
       

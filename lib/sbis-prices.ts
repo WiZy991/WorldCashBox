@@ -299,11 +299,14 @@ export async function getSBISPrices(
       }))
     
     // Получаем hierarchicalId последнего элемента ВСЕГО массива (включая папки) для следующей страницы
-    // Это важно для правильной пагинации - нужно использовать последний hierarchicalId из всего ответа
+    // ВАЖНО: Это критически важно для правильной пагинации по иерархии
+    // API возвращает товары в иерархическом порядке, включая папки и товары внутри них
+    // Для прохода по всей иерархии нужно использовать hierarchicalId последнего элемента из ВСЕГО ответа
     let lastPosition: number | undefined = undefined
     if (nomenclatures.length > 0) {
-      // Используем последний элемент из всего массива (включая папки)
-      // Это важно, так как API использует hierarchicalId для пагинации
+      // ВАЖНО: Используем последний элемент из всего массива (включая папки)
+      // Это позволяет правильно пройти по всей иерархии и получить все товары из всех папок
+      // Даже если последний элемент - это папка, мы должны использовать её hierarchicalId для продолжения
       const lastItem = nomenclatures[nomenclatures.length - 1] as any
       lastPosition = lastItem?.hierarchicalId
       
@@ -311,6 +314,12 @@ export async function getSBISPrices(
       if (lastPosition) {
         const isLastItemParent = lastItem?.isParent === true
         console.log(`[SBIS] lastPosition из последнего элемента: ${lastPosition} (всего элементов: ${nomenclatures.length}, последний - ${isLastItemParent ? 'папка' : 'товар'}, имя: ${lastItem?.name || 'N/A'})`)
+        
+        // ВАЖНО: Если последний элемент - папка, это нормально, мы должны продолжить загрузку
+        // чтобы получить товары из этой папки и следующих папок
+        if (isLastItemParent) {
+          console.log(`[SBIS] ВНИМАНИЕ: Последний элемент - папка "${lastItem?.name}". Продолжаем загрузку для получения товаров из папок.`)
+        }
       } else {
         console.warn(`[SBIS] Не удалось получить lastPosition из последнего элемента. Структура:`, {
           hasHierarchicalId: !!lastItem?.hierarchicalId,
