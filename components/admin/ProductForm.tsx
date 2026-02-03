@@ -115,7 +115,9 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
         image: formData.image || undefined,
         // Поля для интеграции с СБИС
         sbisId: formData.sbisId && (typeof formData.sbisId === 'string' || typeof formData.sbisId === 'number')
-          ? (typeof formData.sbisId === 'string' && formData.sbisId.trim() !== '' ? formData.sbisId.trim() : formData.sbisId)
+          ? (typeof formData.sbisId === 'string' && formData.sbisId.trim() !== '' 
+              ? formData.sbisId.trim().replace(/\/+$/, '') // Убираем лишние слэши в конце
+              : formData.sbisId)
           : undefined,
         sbisWarehouseId: formData.sbisWarehouseId && typeof formData.sbisWarehouseId === 'string' && formData.sbisWarehouseId.trim() !== ''
           ? formData.sbisWarehouseId.trim()
@@ -375,8 +377,12 @@ export default function ProductForm({ product, onClose, onSave }: ProductFormPro
               <input
                 type="text"
                 value={formData.sbisId || ''}
-                onChange={(e) => setFormData({ ...formData, sbisId: e.target.value || undefined })}
-                placeholder="Введите ID или артикул товара из СБИС"
+                onChange={(e) => {
+                  // Убираем лишние пробелы и слэши при вводе
+                  const value = e.target.value.trim().replace(/\/+$/, '')
+                  setFormData({ ...formData, sbisId: value || undefined })
+                }}
+                placeholder="Введите ID или артикул товара из СБИС (например: ST520-5000П)"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <p className="mt-1 text-xs text-gray-500">

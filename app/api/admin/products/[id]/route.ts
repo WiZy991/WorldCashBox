@@ -42,7 +42,9 @@ export async function PUT(
       specifications: productData.specifications || undefined,
       // Поля для интеграции с СБИС
       sbisId: productData.sbisId && (typeof productData.sbisId === 'string' || typeof productData.sbisId === 'number')
-        ? (typeof productData.sbisId === 'string' && productData.sbisId.trim() !== '' ? productData.sbisId.trim() : productData.sbisId)
+        ? (typeof productData.sbisId === 'string' && productData.sbisId.trim() !== '' 
+            ? productData.sbisId.trim().replace(/\/+$/, '') // Убираем лишние слэши в конце
+            : productData.sbisId)
         : undefined,
       sbisPriceListId: productData.sbisPriceListId && typeof productData.sbisPriceListId === 'number'
         ? productData.sbisPriceListId
