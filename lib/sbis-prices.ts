@@ -22,6 +22,9 @@ export interface SBISPriceItem {
   price: number
   currency?: string
   unit?: string
+  code?: string // Код товара (nomNumber)
+  article?: string // Артикул (nomNumber)
+  balance?: string // Остаток товара
 }
 
 /**
@@ -106,49 +109,61 @@ export async function getSBISPriceLists(
 }
 
 /**
- * Получение цен товаров из прайс-листа СБИС
+ * Получение списка товаров из прайс-листа СБИС (API v2 для Saby Retail)
  * 
- * @param priceListId - ID прайс-листа
- * @param pointId - Идентификатор точки продаж
- * @param actualDate - Дата и время для запроса цен
+ * Документация: https://api.sbis.ru/retail/v2/nomenclature/list?
+ * Пункт 8: "Получить список товаров по API для Saby Retail"
+ * 
+ * Возвращает информацию о товарах из прайс-листа или колонки цен, включая:
+ * - id (идентификатор номенклатуры)
+ * - name (название товара)
+ * - cost (integer) - цена товара из прайса
+ * - balance (string) - остаток товара на складе
+ * - article (string) - артикул наименования
+ * - nomNumber (string) - код товара
+ * - externalId (string) - UUID идентификатор
+ * - description (string) - описание
+ * - images (array[string]) - изображения
+ * 
+ * @param priceListId - ID прайс-листа (обязательно)
+ * @param pointId - Идентификатор точки продаж (обязательно)
+ * @param actualDate - Не используется в этом методе, но оставляем для совместимости
  * @param searchString - Поиск по названию товара (опционально)
- * @param page - Номер страницы (опционально)
- * @param pageSize - Количество записей на странице (опционально)
+ * @param page - Не используется, используется position для пагинации
+ * @param pageSize - Количество записей на странице (опционально, по умолчанию 1000, максимум 1000)
  */
 export async function getSBISPrices(
   priceListId: number,
   pointId: number,
-  actualDate: string,
+  actualDate?: string, // Не используется в этом методе, но оставляем для совместимости
   searchString?: string,
   page?: number,
   pageSize?: number
 ): Promise<{ items: SBISPriceItem[]; hasMore: boolean }> {
   const accessToken = getSBISAccessToken()
 
-  // Формируем параметры запроса
+  // Формируем параметры запроса согласно документации пункта 8
   const params = new URLSearchParams({
     priceListId: priceListId.toString(),
     pointId: pointId.toString(),
-    actualDate: actualDate,
+    withBalance: 'true', // Получаем остатки вместе с ценами
   })
 
   if (searchString) {
     params.append('searchString', searchString)
   }
-  if (page !== undefined) {
-    params.append('page', page.toString())
-  }
   if (pageSize !== undefined) {
-    params.append('pageSize', pageSize.toString())
+    params.append('pageSize', Math.min(pageSize, 1000).toString()) // Максимум 1000
+  } else {
+    params.append('pageSize', '1000') // По умолчанию 1000 записей (максимум)
   }
+  // Примечание: пагинация через position и order более продвинутая,
+  // но для простоты используем pageSize. Если нужно, можно добавить поддержку position/order
 
-  // ВАЖНО: В документации нет метода получения цен товаров из прайс-листа!
-  // Есть только метод получения списка прайс-листов.
-  // Возможно, нужно использовать другой endpoint или метод.
-  const url = `https://api.sbis.ru/retail/nomenclature/prices?${params.toString()}`
+  const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
   
-  console.log(`[SBIS] Запрос цен товаров: ${url}`)
-  console.log(`[SBIS] Параметры: priceListId=${priceListId}, pointId=${pointId}, actualDate=${actualDate}`)
+  console.log(`[SBIS] Запрос списка товаров из прайс-листа (API v2): ${url}`)
+  console.log(`[SBIS] Параметры: priceListId=${priceListId}, pointId=${pointId}`)
 
   try {
     const response = await fetch(url, {
@@ -170,22 +185,49 @@ export async function getSBISPrices(
 
     const data = await response.json()
     
-    // Логируем полный ответ для отладки
-    console.log('[SBIS] Полный ответ API:', JSON.stringify(data, null, 2))
+    // Логируем структуру ответа для отладки (первые 3 товара)
+    if (data.nomenclatures && data.nomenclatures.length > 0) {
+      console.log('[SBIS] Пример структуры товара (API v2):', JSON.stringify(data.nomenclatures[0], null, 2))
+    }
     
-    // Структура ответа может отличаться в зависимости от API
-    // Адаптируйте под реальную структуру ответа СБИС
-    const items = data.items || data.prices || data.nomenclature || data.data || []
-    const hasMore = data.outcome?.hasMore || data.hasMore || false
+    // Структура ответа согласно документации пункта 8:
+    // {
+    //   "nomenclatures": [
+    //     {
+    //       "id": integer,
+    //       "name": string,
+    //       "cost": integer, // Цена товара из прайса
+    //       "balance": string, // Остаток товара
+    //       "article": string, // Артикул
+    //       "nomNumber": string, // Код товара
+    //       "externalId": string, // UUID
+    //       ...
+    //     }
+    //   ],
+    //   "outcome": {
+    //     "hasMore": boolean
+    //   }
+    // }
+    const nomenclatures = data.nomenclatures || []
+    const hasMore = data.outcome?.hasMore || false
+    
+    // Преобразуем в формат SBISPriceItem
+    const items: SBISPriceItem[] = nomenclatures.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      price: typeof item.cost === 'number' ? item.cost : parseFloat(item.cost) || 0, // cost - integer в v2
+      code: item.nomNumber || item.article || undefined, // Код товара (приоритет nomNumber)
+      article: item.article || item.nomNumber || undefined, // Артикул (приоритет article)
+      balance: item.balance || undefined, // Остаток товара
+    }))
     
     console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}`)
     
     if (items.length === 0) {
       console.warn('[SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:')
       console.warn('[SBIS] 1. Правильность priceListId и pointId')
-      console.warn('[SBIS] 2. Формат даты actualDate')
-      console.warn('[SBIS] 3. Возможно, endpoint /retail/nomenclature/prices не существует')
-      console.warn('[SBIS] 4. Структура ответа:', Object.keys(data))
+      console.warn('[SBIS] 2. Существует ли прайс-лист и содержит ли он товары')
+      console.warn('[SBIS] 3. Структура ответа:', Object.keys(data))
     }
     
     return {
@@ -193,7 +235,7 @@ export async function getSBISPrices(
       hasMore: hasMore,
     }
   } catch (error) {
-    console.error('Ошибка получения цен из СБИС:', error)
+    console.error('Ошибка получения списка товаров из СБИС:', error)
     throw error
   }
 }

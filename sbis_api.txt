@@ -376,3 +376,569 @@ branchCode
   "id": 1,
   "protocol": 5
 }
+
+4. Получить прайс-лист по API
+Запрос возвращает информацию о действующих прайс-листах и колонках цен.
+
+Структура запроса 
+Метод запроса: GET
+
+Адрес запроса: https://api.sbis.ru/retail/nomenclature/price-list?
+
+Параметр
+* — обязательный
+
+Тип
+
+Описание
+
+pointId*	число	идентификатор точки продаж, который возвращается в результате запроса «Получить точку продаж»
+actualDate *	строка
+«ДД.ММ.ГГГГ ЧЧ:ММ:СС»	дата и время, на которые запрашивается прайс-лист или колонка цен
+searchString	строка	название прайса или колонки цен
+page	число	номер страницы
+pageSize	число	количество записей на странице
+Результат 
+Параметр
+
+Тип
+
+Описание
+
+id	строка
+целое число	идентификаторы меню и колонки цен. Они будут передаваться в других вопросах как параметр priceListId
+name	строка	названия прайса и колонки цен
+outcome	массив	признак наличия записей на следующей странице. Возможные значения: «Да», «Нет»
+ 	hasMore	логический	признак наличия записей на следующей странице. Возможные значения: «Да», «Нет»
+Примеры 
+*.php
+ *.py
+Запрос прайса с помощью библиотеки «Requests»
+
+﻿import requests
+parameters = {
+    'pointId': 206,
+    'actualDate': '2020-09-07 00:00:00'
+}
+url = 'https://api.sbis.ru/retail/nomenclature/price-list?'  
+headers = {
+"X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZUA4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}  
+response = requests.get(url, params=parameters, headers=headers)
+print(response.text)
+Ответ
+
+{
+    "priceLists": [
+        {
+            "id": 15,
+            "name": "Прайс для интернет магазина"
+        },
+        {
+            "id": 10,
+            "name": "Оптовый прайс"
+        }
+    ],
+    "outcome": {
+        "hasMore": false
+    }
+}
+
+5. Получить остатки товаров на складе по API
+Запрос возвращает информацию об остатках товаров на складе. Можно узнать остатки по конкретным товарам и по всем товарам, входящим в прайс-лист.
+
+Предварительно запросите:
+
+идентификаторы организаций через GET-запрос — по адресу «https://api.sbis.ru/retail/company/list»;
+идентификаторы складов через GET-запрос — по адресу «https://api.sbis.ru/retail/company/warehouses?companyId=Х», где вместо Х следует указать идентификатор организации, полученный из предыдущего запроса.
+Структура запроса 
+Метод запроса: GET
+
+Адрес запроса: https://api.sbis.ru/retail/nomenclature/balances?
+
+Параметр
+* — обязательный
+** — условно-обязательный	Тип	Описание
+nomenclatures**	array[integer]	массив идентификаторов товаров, по которым надо узнать остатки. Идентификаторы возвращаются в результате запроса «Получить список товаров». Заполните, если не передан параметр «priceListIds»
+priceListIds**	array[integer]	массив идентификаторов прайс-листов. Идентификаторы возвращаются в результате запроса «Получить прайс-лист». Заполните параметр вместо «nomenclatures», если хотите получить остатки по всем товарам из определенных прайс-листов
+warehouses*	array[integer]	массив идентификаторов складов, по которым получаем остатки товаров
+companies*	array[integer]	массив идентификаторов компаний, на которых числятся остатки товаров
+Структура ответа 
+Параметр	Тип	Описание
+balance	number	количество остатка товара на складе
+nomenclature	integer	идентификатор товара
+Примеры 
+*.php
+*.py
+Запрос остатков с помощью библиотеки «Requests» по списку номенклатур
+
+import requests
+parameters = {
+    'nomenclatures': [123,321],
+    'warehouses': [456, 789],
+    'companies': [444]
+}
+url = 'https://api.sbis.ru/retail/nomenclature/balances?'
+headers = {
+"X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZU
+A4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}
+response = requests.get(url, params=parameters, headers=headers)
+print(response.text)
+Запрос остатков с помощью библиотеки «Requests» по прайс-листу
+
+import requests
+parameters = {
+    'priceListIds': [123,321],
+    'warehouses': [456, 789],
+    'companies': [444]
+}
+url = 'https://api.sbis.ru/retail/nomenclature/balances?'
+headers = {
+"X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZU
+A4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}
+response = requests.get(url, params=parameters, headers=headers)
+print(response.text)
+Ответ
+
+{
+  "balances": [
+    {
+      "balance": 10,
+      "nomenclature": 3
+    },
+    {
+      "balance": 0,
+      "nomenclature": 4
+    }
+  ]
+}
+
+6. Получить прайс-лист по API
+Запрос возвращает информацию о действующих прайс-листах. Чтобы запрос отработал корректно, в точке продаж должен быть непустой прайс-лист с типом «Выбранные наименования».
+
+Метод запроса: GET
+
+Адрес запроса: https://api.sbis.ru/retail/nomenclature/price-list?
+
+Структура запроса 
+Пример в формате *.php
+ Пример запроса в формате *.py
+В качестве примера используется библиотека «Requests».
+
+﻿import requests
+parameters = {
+    'pointId': '12345',
+    'actualDate': '01.01.2020'
+}
+url = 'https://api.sbis.ru/retail/nomenclature/price-list?'  
+headers = {
+"X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZUA4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}  
+response = requests.get(url, params=parameters, headers=headers)
+print(response.text)
+ 
+Параметр	Тип	Описание
+pointId*	integer	Идентификатор точки продаж, который возвращается в результате запроса «Получить точку продаж»
+actualDate *	string	Дата в формате дд.мм.гггг
+searchString	string	Название прайса, который требуется найти
+page	integer	Номер страницы
+pageSize	integer	Количество записей на странице
+* — обязательный параметр.
+
+Структура ответа 
+﻿{
+    "priceLists": [
+        {
+            "id": "string",
+            "name": "string"
+        },
+        {
+            "id": "string",
+            "name": "string"
+        }
+    ],
+    "outcome": {
+        "hasMore": "boolean"
+    }
+}
+ 
+Параметр	Тип	Описание
+id	string	Идентификатор прайса, который будет передаваться в другие вопросы как параметр «priceListId»
+name	string	Название прайса
+outcome	array[{...}]	Признак наличия записей на следующей странице
+Структура «outcome»
+hasMore	boolean	Признак наличия записей на следующей странице
+Примеры 
+{
+    "priceLists": [
+        {
+            "id": 15,
+            "name": "Прайс для интернет магазина"
+        },
+        {
+            "id": 10,
+            "name": "Оптовый прайс"
+        }
+    ],
+    "outcome": {
+        "hasMore": false
+    }
+}
+7. Получить список товаров по API
+Запрос возвращает информацию о товарах и услугах по действующему прайс-листу.
+
+Метод запроса: GET
+
+Адрес запроса: https://api.sbis.ru/retail/nomenclature/list?
+
+Структура запроса
+Структура ответа
+Примеры
+Структура запроса 
+Пример в формате *.php
+ Пример запроса в формате *.py
+В качестве примера используется библиотека «Requests».
+
+﻿import requests
+parameters = {
+    'pointId': '123',
+    'priceListId': '555',
+    'withBalance': 'true',
+    'page': '0',
+    'pageSize': '10'
+    
+}
+url = 'https://api.sbis.ru/retail/nomenclature/list?'  
+headers = {
+"X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZUA4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}  
+response = requests.get(url, params=parameters, headers=headers)
+print(response.text)
+Параметр	Тип	Описание
+pointId *	integer	Идентификатор точки продаж, который вернулся в результате запроса «Получить точку продаж»
+priceListId *	integer	Идентификатор прайс-листа, который вернулся в результате запроса «Получить прайс-лист»
+noStopList	boolean	Параметр исключает позиции, которые есть в прайс-листе
+withBalance	boolean	Параметр определяет, передаются остатки или нет
+searchString	string	Поиск по названию или части названия товара
+page	integer	Номер страницы
+pageSize	integer	Количество записей на странице
+product	string	Название сервиса, по которому нужно получить список товаров. В данном случае «salon»
+Структура ответа 
+﻿{
+    "nomenclatures": [
+        {
+            "attributes": null,
+            "balance": string,
+            "cost": string,
+            "description": string,
+            "externalId": string,
+            "hierarchicalId": integer,
+            "hierarchicalParent": integer,
+            "id": integer,
+            "images": Array[string],
+            "indexNumber": 1097001,
+            "modifiers": [],
+            "name": "Процессоры",
+            "nomNumber": null,
+            "published": true,
+            "unit": null
+            
+        }
+    ],
+    "outcome": {
+        "hasMore": false
+    }
+}
+Параметр	Тип	Описание
+attributes	array[{...}]	Характеристики номенклатуры
+balance	string	Остаток товара с учетом открытых смен. Остаток передается по складу точки продаж
+description	string	Поле «Описание» из карточки номенклатуры
+externalId	string	Хешированное название номенклатурной позиции для запроса подробной информации
+hierarchicalId	integer	Идентификатор раздела
+hierarchicalParent	integer	Идентификатор родительского раздела
+id	integer	Идентификатор номенклатуры
+images	array[string]	Изображение товара
+indexNumber	integer	Порядковый номер в каталоге
+modifiers	array[{...}]	Список модификаторов
+name	string	Название товара
+nomNumber	string	Код товара, указанный в карточке номенклатуры
+published	boolean	Признак публикации номенклатурной позиции
+masters **	string	Список мастеров, которые могут применять этот товар/услугу
+unit	string	Единица измерения
+outcome	boolean	Флаг наличия записей на следующих страницах
+priceIntervals **	array[number]	Минимальная и максимальная цена товара/услуги среди всех прайс-листов, где применяется эта позиция
+executionTime**	integer	Время выполнения услуги. Возвращается, если в параметре "product" указано значение "salon"
+Структура «modifiers»
+id	integer	Идентификатор номенклатурной позиции
+externalId	string	Хешированное название номенклатурной позиции для запроса подробной информации
+nomNumber	string	Код товара, указанный в карточке номенклатуры
+name	string	Название товара
+cost	number	Цена модификатора
+unit	string	Название единицы измерения/Время приготовления(presto)
+hierarchicalParent	integer	Идентификатор родителя в иерархии
+hierarchicalId	integer	Идентификатор в иерархии
+isParent	boolean	Признак, является ли идентификатор родителем в иерархии
+* — обязательный параметр.
+
+** — условно-обязательный параметр, возвращается в запросах к Saby Clients.
+
+Примеры 
+Чтобы получить изображение товара, выполните GET-запрос, где «{img?param=...}» — значение параметра «images».
+
+https://api.sbis.ru/retail/{img?param=...}
+
+
+8. Получить список товаров по API для Saby Retail
+Запрос возвращает информацию о товарах:
+
+из прайс-листа или колонки цен — если передан идентификатор в параметре priceListId;
+из каталога — если идентификатор не указан.
+Структура запроса 
+Метод запроса: GET
+
+Адрес запроса: https://api.sbis.ru/retail/v2/nomenclature/list?
+
+Параметр
+
+Тип	Описание
+pointId	integer	
+Идентификатор точки продаж, который вернулся в результате запроса «Получить точку продаж»
+
+priceListId	integer	
+Идентификатор прайс-листа или колонки цен. Идентификатор возвращается в результате запроса «Получить прайс-лист»
+
+noStopList	boolean	
+Параметр исключает позиции, которые есть в стоп-листе
+
+withBalance	boolean	
+Признак передачи остатков товаров. Возможные значения: true — передается остаток по складу точки продаж в параметре balance, false — не передается
+
+withBarcode	
+boolean
+
+Признак передачи штрихкодов товара. Возможные значения: true — штрихкоды передаются в ответе, false — не передаются
+
+searchString	string	
+Поиск по названию или части названия товара
+
+pageSize	
+integer
+
+Количество записей на странице. Максимальное возможное значение — 1000
+
+position	
+integer
+
+Иерархический идентификатор последней записи из предыдущей страницы. При получении первой страницы параметр не указывается
+
+order	
+string
+
+Направление выборки данных в результате. Возможные значения: before — записи, которые идут до указанного значения position (как листание назад), after — записи, которые идут после указанного значения position (как листание вперед)
+
+product	string	
+Название сервиса, по которому нужно получить список товаров. В данном случае «delivery»
+
+Структура ответа 
+Параметр
+
+Тип
+
+Описание
+
+article	string	
+Артикул наименования
+
+attributes	array[{...}]	
+Массив списков с характеристиками номенклатуры
+
+balance	string	
+Остаток товара на складе точки продаж. Параметр приходит, если в запросе отмечено флагом withBalance
+
+barcodes	
+array{...}
+
+Массив штрихкодов
+
+ 	code	
+string
+
+Штрихкод
+
+codeType	
+string
+
+Тип штрихкода (EAN-13, EAN-8)
+
+cost	integer	
+Цена товара из прайса или колонки цен
+
+description	string	
+Поле «Описание» из карточки номенклатуры
+
+externalId	string	
+Идентификатор номенклатуры в формате UUID
+
+hierarchicalId	integer	
+Идентификатор раздела
+
+hierarchicalParent	integer	
+Идентификатор родительского раздела
+
+id	integer	
+Идентификатор номенклатуры
+
+images	array[string]	
+Изображение товара
+
+indexNumber	integer	
+Порядковый номер в каталоге
+
+modifiers	array[{...}]	
+Список модификаторов
+
+ 	id	integer	
+Идентификатор номенклатурной позиции
+
+name	string	
+Название модификатора или группы модификаторов
+
+cost	number	
+Цена модификатора
+
+baseCount	integer	
+Количество порций модификатора в базовой единице измерения, которое добавлено в товар
+
+сount	number	
+Количество модификатора
+
+maxCount	number	
+Максимальное количество модификатора, которое можно выбрать. Распространяется на все позиции, связанные с родителем, у которого оно заполнено
+
+minCount	number	
+Минимальное количество модификатора, которое нужно выбрать. Распространяется на все позиции, связанные с родителем, у которого оно заполнено
+
+parentType	integer	
+Тип родителя/папки
+
+hierarchicalParent	integer	
+Идентификатор родителя в иерархии
+
+hierarchicalId	integer	
+Идентификатор в иерархии
+
+isParent	boolean	
+Признак, является ли идентификатор родителем в иерархии
+
+name	string	
+Название товара
+
+nomNumber	string	
+Код товара, указанный в карточке номенклатуры
+
+published	boolean	
+Признак публикации номенклатурной позиции
+
+short_code	integer	
+Короткий код
+
+unit	string	
+Единица измерения
+
+outcome	boolean	
+Флаг наличия записей на следующих страницах
+
+priceIntervals	array[number]	
+Минимальная и максимальная цена товара среди всех прайс-листов, где применяется эта позиция
+
+С помощью API-запросов вы можете получить дополнительную информацию по товарам.
+
+Получить изображение товара:
+метод: GET
+запрос: https://api.sbis.ru/retail/{img?param=...}, где {img?param=...} — значение параметра «images» из вернувшихся данных товара.
+Получить список «С этим товаром покупают»:
+метод: GET
+запрос: https://api.sbis.ru/retail/nomenclature/{IdNom}, где {IdNom} — идентификатор номенклатуры.
+Получить список позиций, находящихся в стоп-листе:
+метод: GET
+запрос: https://api.sbis.ru/retail/nomenclature/stop-list.
+Структура запроса
+
+Параметр	Тип	Описание
+pointId	integer	Идентификатор точки продаж
+page	integer	Номер страницы
+pageSize	integer	Количество записей на странице
+Структура ответа
+
+Параметр	Тип	Описание
+balance	integer	Оставшееся количество номенклатуры, доступное для продажи
+count	integer	Начальное количество
+externalId	string	Идентификатор номенклатуры в формате UUID
+id	integer	Идентификатор номенклатуры
+images	array[string]	Массив ссылок на изображение товара
+name	string	Название блюда
+nomNumber	string	Код товара, указанный в карточке номенклатуры
+period	integer	Количество часов, которое товар будет находиться в стоп-листе
+reason	string	Причина нахождения в стоп-листе
+stopListId	integer	Идентификатор стоп-листа
+outcome	boolean	Флаг наличия записей на следующих страницах
+Примеры 
+Запрос 
+*.php
+*.py
+В качестве примера используется библиотека «Requests».
+
+﻿import requests
+parameters = {
+    'pointId': 123,
+    'priceListId': 555,
+    'withBalance': True,
+    'withBarcode': True,
+    'onlyPublished': True,
+    'page': '0',
+    'pageSize': '10'
+}
+url = 'https://api.sbis.ru/retail/v2/nomenclature/list?'
+headers = {
+    "X-SBISAccessToken": "MlU3cjkmREE4elU5NihQKmglfFB0N1dqNH43W3BGPiVCYiZnZ21GUzlpLU1ERVFII2MmZUA4bG98N1ddOClBKjIwMjAtMTAtMTMgMTI6MDQ6MTMuODkzNjA4"
+}
+response = requests.get(url, params = parameters, headers = headers)
+print(response.text)
+Ответ 
+
+Запрос получения списка позиций, находящихся в стоп-листе 
+{
+    "nomenclatures": [
+        {
+            "balance": 0.0,
+            "count": 3.0,
+            "externalId": "1bf96d0f-2cdf-48a7-aac8-577968766703",
+            "id": 4207,
+            "images": [
+                "/img?params=eyJPYmplY3RUeXBlIjogIm5vbWVuY2xhdHVyZV9mb3JfcmVmIiwgIk9iamVjdElkIjogMjIwMSwgIlBob3RvVVJMIjogImh0dHBzOi8vZml4LW9ubGluZS5zYmlzLnJ1L2ZzLXB1YmxpYy9ub21lbmNsYXR1cmVfZmlsZXMvMzBkZDI0OGQtMzY3OC00ODhiLWEwMmMtODk5YTlkYWJjNzliIiwgIlBob3RvSWQiOiBudWxsLCAiU2l6ZSI6IG51bGwsICJBZGRpdGlvbmFsUGFyYW1zIjogbnVsbH0="
+            ],
+            "name": "Кофе Эспрессо",
+            "nomNumber": "RC-9d6b691b",
+            "period": 1.0,
+            "reason": null,
+            "stopListId": 2307
+        },
+        {
+            "balance": 2.0,
+            "count": 3.0,
+            "externalId": "0eb55818-e016-4fef-937b-a0e0e1ab1b6b",
+            "id": 4960,
+            "images": null,
+            "name": "Смузи фруктовый с киви",
+            "nomNumber": "RC-0eb55894",
+            "period": 0.0,
+            "reason": "нет киви на складе",
+            "stopListId": 2306
+        }
+    ],
+    "outcome": {
+        "hasMore": false
+    }
+}

@@ -11,7 +11,9 @@ import {
 import {
   getSBISStock,
   getSBISProductStock,
-  getSBISWarehouseById
+  getSBISWarehouseById,
+  getSBISCompanies,
+  getSBISCompanyWarehouses
 } from '@/lib/sbis-stock'
 
 // Помечаем route как динамический, так как он использует process.env и файловую систему
@@ -161,27 +163,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Получаем актуальные цены из СБИС
-    const actualDate = formatSBISDate()
-    let allPrices: Array<{ id: string | number; name: string; price: number }> = []
+    // Получаем актуальные цены из СБИС через метод "Получить список товаров для Saby Retail" (пункт 8, API v2)
+    let allPrices: Array<{ id: string | number; name: string; price: number; code?: string; article?: string }> = []
     let hasMore = true
-    let page = 1
-    const pageSize = 100
+    let position: number | undefined = undefined // Используем position для пагинации в v2 API
+    const pageSize = 1000 // Максимальный размер страницы в v2 API
 
     try {
       while (hasMore) {
-        const pricesResponse = await getSBISPrices(priceListId, SBIS_POINT_ID, actualDate, undefined, page, pageSize)
+        // Метод getSBISPrices теперь использует /retail/v2/nomenclature/list (пункт 8, API v2)
+        // actualDate не требуется для этого метода, но оставляем для совместимости
+        const actualDate = formatSBISDate()
+        const pricesResponse = await getSBISPrices(priceListId, SBIS_POINT_ID, actualDate, undefined, undefined, pageSize)
         allPrices = allPrices.concat(pricesResponse.items)
         hasMore = pricesResponse.hasMore
-        page++
         
-        // Защита от бесконечного цикла
-        if (page > 100) {
-          console.warn('Достигнут лимит страниц (100), прерываем загрузку')
+        // В v2 API пагинация через position, но для простоты используем pageSize=1000
+        // Если нужно получить больше товаров, можно добавить поддержку position/order
+        if (!hasMore || allPrices.length >= 10000) {
+          // Защита от слишком большого количества товаров
+          console.log(`Загружено ${allPrices.length} товаров, останавливаем загрузку`)
           break
         }
       }
-      console.log(`Загружено ${allPrices.length} товаров из прайс-листа СБИС`)
+      console.log(`✓ Загружено ${allPrices.length} товаров из прайс-листа СБИС (API v2)`)
       // Логируем структуру первых товаров для отладки
       if (allPrices.length > 0) {
         console.log('Пример структуры товара из СБИС (первые 3):', 
@@ -189,13 +194,26 @@ export async function POST(request: NextRequest) {
             id: p.id,
             name: p.name,
             price: p.price,
-            // Показываем все доступные поля
-            allFields: Object.keys(p)
+            code: p.code,
+            article: p.article,
           }))
         )
       }
     } catch (error) {
       console.error('Ошибка получения цен из СБИС:', error)
+      
+      // Проверяем, является ли ошибка "метод не зарегистрирован"
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      if (errorMessage.includes('не зарегистрирован') || errorMessage.includes('prices')) {
+        console.error('⚠️ КРИТИЧЕСКАЯ ОШИБКА: Метод получения цен товаров не существует в СБИС API!')
+        console.error('⚠️ В документации есть только метод получения списка прайс-листов, но нет метода получения цен товаров.')
+        console.error('⚠️ Необходимо обратиться к документации СБИС или техподдержке для получения правильного метода.')
+        console.error('⚠️ Возможные варианты:')
+        console.error('   1. Использовать JSON-RPC метод (например, sabyNomenclature.GetPrices)')
+        console.error('   2. Использовать другой endpoint REST API')
+        console.error('   3. Получать цены через другой способ (экспорт, вебхук и т.д.)')
+      }
+      
       // Если не удалось получить цены через API цен, пробуем получить по каждому товару
       console.log('Пробуем получить цены по каждому товару индивидуально...')
     }
@@ -204,33 +222,75 @@ export async function POST(request: NextRequest) {
     let allStock: Array<{ id: string | number; stock: number }> = []
     if (syncStock && warehouseId) {
       try {
-        const actualDate = formatSBISDate()
-        let hasMoreStock = true
-        let pageStock = 1
-        const pageSizeStock = 100
-
-        while (hasMoreStock) {
-          const stockResponse = await getSBISStock(
-            warehouseId,
-            SBIS_POINT_ID,
-            actualDate,
-            undefined,
-            pageStock,
-            pageSizeStock
-          )
-          allStock = allStock.concat(stockResponse.items)
-          hasMoreStock = stockResponse.hasMore
-          pageStock++
+        // Согласно документации, нужно получить числовые ID компании и склада
+        // 1. Получаем список компаний
+        console.log('[SBIS] Получение списка компаний...')
+        const companies = await getSBISCompanies()
+        if (companies.length === 0) {
+          throw new Error('Не найдено компаний в СБИС')
+        }
+        
+        // Используем первую компанию (или можно добавить переменную окружения SBIS_COMPANY_ID)
+        const companyId = companies[0].id
+        console.log(`[SBIS] Используется компания: ${companies[0].name} (ID: ${companyId})`)
+        
+        // 2. Получаем список складов компании
+        console.log(`[SBIS] Получение списка складов компании ${companyId}...`)
+        const warehouses = await getSBISCompanyWarehouses(companyId)
+        
+        // Ищем склад по UUID
+        const warehouse = warehouses.find(w => w.uuid === warehouseId || String(w.id) === warehouseId)
+        if (!warehouse) {
+          console.warn(`[SBIS] Склад с UUID ${warehouseId} не найден в списке складов компании. Пробуем использовать первый склад.`)
+          if (warehouses.length === 0) {
+            throw new Error(`Не найдено складов для компании ${companyId}`)
+          }
+          // Используем первый склад
+          const firstWarehouse = warehouses[0]
+          console.log(`[SBIS] Используется склад: ${firstWarehouse.name} (ID: ${firstWarehouse.id})`)
           
-          // Защита от бесконечного цикла
-          if (pageStock > 100) {
-            console.warn('Достигнут лимит страниц для остатков (100), прерываем загрузку')
-            break
+          // 3. Получаем остатки по прайс-листу
+          if (priceListId) {
+            console.log(`[SBIS] Получение остатков по прайс-листу ${priceListId}...`)
+            const stockResponse = await getSBISStock(
+              [priceListId], // priceListIds
+              undefined, // nomenclatures
+              [firstWarehouse.id], // warehouses (числовые ID)
+              [companyId] // companies
+            )
+            allStock = stockResponse.items
+            console.log(`[SBIS] Загружено остатков товаров: ${allStock.length}`)
+          } else {
+            console.warn('[SBIS] priceListId не указан, остатки не будут загружены')
+          }
+        } else {
+          console.log(`[SBIS] Найден склад: ${warehouse.name} (ID: ${warehouse.id}, UUID: ${warehouse.uuid})`)
+          
+          // 3. Получаем остатки по прайс-листу
+          if (priceListId) {
+            console.log(`[SBIS] Получение остатков по прайс-листу ${priceListId}...`)
+            const stockResponse = await getSBISStock(
+              [priceListId], // priceListIds
+              undefined, // nomenclatures
+              [warehouse.id], // warehouses (числовые ID)
+              [companyId] // companies
+            )
+            allStock = stockResponse.items
+            console.log(`[SBIS] Загружено остатков товаров: ${allStock.length}`)
+          } else {
+            console.warn('[SBIS] priceListId не указан, остатки не будут загружены')
           }
         }
-        console.log(`Загружено остатков товаров: ${allStock.length}`)
       } catch (error) {
         console.error('Ошибка получения остатков из СБИС:', error)
+        
+        // Проверяем, является ли ошибка "метод не зарегистрирован"
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        if (errorMessage.includes('не зарегистрирован') || errorMessage.includes('stock')) {
+          console.error('⚠️ КРИТИЧЕСКАЯ ОШИБКА: Метод получения остатков не существует в СБИС API!')
+          console.error('⚠️ Необходимо использовать JSON-RPC метод sabyWarehouse.GetStock или другой способ.')
+        }
+        
         // Продолжаем работу даже если не удалось получить остатки
       }
     }
@@ -252,32 +312,35 @@ export async function POST(request: NextRequest) {
 
       if (product.sbisId && allPrices.length > 0) {
         // Ищем цену в загруженных данных
-        // Пробуем разные варианты сопоставления:
-        // 1. Точное совпадение ID
-        // 2. Совпадение кода товара (если есть поле code)
-        // 3. Частичное совпадение по названию
+        // Пробуем разные варианты сопоставления (в порядке приоритета):
+        // 1. Точное совпадение кода товара (nomNumber) - самый надежный способ
+        // 2. Точное совпадение ID
+        // 3. Частичное совпадение по названию (как запасной вариант)
         const priceItem = allPrices.find(item => {
-          // Точное совпадение ID
+          // Приоритет 1: Совпадение кода товара (nomNumber) - это то, что указано в поле "Код" в СБИС
+          if (item.code && String(item.code) === String(product.sbisId)) {
+            console.log(`✓ Товар ${product.name} найден по коду (nomNumber): ${item.code}`)
+            return true
+          }
+          // Приоритет 2: Совпадение артикула (article, тот же nomNumber)
+          if (item.article && String(item.article) === String(product.sbisId)) {
+            console.log(`✓ Товар ${product.name} найден по артикулу: ${item.article}`)
+            return true
+          }
+          // Приоритет 3: Точное совпадение ID
           if (String(item.id) === String(product.sbisId)) {
-            console.log(`Товар ${product.name} найден по ID: ${item.id}`)
+            console.log(`✓ Товар ${product.name} найден по ID: ${item.id}`)
             return true
           }
-          // Совпадение кода (если есть поле code в ответе API)
-          if ((item as any).code && String((item as any).code) === String(product.sbisId)) {
-            console.log(`Товар ${product.name} найден по коду: ${(item as any).code}`)
-            return true
-          }
-          // Совпадение артикула (если есть поле article или sku)
-          if ((item as any).article && String((item as any).article) === String(product.sbisId)) {
-            console.log(`Товар ${product.name} найден по артикулу: ${(item as any).article}`)
-            return true
-          }
-          // Частичное совпадение по названию (как запасной вариант)
+          // Приоритет 4: Частичное совпадение по названию (как запасной вариант)
           if (item.name && product.name) {
-            const itemNameLower = item.name.toLowerCase()
-            const productNameLower = product.name.toLowerCase()
-            if (itemNameLower.includes(productNameLower) || productNameLower.includes(itemNameLower)) {
-              console.log(`Товар ${product.name} найден по названию: ${item.name}`)
+            const itemNameLower = item.name.toLowerCase().trim()
+            const productNameLower = product.name.toLowerCase().trim()
+            // Проверяем, содержит ли одно название другое (с допуском на небольшие различия)
+            if (itemNameLower === productNameLower || 
+                itemNameLower.includes(productNameLower) || 
+                productNameLower.includes(itemNameLower)) {
+              console.log(`⚠ Товар ${product.name} найден по названию (неточное совпадение): ${item.name}`)
               return true
             }
           }

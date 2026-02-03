@@ -20,61 +20,13 @@ export interface SBISStockResponse {
 }
 
 /**
- * Получение остатков товаров на складе через СБИС API
+ * Получение списка компаний через СБИС API
  * 
- * @param warehouseId - ID склада в СБИС (UUID)
- * @param pointId - Идентификатор точки продаж
- * @param actualDate - Дата и время для запроса остатков (формат: "ДД.ММ.ГГГГ ЧЧ:ММ:СС")
- * @param searchString - Поиск по названию товара (опционально)
- * @param page - Номер страницы (опционально)
- * @param pageSize - Количество записей на странице (опционально)
+ * Документация: https://api.sbis.ru/retail/company/list
  */
-export async function getSBISStock(
-  warehouseId: string,
-  pointId: number,
-  actualDate: string,
-  searchString?: string,
-  page?: number,
-  pageSize?: number
-): Promise<SBISStockResponse> {
+export async function getSBISCompanies(): Promise<Array<{ id: number; name: string }>> {
   const accessToken = getSBISAccessToken()
-
-  if (!warehouseId) {
-    throw new Error('warehouseId обязателен для получения остатков')
-  }
-
-  if (!pointId) {
-    throw new Error('pointId обязателен для получения остатков')
-  }
-
-  if (!actualDate) {
-    throw new Error('actualDate обязателен для получения остатков')
-  }
-
-  // Формируем параметры запроса
-  const params = new URLSearchParams({
-    warehouseId: warehouseId,
-    pointId: pointId.toString(),
-    actualDate: actualDate,
-  })
-
-  if (searchString) {
-    params.append('searchString', searchString)
-  }
-  if (page !== undefined) {
-    params.append('page', page.toString())
-  }
-  if (pageSize !== undefined) {
-    params.append('pageSize', pageSize.toString())
-  }
-
-  // URL для получения остатков товаров на складе
-  // Примечание: URL может отличаться в зависимости от версии API СБИС
-  // Возможные варианты:
-  // - https://api.sbis.ru/retail/nomenclature/stock?
-  // - https://api.sbis.ru/retail/warehouse/stock?
-  // - https://online.sbis.ru/service/ (JSON-RPC метод)
-  const url = `https://api.sbis.ru/retail/nomenclature/stock?${params.toString()}`
+  const url = `https://api.sbis.ru/retail/company/list`
 
   try {
     const response = await fetch(url, {
@@ -91,12 +43,135 @@ export async function getSBISStock(
     }
 
     const data = await response.json()
+    return data.companies || data || []
+  } catch (error) {
+    console.error('Ошибка получения списка компаний из СБИС:', error)
+    throw error
+  }
+}
+
+/**
+ * Получение списка складов компании через СБИС API
+ * 
+ * Документация: https://api.sbis.ru/retail/company/warehouses?companyId=X
+ * 
+ * @param companyId - Числовой ID компании
+ */
+export async function getSBISCompanyWarehouses(companyId: number): Promise<Array<{ id: number; name: string; uuid?: string }>> {
+  const accessToken = getSBISAccessToken()
+  const url = `https://api.sbis.ru/retail/company/warehouses?companyId=${companyId}`
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-SBISAccessToken': accessToken,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`СБИС API вернул ошибку (${response.status}): ${errorText}`)
+    }
+
+    const data = await response.json()
+    return data.warehouses || data || []
+  } catch (error) {
+    console.error('Ошибка получения списка складов компании из СБИС:', error)
+    throw error
+  }
+}
+
+/**
+ * Получение остатков товаров на складе через СБИС API
+ * 
+ * Документация: https://api.sbis.ru/retail/nomenclature/balances?
+ * 
+ * @param priceListIds - Массив идентификаторов прайс-листов (опционально, если не указан, используем nomenclatures)
+ * @param nomenclatures - Массив идентификаторов товаров (опционально, если не указан, используем priceListIds)
+ * @param warehouses - Массив идентификаторов складов (числовые ID, не UUID!)
+ * @param companies - Массив идентификаторов компаний (числовые ID)
+ */
+export async function getSBISStock(
+  priceListIds?: number[],
+  nomenclatures?: number[],
+  warehouses?: number[],
+  companies?: number[]
+): Promise<SBISStockResponse> {
+  const accessToken = getSBISAccessToken()
+
+  // Проверяем, что передан хотя бы один из обязательных параметров
+  if (!priceListIds && !nomenclatures) {
+    throw new Error('Необходимо указать либо priceListIds, либо nomenclatures')
+  }
+
+  if (!warehouses || warehouses.length === 0) {
+    throw new Error('warehouses обязателен для получения остатков (массив числовых ID складов)')
+  }
+
+  if (!companies || companies.length === 0) {
+    throw new Error('companies обязателен для получения остатков (массив числовых ID компаний)')
+  }
+
+  // Формируем параметры запроса согласно документации
+  const params = new URLSearchParams()
+  
+  if (priceListIds && priceListIds.length > 0) {
+    // Передаем массив как несколько параметров с одинаковым именем
+    priceListIds.forEach(id => params.append('priceListIds', id.toString()))
+  }
+  
+  if (nomenclatures && nomenclatures.length > 0) {
+    nomenclatures.forEach(id => params.append('nomenclatures', id.toString()))
+  }
+  
+  warehouses.forEach(id => params.append('warehouses', id.toString()))
+  companies.forEach(id => params.append('companies', id.toString()))
+
+  const url = `https://api.sbis.ru/retail/nomenclature/balances?${params.toString()}`
+
+  console.log(`[SBIS] Запрос остатков: ${url}`)
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-SBISAccessToken': accessToken,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[SBIS] Ошибка API (${response.status}):`, errorText)
+      throw new Error(`СБИС API вернул ошибку (${response.status}): ${errorText}`)
+    }
+
+    const data = await response.json()
     
-    // Структура ответа может отличаться в зависимости от API
-    // Адаптируйте под реальную структуру ответа СБИС
+    console.log(`[SBIS] Ответ API (остатки):`, JSON.stringify(data, null, 2))
+    
+    // Структура ответа согласно документации:
+    // {
+    //   "balances": [
+    //     {
+    //       "balance": 10,
+    //       "nomenclature": 3
+    //     }
+    //   ]
+    // }
+    const balances = data.balances || []
+    
+    // Преобразуем в формат SBISStockItem
+    const items: SBISStockItem[] = balances.map((item: any) => ({
+      id: item.nomenclature,
+      stock: item.balance,
+    }))
+    
     return {
-      items: data.items || data.stock || data.result || [],
-      hasMore: data.outcome?.hasMore || data.hasMore || false,
+      items: items,
+      hasMore: false, // API не возвращает информацию о пагинации
     }
   } catch (error) {
     console.error('Ошибка получения остатков из СБИС:', error)
@@ -350,6 +425,9 @@ export async function getSBISWarehouseById(
 /**
  * Получение информации о складе по названию
  * 
+ * При поиске по названию необходимо передать реквизиты организации (ИНН, КПП),
+ * иначе API вернет ошибку "Не были переданы идентификаторы!"
+ * 
  * @param warehouseName - Название склада
  * @param sessionId - ID сессии СБИС (опционально)
  */
@@ -357,7 +435,18 @@ export async function getSBISWarehouseByName(
   warehouseName: string,
   sessionId?: string
 ): Promise<SBISWarehouse> {
-  return readSBISWarehouse({ name: warehouseName }, sessionId)
+  // Получаем реквизиты организации из переменных окружения
+  const SBIS_ORG_INN = process.env.SBIS_ORG_INN || '4804948184' // ИНН из примера в документации
+  const SBIS_ORG_KPP = process.env.SBIS_ORG_KPP || '480494818' // КПП из примера в документации
+  
+  // При поиске по названию обязательно передаем реквизиты организации
+  return readSBISWarehouse({
+    name: warehouseName,
+    organization: {
+      inn: SBIS_ORG_INN,
+      kpp: SBIS_ORG_KPP,
+    }
+  }, sessionId)
 }
 
 /**

@@ -14,7 +14,10 @@ module.exports = {
       SBIS_POINT_ID: '206',
       SBIS_PRICE_LIST_ID: '15',
       SBIS_WAREHOUSE_ID: '284a42ba-97cc-4d9c-98af-00000000100a',
-      SBIS_WAREHOUSE_NAME: 'Склад32'
+      SBIS_WAREHOUSE_NAME: 'Толстого 32А', // Название склада для поиска
+      // Реквизиты организации (необходимы для поиска склада по названию)
+      SBIS_ORG_INN: '4804948184', // ИНН компании
+      SBIS_ORG_KPP: '480494818' // КПП компании
     },
     error_file: './logs/pm2-error.log',
     out_file: './logs/pm2-out.log',
