@@ -141,7 +141,7 @@ export async function getSBISPrices(
   page?: number,
   pageSize?: number,
   position?: number // Иерархический идентификатор для пагинации
-): Promise<{ items: SBISPriceItem[]; hasMore: boolean; lastPosition?: number }> {
+): Promise<{ items: SBISPriceItem[]; hasMore: boolean; lastPosition?: number; currentPage?: number }> {
   const accessToken = getSBISAccessToken()
 
   // Формируем параметры запроса согласно документации пункта 8
@@ -154,11 +154,12 @@ export async function getSBISPrices(
     // onlyPublished: false - не указываем, чтобы получить все товары
   })
   
-  // pointId может быть необязательным для API v2
-  // Пробуем без pointId, если он вызывает ошибку
-  // if (pointId) {
-  //   params.append('pointId', pointId.toString())
-  // }
+  // ВАЖНО: Передаем pointId (ID склада/точки продаж) для получения товаров и остатков по этому складу
+  // Согласно документации, pointId - это идентификатор точки продаж
+  // В нашем случае используем ID склада как pointId
+  if (pointId && pointId > 0) {
+    params.append('pointId', pointId.toString())
+  }
 
   if (searchString) {
     params.append('searchString', searchString)
@@ -169,14 +170,16 @@ export async function getSBISPrices(
     params.append('pageSize', '1000') // По умолчанию 1000 записей (максимум)
   }
   
-  // Пагинация через position (иерархический идентификатор последней записи)
-  // ВАЖНО: position должен быть hierarchicalId последнего элемента из ВСЕГО ответа (включая папки)
-  // Это позволяет правильно проходить по иерархии и получать товары из всех папок
-  // Для первой страницы position не указывается
-  // Для следующих страниц используем hierarchicalId последнего элемента предыдущей страницы
+  // Пагинация: пробуем использовать page (как в примере документации), если не указан position
+  // В примере документации используется page: '0', pageSize: '10'
+  // Если указан position, используем его (для иерархической пагинации)
   if (position !== undefined && position !== null) {
+    // Используем position для иерархической пагинации
     params.append('position', position.toString())
     params.append('order', 'after') // Записи после указанного position (включая товары из папок)
+  } else if (page !== undefined) {
+    // Используем page для обычной пагинации (как в примере документации)
+    params.append('page', page.toString())
   }
 
   const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
@@ -320,7 +323,7 @@ export async function getSBISPrices(
       console.log('[SBIS] nomenclatures пустой, больше нет данных для загрузки')
     }
     
-    console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}, lastPosition: ${lastPosition}`)
+    console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}, lastPosition: ${lastPosition}, page: ${page}`)
     
     if (items.length === 0) {
       console.warn('[SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:')
@@ -333,6 +336,7 @@ export async function getSBISPrices(
       items: items,
       hasMore: hasMore,
       lastPosition: lastPosition,
+      currentPage: page,
     }
   } catch (error) {
     console.error('Ошибка получения списка товаров из СБИС:', error)
