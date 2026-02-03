@@ -25,6 +25,7 @@ export interface SBISPriceItem {
   code?: string // Код товара (nomNumber)
   article?: string // Артикул (nomNumber)
   balance?: string | number // Остаток товара (может быть string или number в зависимости от API)
+  hierarchicalId?: number // Иерархический идентификатор для пагинации
 }
 
 /**
@@ -164,8 +165,14 @@ export async function getSBISPrices(
   } else {
     params.append('pageSize', '1000') // По умолчанию 1000 записей (максимум)
   }
-  // Примечание: пагинация через position и order более продвинутая,
-  // но для простоты используем pageSize. Если нужно, можно добавить поддержку position/order
+  
+  // Пагинация через position (иерархический идентификатор последней записи)
+  // Для первой страницы position не указывается
+  // Для следующих страниц используем hierarchicalId последнего элемента предыдущей страницы
+  if (position !== undefined) {
+    params.append('position', position.toString())
+    params.append('order', 'after') // Записи после указанного position
+  }
 
   const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
   
@@ -236,9 +243,15 @@ export async function getSBISPrices(
         code: item.nomNumber ? String(item.nomNumber).trim() : undefined, // Код товара (убираем пробелы)
         article: item.article ? String(item.article).trim() : undefined, // Артикул (убираем пробелы)
         balance: item.balance !== null && item.balance !== undefined ? Number(item.balance) : undefined, // Остаток товара
+        hierarchicalId: item.hierarchicalId, // Сохраняем для пагинации
       }))
     
-    console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}`)
+    // Получаем hierarchicalId последнего элемента для следующей страницы
+    const lastPosition = items.length > 0 && nomenclatures.length > 0
+      ? (nomenclatures[nomenclatures.length - 1] as any)?.hierarchicalId
+      : undefined
+    
+    console.log(`[SBIS] Получено товаров: ${items.length}, hasMore: ${hasMore}, lastPosition: ${lastPosition}`)
     
     if (items.length === 0) {
       console.warn('[SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:')
@@ -250,6 +263,7 @@ export async function getSBISPrices(
     return {
       items: items,
       hasMore: hasMore,
+      lastPosition: lastPosition,
     }
   } catch (error) {
     console.error('Ошибка получения списка товаров из СБИС:', error)

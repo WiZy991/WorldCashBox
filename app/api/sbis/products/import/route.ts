@@ -82,10 +82,12 @@ export async function POST(request: NextRequest) {
     console.log(`[SBIS Import] Загрузка товаров из прайс-листа ${SBIS_PRICE_LIST_ID}...`)
     
     // Загружаем товары порциями по 1000 (максимум для API v2)
+    // Используем position для пагинации (иерархический идентификатор)
     let allProducts: Array<{ id: string | number; name: string; price: number; code?: string; article?: string; balance?: string | number }> = []
     let hasMore = true
     let pageCount = 0
-    const maxPages = 100 // Ограничение на 100 страниц (100,000 товаров максимум)
+    let lastPosition: number | undefined = undefined
+    const maxPages = 200 // Ограничение на 200 страниц (200,000 товаров максимум)
     
     while (hasMore && pageCount < maxPages) {
       const pricesResponse = await getSBISPrices(
@@ -93,15 +95,23 @@ export async function POST(request: NextRequest) {
         0, // pointId не используется
         undefined, // actualDate
         undefined, // searchString - получаем все товары
-        undefined, // page
-        1000 // pageSize - максимум
+        undefined, // page (не используется в API v2)
+        1000, // pageSize - максимум
+        lastPosition // position для пагинации
       )
       
       allProducts = [...allProducts, ...pricesResponse.items]
       hasMore = pricesResponse.hasMore
+      lastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
       pageCount++
       
-      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length})`)
+      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${hasMore}, position: ${lastPosition}`)
+      
+      // Если не получили товаров, прекращаем загрузку
+      if (pricesResponse.items.length === 0) {
+        console.warn(`[SBIS Import] Получено 0 товаров на странице ${pageCount}, прекращаем загрузку`)
+        break
+      }
       
       // Небольшая задержка между запросами, чтобы не перегружать API
       if (hasMore) {

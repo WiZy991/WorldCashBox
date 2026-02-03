@@ -196,59 +196,56 @@ export default function AdminProducts() {
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full">
-            <div className="overflow-x-auto max-w-full">
-              <table className="w-full min-w-full">
+            <div className="w-full">
+              <table className="w-full table-fixed">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
                       Название
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                       Категория
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
                       Цена
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">
                       Действия
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredProducts.map((product, index) => (
-                    <motion.tr
+                  {filteredProducts.map((product) => (
+                    <tr
                       key={product.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
                       className="hover:bg-gray-50"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="flex items-center min-w-0">
                           {product.image && (
                             <img
                               src={product.image}
                               alt={product.name}
-                              className="w-12 h-12 object-cover rounded-lg mr-3 flex-shrink-0"
+                              className="w-10 h-10 object-cover rounded-lg mr-2 flex-shrink-0"
                             />
                           )}
                           <div className="min-w-0 flex-1">
                             <div className="text-sm font-medium text-gray-900 truncate">{product.name || 'Без названия'}</div>
-                            <div className="text-sm text-gray-500 truncate">
-                              {product.description ? `${product.description.substring(0, 50)}...` : 'Нет описания'}
+                            <div className="text-xs text-gray-500 truncate">
+                              {product.description ? `${product.description.substring(0, 40)}...` : 'Нет описания'}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-4">
                         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-primary-100 text-primary-800">
                           {product.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-4 py-4 text-sm text-gray-900">
                         {product.price ? `${product.price.toLocaleString()} ₽` : '—'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-4 py-4 text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleEdit(product)}
@@ -264,7 +261,7 @@ export default function AdminProducts() {
                           </button>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>
