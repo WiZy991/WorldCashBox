@@ -39,11 +39,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     
     const SBIS_PRICE_LIST_ID = parseInt(process.env.SBIS_PRICE_LIST_ID || body.priceListId || '15')
-    const SBIS_WAREHOUSE_NAME = process.env.SBIS_WAREHOUSE_NAME || body.warehouseName || 'Филиал в г. Владивосток'
     const force = body.force || false
 
     console.log('[SBIS Import] Начало автоматической загрузки товаров...')
-    console.log(`[SBIS Import] Прайс-лист: ${SBIS_PRICE_LIST_ID}, Склад: ${SBIS_WAREHOUSE_NAME}`)
+    console.log(`[SBIS Import] Прайс-лист: ${SBIS_PRICE_LIST_ID}`)
+    console.log(`[SBIS Import] Ищем склады: "Филиал в г. Владивосток" и "Инженерный"`)
 
     // 1. Получаем список компаний
     console.log('[SBIS Import] Получение списка компаний...')
@@ -59,26 +59,24 @@ export async function POST(request: NextRequest) {
     console.log(`[SBIS Import] Получение списка складов компании ${companyId}...`)
     const warehouses = await getSBISCompanyWarehouses(companyId)
     
-    // Ищем склад по названию
-    let warehouse = warehouses.find(w => 
-      w.name.toLowerCase().includes(SBIS_WAREHOUSE_NAME.toLowerCase()) ||
-      SBIS_WAREHOUSE_NAME.toLowerCase().includes(w.name.toLowerCase())
-    )
+    // Ищем конкретные склады по названию: "Филиал в г. Владивосток" и "Инженерный"
+    const targetWarehouseNames = ['Филиал в г. Владивосток', 'Инженерный']
+    const targetWarehouses = warehouses.filter(w => {
+      // Точное совпадение по названию
+      return targetWarehouseNames.includes(w.name)
+    })
     
-    // Если не нашли, ищем по адресу
-    if (!warehouse) {
-      warehouse = warehouses.find(w => {
-        const address = (w as any).address || ''
-        return address.toLowerCase().includes('толстого') || 
-               address.toLowerCase().includes('32')
-      })
+    if (targetWarehouses.length === 0) {
+      throw new Error(`Склады "${targetWarehouseNames.join('" и "')}" не найдены. Доступные склады: ${warehouses.map(w => w.name).join(', ')}`)
     }
     
-    if (!warehouse) {
-      throw new Error(`Склад "${SBIS_WAREHOUSE_NAME}" не найден. Доступные склады: ${warehouses.map(w => w.name).join(', ')}`)
+    console.log(`[SBIS Import] Найдено складов: ${targetWarehouses.length}`)
+    for (const wh of targetWarehouses) {
+      console.log(`[SBIS Import] - ${wh.name} (ID: ${wh.id}, адрес: ${(wh as any).address || 'не указан'})`)
     }
     
-    console.log(`[SBIS Import] Найден склад: ${warehouse.name} (ID: ${warehouse.id})`)
+    // Используем первый склад для получения списка товаров (остатки будем получать со всех складов)
+    const primaryWarehouse = targetWarehouses[0]
     
     // 3. Загружаем все товары из прайс-листа (без pointId, чтобы получить все товары)
     console.log(`[SBIS Import] Загрузка товаров из прайс-листа ${SBIS_PRICE_LIST_ID}...`)
@@ -113,21 +111,27 @@ export async function POST(request: NextRequest) {
     
     console.log(`[SBIS Import] Всего загружено товаров: ${allProducts.length}`)
     
-    // 4. Получаем остатки товаров на складе
-    console.log(`[SBIS Import] Получение остатков товаров на складе ${warehouse.id}...`)
+    // 4. Получаем остатки товаров со всех складов "Толстого 32А"
+    console.log(`[SBIS Import] Получение остатков товаров со складов: ${targetWarehouses.map(w => w.name).join(', ')}...`)
+    
+    // Получаем остатки со всех целевых складов
+    const warehouseIds = targetWarehouses.map(w => w.id)
     const stockResponse = await getSBISStock(
       [SBIS_PRICE_LIST_ID], // priceListIds
       undefined, // nomenclatures
-      [warehouse.id], // warehouses
+      warehouseIds, // warehouses - все склады "Толстого 32А"
       [companyId] // companies
     )
     
+    // Суммируем остатки по всем складам для каждого товара
     const stockMap = new Map<number, number>()
     for (const item of stockResponse.items) {
-      stockMap.set(Number(item.id), item.stock)
+      const productId = Number(item.id)
+      const currentStock = stockMap.get(productId) || 0
+      stockMap.set(productId, currentStock + item.stock)
     }
     
-    console.log(`[SBIS Import] Получено остатков: ${stockMap.size}`)
+    console.log(`[SBIS Import] Получено остатков (сумма по всем складам): ${stockMap.size}`)
     
     // 5. Загружаем существующие товары
     let existingProducts: Product[] = []
@@ -185,7 +189,7 @@ export async function POST(request: NextRequest) {
         stock: stock,
         inStock: stock > 0,
         stockUpdatedAt: now,
-        sbisWarehouseId: warehouse.uuid || String(warehouse.id),
+        sbisWarehouseId: primaryWarehouse.uuid || String(primaryWarehouse.id), // Сохраняем ID основного склада
         // Сохраняем изображение, если было
         image: existingProduct?.image,
         images: existingProduct?.images
@@ -242,11 +246,12 @@ export async function POST(request: NextRequest) {
         updated: updatedProducts.length,
         skipped: skippedProducts.length,
         categories: categoryStats,
-        warehouse: {
-          id: warehouse.id,
-          name: warehouse.name,
-          uuid: warehouse.uuid
-        },
+        warehouses: targetWarehouses.map(w => ({
+          id: w.id,
+          name: w.name,
+          uuid: w.uuid,
+          address: (w as any).address
+        })),
         priceListId: SBIS_PRICE_LIST_ID,
         importedAt: now
       }

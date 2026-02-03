@@ -254,11 +254,19 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
         {product.inStock !== undefined && (
           <div className="absolute top-4 left-4 z-10">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-md ${
+              className={`px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-lg ${
                 product.inStock ? 'bg-green-500' : 'bg-red-500'
               }`}
             >
-              {product.inStock ? 'В наличии' : 'Нет в наличии'}
+              {product.inStock ? (
+                product.stock !== undefined && product.stock > 0 ? (
+                  `✓ В наличии (${product.stock})`
+                ) : (
+                  '✓ В наличии'
+                )
+              ) : (
+                '✗ Нет в наличии'
+              )}
             </span>
           </div>
         )}

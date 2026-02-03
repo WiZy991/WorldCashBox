@@ -43,22 +43,38 @@ const categoryKeywords: Record<string, string[]> = {
 // Ключевые слова для определения подкатегорий
 const subcategoryKeywords: Record<string, Record<string, string[]>> = {
   equipment: {
-    'smart_cash_registers': ['онлайн-касса', 'онлайн касса', 'online cash', 'smart cash', 'смарт-касса', 'смарт касса', 'эвотор', 'evotor', 'атол', 'atol', 'poscenter'],
-    'fiscal_registrars': ['фискальный', 'fiscal', 'регистратор', 'registrar', 'фн', 'fn'],
-    'printers': ['принтер', 'printer', 'термопринтер', 'thermal', 'этикеток', 'label', 'чек', 'receipt'],
-    'scanners': ['сканер', 'scanner', 'штрих', 'barcode', 'баркод'],
-    'weights': ['весы', 'weight', 'scale', 'весовой', 'scales'],
-    'drawers': ['ящик', 'drawer', 'денежный', 'cash'],
-    'pos': ['pos', 'терминал', 'terminal', 'pos-терминал', 'pos терминал'],
-    'acquiring': ['эквайринг', 'acquiring', 'платежный', 'payment'],
-    'tsd': ['тсд', 'tsd', 'терминал сбора данных', 'data collection'],
-    'banknote': ['детектор', 'счетчик', 'банкнот', 'banknote', 'detector', 'counter'],
-    'staff_call': ['вызов', 'персонал', 'staff', 'call', 'система вызова']
+    'smart_cash_registers': [
+      'онлайн-касса', 'онлайн касса', 'online cash', 'smart cash', 'смарт-касса', 'смарт касса',
+      'эвотор', 'evotor', 'evotor-', 'evotor ', 'эвотор-', 'эвотор ',
+      'атол', 'atol', 'atol-', 'atol ', 'атол-', 'атол ',
+      'poscenter', 'pos-center', 'pos центр', 'pos-центр',
+      'инкассатор', 'инкассация', 'смарт-терминал', 'smart terminal'
+    ],
+    'fiscal_registrars': ['фискальный', 'fiscal', 'регистратор', 'registrar', 'фн-', 'фн ', 'фн.', 'fn-', 'fn ', 'fn.'],
+    'printers': ['принтер', 'printer', 'термопринтер', 'thermal', 'этикеток', 'label', 'чек', 'receipt', 'печать'],
+    'scanners': ['сканер', 'scanner', 'штрих', 'barcode', 'баркод', 'qr', 'qr-'],
+    'weights': ['весы', 'weight', 'scale', 'весовой', 'scales', 'весоизмерительный'],
+    'drawers': ['ящик', 'drawer', 'денежный', 'cash', 'кассовый ящик'],
+    'pos': ['pos-', 'pos ', 'pos-терминал', 'pos терминал', 'pos-система', 'pos система', 'pos-компьютер'],
+    'acquiring': ['эквайринг', 'acquiring', 'платежный', 'payment', 'пин-пад', 'pinpad'],
+    'tsd': ['тсд', 'tsd', 'терминал сбора данных', 'data collection', 'терминал сбора'],
+    'banknote': ['детектор', 'счетчик', 'банкнот', 'banknote', 'detector', 'counter', 'валютный'],
+    'staff_call': ['вызов', 'персонал', 'staff', 'call', 'система вызова', 'вызов персонала']
   },
   consumables: {
-    'consumables_for_printers': ['лента', 'ribbon', 'картридж', 'cartridge', 'тонер', 'toner', 'принтер', 'printer'],
-    'consumables_for_scanners': ['сканер', 'scanner', 'этикетка', 'label'],
-    'consumables_for_scales': ['весы', 'weight', 'scale', 'весовой']
+    'consumables_for_printers': [
+      'лента', 'ribbon', 'картридж', 'cartridge', 'тонер', 'toner',
+      'чековая лента', 'receipt paper', 'термолента', 'thermal ribbon',
+      'ролик', 'roll', 'рулон', 'бумага для принтера', 'paper for printer'
+    ],
+    'consumables_for_scanners': [
+      'этикетка', 'label', 'наклейка', 'sticker',
+      'этикетка для сканера', 'label for scanner'
+    ],
+    'consumables_for_scales': [
+      'весовой', 'weight', 'scale', 'весы',
+      'этикетка для весов', 'label for scale', 'весовая этикетка'
+    ]
   },
   software: {
     'datamobile': ['datamobile', 'датамобайл', 'дата мобайл'],
@@ -90,40 +106,103 @@ const subcategoryKeywords: Record<string, Record<string, string[]>> = {
 
 /**
  * Определяет категорию товара по названию
+ * Использует приоритетную логику: сначала проверяет специфичные бренды/модели, затем общие ключевые слова
  */
 export function detectCategory(productName: string): Product['category'] {
   const nameLower = productName.toLowerCase()
   
-  // Подсчитываем совпадения для каждой категории
-  const scores: Record<string, number> = {
-    equipment: 0,
-    consumables: 0,
-    software: 0,
-    video: 0,
-    services: 0
-  }
+  // ПРИОРИТЕТ 1: Специфичные бренды и модели оборудования (высокий приоритет)
+  const equipmentBrands = [
+    'эвотор', 'evotor', 'атол', 'atol', 'poscenter', 'pos-center', 'pos центр',
+    'инкассатор', 'инкассация', 'счетчик банкнот', 'детектор банкнот',
+    'терминал', 'касса', 'регистратор', 'фискальный', 'фн-', 'фн ',
+    'сканер', 'scanner', 'принтер', 'printer', 'весы', 'scale', 'weight',
+    'тсд', 'tsd', 'терминал сбора данных', 'эквайринг', 'acquiring',
+    'денежный ящик', 'cash drawer', 'drawer', 'ящик', 'монитор', 'дисплей',
+    'touch', 'тач', 'планшет', 'tablet', 'pos-', 'pos ', 'pos-терминал'
+  ]
   
-  for (const [category, keywords] of Object.entries(categoryKeywords)) {
-    for (const keyword of keywords) {
-      if (nameLower.includes(keyword.toLowerCase())) {
-        scores[category]++
-      }
+  // ПРИОРИТЕТ 2: Расходные материалы (только если НЕ оборудование)
+  const consumablesKeywords = [
+    'лента', 'ribbon', 'этикетка', 'label', 'чек', 'receipt', 'бумага', 'paper',
+    'картридж', 'cartridge', 'тонер', 'toner', 'расходник', 'consumable',
+    'ролик', 'roll', 'рулон', 'наклейка', 'sticker'
+  ]
+  
+  // ПРИОРИТЕТ 3: Программное обеспечение
+  const softwareKeywords = [
+    'программа', 'программное', 'software', 'по', 'модуль', 'module',
+    'система', 'system', 'crm', 'erp', '1с', '1c', 'битрикс', 'bitrix',
+    'datamobile', 'клеверенс', 'kleverens', 'далион', 'dalion',
+    'frontol', 'фронтол', 'электронная поставка', 'delivery',
+    'лицензия', 'license', 'подписка', 'subscription', 'офд', 'ofd'
+  ]
+  
+  // ПРИОРИТЕТ 4: Видеонаблюдение
+  const videoKeywords = [
+    'камера', 'camera', 'видео', 'video', 'наблюдение', 'surveillance',
+    'ip-камера', 'ip camera', 'видеокамера', 'видеонаблюдение',
+    'кронштейн', 'bracket', 'mount', 'монтаж', 'ups', 'бесперебойник',
+    'аккумулятор', 'battery', 'диск', 'disk', 'хранилище', 'storage', 'hdd'
+  ]
+  
+  // ПРИОРИТЕТ 5: Услуги
+  const servicesKeywords = [
+    'услуга', 'service', 'установка', 'installation', 'настройка', 'setup',
+    'консультация', 'consultation', 'обслуживание', 'maintenance',
+    'маркировка', 'marking', 'автоматизация', 'automation', 'регистрация ккт'
+  ]
+  
+  // Сначала проверяем оборудование (высокий приоритет)
+  for (const brand of equipmentBrands) {
+    if (nameLower.includes(brand)) {
+      // Дополнительная проверка: если это расходный материал для оборудования, все равно equipment
+      // Например: "Лента для принтера Эвотор" - это equipment, а не consumables
+      return 'equipment'
     }
   }
   
-  // Находим категорию с максимальным количеством совпадений
-  const maxScore = Math.max(...Object.values(scores))
-  if (maxScore === 0) {
-    // Если не найдено совпадений, используем 'equipment' по умолчанию
-    return 'equipment'
+  // Затем проверяем расходные материалы (только если точно не оборудование)
+  for (const keyword of consumablesKeywords) {
+    if (nameLower.includes(keyword)) {
+      // Проверяем, не является ли это частью названия оборудования
+      // Например: "Принтер этикеток" - это equipment, а не consumables
+      if (nameLower.includes('принтер') || nameLower.includes('printer') || 
+          nameLower.includes('сканер') || nameLower.includes('scanner')) {
+        return 'equipment'
+      }
+      return 'consumables'
+    }
   }
   
-  const detectedCategory = Object.entries(scores).find(([_, score]) => score === maxScore)?.[0] as Product['category']
-  return detectedCategory || 'equipment'
+  // Проверяем программное обеспечение
+  for (const keyword of softwareKeywords) {
+    if (nameLower.includes(keyword)) {
+      return 'software'
+    }
+  }
+  
+  // Проверяем видеонаблюдение
+  for (const keyword of videoKeywords) {
+    if (nameLower.includes(keyword)) {
+      return 'video'
+    }
+  }
+  
+  // Проверяем услуги
+  for (const keyword of servicesKeywords) {
+    if (nameLower.includes(keyword)) {
+      return 'services'
+    }
+  }
+  
+  // По умолчанию - оборудование
+  return 'equipment'
 }
 
 /**
  * Определяет подкатегорию товара по названию и категории
+ * Использует приоритетную логику для более точного определения
  */
 export function detectSubcategory(productName: string, category: Product['category']): string | undefined {
   const nameLower = productName.toLowerCase()
@@ -133,7 +212,79 @@ export function detectSubcategory(productName: string, category: Product['catego
     return undefined
   }
   
-  // Подсчитываем совпадения для каждой подкатегории
+  // ПРИОРИТЕТ 1: Проверяем специфичные бренды и модели (высокий приоритет)
+  if (category === 'equipment') {
+    // Эвотор и АТОЛ - всегда онлайн-кассы
+    if (nameLower.includes('эвотор') || nameLower.includes('evotor') ||
+        nameLower.includes('атол') || nameLower.includes('atol')) {
+      // Проверяем, не является ли это фискальным регистратором
+      if (nameLower.includes('фискальный') || nameLower.includes('фн-') || nameLower.includes('фн ')) {
+        return 'fiscal_registrars'
+      }
+      return 'smart_cash_registers'
+    }
+    
+    // POSCenter - онлайн-кассы
+    if (nameLower.includes('poscenter') || nameLower.includes('pos-center') || nameLower.includes('pos центр')) {
+      return 'smart_cash_registers'
+    }
+    
+    // Фискальные регистраторы (проверяем до общих терминов)
+    if (nameLower.includes('фискальный') || nameLower.includes('фн-') || nameLower.includes('фн ') || nameLower.includes('фн.')) {
+      return 'fiscal_registrars'
+    }
+    
+    // Принтеры (проверяем до сканеров, так как могут быть принтеры-сканеры)
+    if (nameLower.includes('принтер') || nameLower.includes('printer')) {
+      return 'printers'
+    }
+    
+    // Сканеры
+    if (nameLower.includes('сканер') || nameLower.includes('scanner')) {
+      return 'scanners'
+    }
+    
+    // Весы
+    if (nameLower.includes('весы') || nameLower.includes('weight') || nameLower.includes('scale')) {
+      return 'weights'
+    }
+    
+    // Денежные ящики
+    if (nameLower.includes('ящик') || nameLower.includes('drawer') || 
+        (nameLower.includes('денежный') && nameLower.includes('ящик'))) {
+      return 'drawers'
+    }
+    
+    // ТСД
+    if (nameLower.includes('тсд') || nameLower.includes('tsd') || nameLower.includes('терминал сбора данных')) {
+      return 'tsd'
+    }
+    
+    // Детекторы и счетчики банкнот
+    if (nameLower.includes('детектор') || nameLower.includes('счетчик') || 
+        nameLower.includes('банкнот') || nameLower.includes('banknote') ||
+        nameLower.includes('инкассатор') || nameLower.includes('инкассация')) {
+      return 'banknote'
+    }
+    
+    // Эквайринг
+    if (nameLower.includes('эквайринг') || nameLower.includes('acquiring') || 
+        nameLower.includes('пин-пад') || nameLower.includes('pinpad')) {
+      return 'acquiring'
+    }
+    
+    // Системы вызова персонала
+    if (nameLower.includes('вызов') && nameLower.includes('персонал')) {
+      return 'staff_call'
+    }
+    
+    // POS-терминалы (общий термин, проверяем в конце)
+    if (nameLower.includes('pos-') || nameLower.includes('pos ') || nameLower.includes('pos-терминал')) {
+      return 'pos'
+    }
+  }
+  
+  // ПРИОРИТЕТ 2: Общая логика подсчета совпадений для остальных категорий
   const scores: Record<string, number> = {}
   
   for (const [subcategory, keywords] of Object.entries(subcategories)) {

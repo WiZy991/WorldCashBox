@@ -234,12 +234,56 @@ export default function ProductPage() {
               {product.name}
             </h1>
 
-            {/* Price */}
-            {product.price !== undefined && (
-              <div className="text-5xl font-extrabold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-                {product.id === 'bitrix24' ? 'От ' : ''}{product.price.toLocaleString('ru-RU')} ₽
-              </div>
-            )}
+            {/* Price and Stock */}
+            <div className="space-y-4">
+              {product.price !== undefined && (
+                <div className="text-5xl font-extrabold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+                  {product.id === 'bitrix24' ? 'От ' : ''}{product.price.toLocaleString('ru-RU')} ₽
+                </div>
+              )}
+              
+              {/* Stock Status */}
+              {product.inStock !== undefined && (
+                <div className="flex items-center space-x-4">
+                  <div className={`px-4 py-2 rounded-xl font-semibold text-lg ${
+                    product.inStock 
+                      ? 'bg-green-100 text-green-700 border-2 border-green-300' 
+                      : 'bg-red-100 text-red-700 border-2 border-red-300'
+                  }`}>
+                    {product.inStock ? (
+                      <>
+                        <span className="flex items-center space-x-2">
+                          <Check className="w-5 h-5" />
+                          <span>
+                            {product.stock !== undefined && product.stock > 0 
+                              ? `В наличии: ${product.stock} шт.`
+                              : 'В наличии'
+                            }
+                          </span>
+                        </span>
+                      </>
+                    ) : (
+                      <span className="flex items-center space-x-2">
+                        <span>✗</span>
+                        <span>Нет в наличии</span>
+                      </span>
+                    )}
+                  </div>
+                  
+                  {product.stockUpdatedAt && (
+                    <span className="text-sm text-gray-500">
+                      Обновлено: {new Date(product.stockUpdatedAt).toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Description */}
             <div className="prose max-w-none">
