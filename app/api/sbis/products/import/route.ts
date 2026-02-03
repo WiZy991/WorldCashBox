@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
     // Для получения товаров не используем pointId (получаем все товары из прайс-листа)
     // Для получения остатков используем ID складов в отдельном запросе
     const warehouseIds = targetWarehouses.map(w => w.id) // ID всех складов для получения остатков
+    const primaryWarehouse = targetWarehouses[0] // Первый склад для сохранения в sbisWarehouseId
     
     console.log(`[SBIS Import] Склады для получения остатков: ${targetWarehouses.map(w => `${w.name} (${w.id})`).join(', ')}`)
     
