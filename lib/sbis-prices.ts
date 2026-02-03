@@ -150,6 +150,8 @@ export async function getSBISPrices(
   const params = new URLSearchParams({
     priceListId: priceListId.toString(),
     withBalance: 'true', // Получаем остатки вместе с ценами
+    // Не используем onlyPublished, чтобы получить ВСЕ товары, включая неопубликованные
+    // onlyPublished: false - не указываем, чтобы получить все товары
   })
   
   // pointId может быть необязательным для API v2
@@ -168,11 +170,13 @@ export async function getSBISPrices(
   }
   
   // Пагинация через position (иерархический идентификатор последней записи)
+  // ВАЖНО: position должен быть hierarchicalId последнего элемента из ВСЕГО ответа (включая папки)
+  // Это позволяет правильно проходить по иерархии и получать товары из всех папок
   // Для первой страницы position не указывается
   // Для следующих страниц используем hierarchicalId последнего элемента предыдущей страницы
-  if (position !== undefined) {
+  if (position !== undefined && position !== null) {
     params.append('position', position.toString())
-    params.append('order', 'after') // Записи после указанного position
+    params.append('order', 'after') // Записи после указанного position (включая товары из папок)
   }
 
   const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
@@ -265,24 +269,19 @@ export async function getSBISPrices(
     console.log(`[SBIS] outcome:`, data.outcome, `hasMore:`, hasMore)
     
     // Преобразуем в формат SBISPriceItem
-    // Фильтруем только товары (не папки/категории) - у товаров есть цена или они опубликованы
-    // ВАЖНО: Папки (isParent === true) пропускаем, но они нужны для правильной пагинации через lastPosition
+    // ВАЖНО: Включаем ВСЕ товары, даже без цены и неопубликованные
+    // Фильтруем только папки (isParent === true) - они не являются товарами
+    // Но они важны для пагинации, так как товары находятся внутри папок
     // ВАЖНО: Товары находятся внутри папок, поэтому мы должны проходить по всем элементам (включая папки) для пагинации
     const items: SBISPriceItem[] = nomenclatures
       .filter((item: any) => {
-        // Пропускаем папки/категории (isParent === true) - они не являются товарами
-        // Но они важны для пагинации, так как товары находятся внутри папок
+        // Пропускаем только папки/категории (isParent === true) - они не являются товарами
+        // ВСЕ остальное (товары с ценой, без цены, опубликованные, неопубликованные) - включаем
         if (item.isParent === true) {
           return false
         }
-        // Включаем товары с ценой ИЛИ без цены (может быть 0 или null, но это все равно товар)
-        // Исключаем только те, у которых явно нет цены И они не опубликованы
-        // Это позволяет получить все товары, включая те, у которых цена = 0
-        if (item.cost === null || item.cost === undefined) {
-          // Если нет цены, включаем только если опубликован
-          return item.published === true
-        }
-        // Если есть цена (даже 0), включаем товар
+        // Включаем все товары, независимо от наличия цены или статуса публикации
+        // Это позволяет получить все товары из папок, включая неопубликованные
         return true
       })
       .map((item: any) => ({
@@ -306,7 +305,8 @@ export async function getSBISPrices(
       
       // Логируем для отладки
       if (lastPosition) {
-        console.log(`[SBIS] lastPosition из последнего элемента: ${lastPosition} (всего элементов в ответе: ${nomenclatures.length})`)
+        const isLastItemParent = lastItem?.isParent === true
+        console.log(`[SBIS] lastPosition из последнего элемента: ${lastPosition} (всего элементов: ${nomenclatures.length}, последний - ${isLastItemParent ? 'папка' : 'товар'}, имя: ${lastItem?.name || 'N/A'})`)
       } else {
         console.warn(`[SBIS] Не удалось получить lastPosition из последнего элемента. Структура:`, {
           hasHierarchicalId: !!lastItem?.hierarchicalId,
