@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readSBISWarehouse, getSBISWarehouseById, getSBISWarehouseByName, SBISWarehouseRequisites } from '@/lib/sbis-stock'
 
+// Помечаем route как динамический
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 /**
  * API endpoint для получения информации о складе из СБИС
  * 

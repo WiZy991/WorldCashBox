@@ -14,6 +14,10 @@ import {
   getSBISWarehouseById
 } from '@/lib/sbis-stock'
 
+// Помечаем route как динамический, так как он использует process.env и файловую систему
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 const productsJsonPath = join(process.cwd(), 'data', 'products.json')
 
 /**
