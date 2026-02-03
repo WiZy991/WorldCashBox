@@ -223,7 +223,18 @@ export async function getSBISPrices(
     //     "hasMore": boolean
     //   }
     // }
-    const nomenclatures = data.nomenclatures || []
+    // Проверяем, что nomenclatures - это массив
+    let nomenclatures: any[] = []
+    if (Array.isArray(data.nomenclatures)) {
+      nomenclatures = data.nomenclatures
+    } else if (data.nomenclatures && typeof data.nomenclatures === 'object') {
+      // Если это объект, преобразуем в массив
+      nomenclatures = Object.values(data.nomenclatures)
+    } else {
+      console.warn('[SBIS] nomenclatures не является массивом:', typeof data.nomenclatures, data.nomenclatures)
+      nomenclatures = []
+    }
+    
     const hasMore = data.outcome?.hasMore || false
     
     // Преобразуем в формат SBISPriceItem
