@@ -254,14 +254,27 @@ export async function POST(request: NextRequest) {
     let processedCount = 0
     let skippedNoPrice = 0
     
+    // ВАЖНО: Удаляем дубликаты из allProducts перед обработкой
+    // Используем Set для отслеживания уникальных товаров по ID или коду
+    const uniqueProducts = new Map<string | number, typeof allProducts[0]>()
     for (const sbisProduct of allProducts) {
+      // Используем ID или код как ключ для уникальности
+      const key = sbisProduct.code || sbisProduct.id
+      if (!uniqueProducts.has(key)) {
+        uniqueProducts.set(key, sbisProduct)
+      }
+    }
+    const deduplicatedProducts = Array.from(uniqueProducts.values())
+    console.log(`[SBIS Import] После удаления дубликатов: ${deduplicatedProducts.length} уникальных товаров (было: ${allProducts.length})`)
+    
+    for (const sbisProduct of deduplicatedProducts) {
       processedCount++
       
       // Пропускаем папки/категории (товары без цены)
       if (!sbisProduct.price || sbisProduct.price <= 0) {
         skippedNoPrice++
         if (processedCount <= 10 || processedCount % 50 === 0) {
-          console.log(`[SBIS Import] Пропущен товар без цены: ${sbisProduct.name} (${processedCount}/${allProducts.length})`)
+          console.log(`[SBIS Import] Пропущен товар без цены: ${sbisProduct.name} (цена: ${sbisProduct.price}, ${processedCount}/${deduplicatedProducts.length})`)
         }
         continue
       }
@@ -276,8 +289,9 @@ export async function POST(request: NextRequest) {
       // Проверяем, существует ли товар
       const existingProduct = existingProducts.find(p => 
         p.id === productId || 
-        p.sbisId === sbisProduct.id || 
-        (sbisProduct.code && p.sbisId === sbisProduct.code)
+        p.sbisId === String(sbisProduct.id) || 
+        (sbisProduct.code && p.sbisId === sbisProduct.code) ||
+        (sbisProduct.code && p.sbisId === String(sbisProduct.id))
       )
       
       // Получаем остаток
@@ -338,9 +352,14 @@ export async function POST(request: NextRequest) {
         // Создаем новый товар
         existingProducts.push(productData)
         createdProducts.push(productData)
-        if (createdProducts.length <= 5 || createdProducts.length % 10 === 0) {
-          console.log(`[SBIS Import] Создан новый товар #${createdProducts.length}: ${productData.name} (ID: ${productId})`)
+        if (createdProducts.length <= 10 || createdProducts.length % 10 === 0) {
+          console.log(`[SBIS Import] Создан новый товар #${createdProducts.length}: ${productData.name} (ID: ${productId}, цена: ${productData.price}, категория: ${category})`)
         }
+      }
+      
+      // Логируем каждые 50 обработанных товаров
+      if (processedCount % 50 === 0) {
+        console.log(`[SBIS Import] Обработано: ${processedCount}/${deduplicatedProducts.length}, создано: ${createdProducts.length}, обновлено: ${updatedProducts.length}, пропущено без цены: ${skippedNoPrice}`)
       }
     }
     
@@ -375,6 +394,7 @@ export async function POST(request: NextRequest) {
       message: 'Товары успешно импортированы',
       stats: {
         total: allProducts.length,
+        unique: deduplicatedProducts.length,
         created: createdProducts.length,
         updated: updatedProducts.length,
         skipped: skippedNoPrice,
