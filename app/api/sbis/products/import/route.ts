@@ -60,6 +60,9 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
     )
     const force = body.force || false
 
+    console.log('[SBIS Import] ==========================================')
+    console.log('[SBIS Import] ====== НАЧАЛО ИМПОРТА ТОВАРОВ ======')
+    console.log('[SBIS Import] ==========================================')
     console.log('[SBIS Import] Начало автоматической загрузки товаров...')
     console.log(`[SBIS Import] Прайс-лист: ${SBIS_PRICE_LIST_ID}`)
     console.log(`[SBIS Import] Ищем склады: "Филиал в г. Владивосток" и "Инженерный"`)
@@ -214,9 +217,12 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
             }
           }
           
-          allProducts = [...allProducts, ...filteredItems]
+          // Дедупликация при добавлении
+          const existingIds = new Set(allProducts.map(p => String(p.id)))
+          const newItems = filteredItems.filter(item => !existingIds.has(String(item.id)))
+          allProducts = [...allProducts, ...newItems]
           
-          console.log(`[SBIS Import] API v1 стр.${page + 1}: товаров=${response.items.length}, отфильтровано=${filteredItems.length}, всего=${allProducts.length}, hasMore=${response.hasMore}`)
+          console.log(`[SBIS Import] API v1 стр.${page + 1}: получено=${response.items.length}, отфильтровано по складу=${filteredItems.length}, новых=${newItems.length}, всего=${allProducts.length}, hasMore=${response.hasMore}`)
           
           hasMore = response.hasMore || response.items.length === 1000
           if (hasMore && response.items.length > 0) {

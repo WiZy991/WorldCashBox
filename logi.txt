@@ -1,0 +1,312 @@
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "externalId": "94377a27-44b5-43d7-9142-56023dbb297f",
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "hierarchicalId": 13444,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "hierarchicalParent": 13227,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "id": 13444,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "images": null,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "indexNumber": 13133003,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "isKit": false,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "isParent": null,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "modifiers": [],
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "name": "DS-H304QA(C)",
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "nomNumber": "300227075",
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "published": null,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "short_code": null,
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "unit": "шт"
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00: [SBIS] lastPosition из последнего элемента: 15413 (всего элементов: 435, последний - товар, имя: Интеграция ОФД в 1С)
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00: [SBIS] Получено товаров: 410, hasMore: false, lastPosition: 15413, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:     [SBIS Import] Пропущено дубликатов: 410
+0|worldcashbox  | 2026-02-05 05:56:26 +00:00:     [SBIS Import] Стр.2: товаров=410, папок=25, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15413&order=after
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15413
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   nomenclaturesType: 'object',
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   nomenclaturesLength: 'N/A',
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   outcome: { hasMore: false }
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] nomenclatures - пустой объект {}, больше нет данных
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] nomenclatures пустой, больше нет данных для загрузки
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Получено товаров: 0, hasMore: false, lastPosition: undefined, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] 1. Правильность priceListId и pointId
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] 2. Существует ли прайс-лист и содержит ли он товары
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] 3. Структура ответа: [ 'nomenclatures', 'outcome' ]
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:     [SBIS Import] Стр.3: товаров=0, папок=0, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS Import] Обработано папок: 50, товаров: 3058, в очереди: 6031
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00:     [SBIS Import] Загрузка из "Эвотор Power" (id=12133, глубина=2)...
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=12133&order=after
+0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=12133
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   nomenclaturesType: 'array',
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   nomenclaturesLength: 1001,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   outcome: { hasMore: true }
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Пример структуры товара (API v2): {
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "article": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "attributes": {
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "calories": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "caloriesPerUnit": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "carbohydrate": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "fat": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "outQuantity": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "protein": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "spirit": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "storageConditions": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "volume": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "weight": null
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   },
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "balance": 2,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "cost": 18200,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "description": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "description_simple": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "externalId": "fdf268f4-84c8-4144-a4ad-da4d0fd75058",
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "hierarchicalId": 9303,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "hierarchicalParent": 12133,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "id": 9303,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "images": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "indexNumber": 8985003,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "isKit": false,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "isParent": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "modifiers": [],
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "name": "Модуль планшета EV.M035.49.00-01.Rev.4",
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "nomNumber": "X241717",
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "published": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "short_code": null,
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "unit": "шт"
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] outcome: { hasMore: true } hasMore: true
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] lastPosition из последнего элемента: 13471 (всего элементов: 1001, последний - товар, имя: DS-N332/2(C))
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Получено товаров: 921, hasMore: true, lastPosition: 13471, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     [SBIS Import] Пропущено дубликатов: 921
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     [SBIS Import] Стр.1: товаров=921, папок=80, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=13471&order=after
+0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=13471
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   nomenclaturesType: 'array',
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   nomenclaturesLength: 407,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   outcome: { hasMore: false }
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Пример структуры товара (API v2): {
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "article": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "attributes": {
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "calories": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "caloriesPerUnit": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "carbohydrate": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "fat": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "outQuantity": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "protein": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "spirit": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "storageConditions": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "volume": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "weight": null
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   },
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "balance": 0,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "cost": 15042,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "description": "<p>4-х канальный WiFi 2.4ГГц IP-регистратор Видеовход: 4 IP@4Мп; видеовыход: 1 VGA и 1 HDMI до 4К; аудиовыход; 1 канал RCA; Видеосжатие H.265+/H.265/H.264+/H.264; Входящий поток 50 Мбит/с; Исходящий поток 40 Мбит/с. Разрешение записи: до 4Мп. Синхр.воспр. 4 канала@4Мп (12,5 fps), 4 канала@1080P (25 fps); 1 SATA для HDD до 6Тб, 2х2 MIMO антенны,1 10M/100M Ethernet интерфейс; 2 х USB 2.0; -10°C до +55°C; 12В DC; 10Вт макс (без HDD).</p>",
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "description_simple": "4-х канальный WiFi 2.4ГГц IP-регистратор Видеовход: 4 IP@4Мп; видеовыход: 1 VGA и 1 HDMI до 4К; аудиовыход; 1 канал RCA; Видеосжатие H.265+/H.265/H.264+/H.264; Входящий поток 50 Мбит/с; Исходящий поток 40 Мбит/с. Разрешение записи: до 4Мп. Синхр.воспр. 4 канала@4Мп (12,5 fps), 4 канала@1080P (25 fps); 1 SATA для HDD до 6Тб, 2х2 MIMO антенны,1 10M/100M Ethernet интерфейс; 2 х USB 2.0; -10°C до +55°C; 12В DC; 10Вт макс (без HDD).",
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "externalId": "9b991eb9-1d76-480f-8c59-71dc6a85f6a5",
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "hierarchicalId": 13472,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "hierarchicalParent": 13227,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "id": 13472,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "images": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "indexNumber": 13161003,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "isKit": false,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "isParent": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "modifiers": [],
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "name": "DS-N304W(B)",
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "nomNumber": "303613909",
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "published": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "short_code": null,
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "unit": "шт"
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] lastPosition из последнего элемента: 15413 (всего элементов: 407, последний - товар, имя: Интеграция ОФД в 1С)
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Получено товаров: 382, hasMore: false, lastPosition: 15413, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     [SBIS Import] Пропущено дубликатов: 382
+0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     [SBIS Import] Стр.2: товаров=382, папок=25, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15413&order=after
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15413
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   nomenclaturesType: 'object',
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   nomenclaturesLength: 'N/A',
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   outcome: { hasMore: false }
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] nomenclatures - пустой объект {}, больше нет данных
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] nomenclatures пустой, больше нет данных для загрузки
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Получено товаров: 0, hasMore: false, lastPosition: undefined, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] 1. Правильность priceListId и pointId
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] 2. Существует ли прайс-лист и содержит ли он товары
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] 3. Структура ответа: [ 'nomenclatures', 'outcome' ]
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:     [SBIS Import] Стр.3: товаров=0, папок=0, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00:     [SBIS Import] Загрузка из "Эвотор 6" (id=15054, глубина=2)...
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15054&order=after
+0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15054
+0|worldcashbox  | 2026-02-05 05:56:33 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   nomenclaturesType: 'array',
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   nomenclaturesLength: 1001,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   outcome: { hasMore: true }
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Пример структуры товара (API v2): {
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "article": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "attributes": {
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "calories": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "caloriesPerUnit": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "carbohydrate": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "fat": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "outQuantity": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "protein": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "spirit": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "storageConditions": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "volume": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "weight": null
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   },
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "balance": 2,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "cost": 1300,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "description": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "description_simple": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "externalId": "e917ef82-f377-403d-bd7a-9c2c1a4813bb",
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "hierarchicalId": 15055,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "hierarchicalParent": 15054,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "id": 15055,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "images": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "indexNumber": 14744003,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "isKit": false,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "isParent": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "modifiers": [],
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "name": "Сетевой адаптер Эвотор 6 (K7410000139LA)",
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "nomNumber": "X4884621",
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "published": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "short_code": null,
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "unit": "шт"
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] outcome: { hasMore: true } hasMore: true
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] lastPosition из последнего элемента: 13480 (всего элементов: 1001, последний - товар, имя: DS-1473ZJ-155)
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Получено товаров: 922, hasMore: true, lastPosition: 13480, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     [SBIS Import] Пропущено дубликатов: 922
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     [SBIS Import] Стр.1: товаров=922, папок=79, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=13480&order=after
+0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=13480
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesType: 'array',
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesLength: 398,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   outcome: { hasMore: false }
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Пример структуры товара (API v2): {
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "article": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "attributes": {
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "calories": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "caloriesPerUnit": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "carbohydrate": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "fat": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "outQuantity": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "protein": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "spirit": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "storageConditions": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "volume": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "weight": null
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   },
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "balance": 0,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "cost": 3885,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "description": "<p>Настенный кронштейн, белый, для купольных камер IPC-T0XX, алюминий, 131×183.5×228.5мм</p>",
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "description_simple": "Настенный кронштейн, белый, для купольных камер IPC-T0XX, алюминий, 131×183.5×228.5мм",
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "externalId": "1f03b475-2db8-4e41-9c3b-1568c874b264",
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "hierarchicalId": 13481,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "hierarchicalParent": 13227,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "id": 13481,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "images": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "indexNumber": 13170003,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "isKit": false,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "isParent": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "modifiers": [],
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "name": "DS-1273ZJ-130-TRL",
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "nomNumber": "302700374",
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "published": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "short_code": null,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "unit": "шт"
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] lastPosition из последнего элемента: 15413 (всего элементов: 398, последний - товар, имя: Интеграция ОФД в 1С)
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Получено товаров: 373, hasMore: false, lastPosition: 15413, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Пропущено дубликатов: 373
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Стр.2: товаров=373, папок=25, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15413&order=after
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15413
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesType: 'object',
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesLength: 'N/A',
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   outcome: { hasMore: false }
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] nomenclatures - пустой объект {}, больше нет данных
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] nomenclatures пустой, больше нет данных для загрузки
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Получено товаров: 0, hasMore: false, lastPosition: undefined, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] 1. Правильность priceListId и pointId
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] 2. Существует ли прайс-лист и содержит ли он товары
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] 3. Структура ответа: [ 'nomenclatures', 'outcome' ]
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Стр.3: товаров=0, папок=0, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Загрузка из "Новое ( к сортировке!)" (id=7406, глубина=2)...
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=7406&order=after
+0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=7406
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Структура ответа API: {
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   hasNomenclatures: true,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   nomenclaturesType: 'array',
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   nomenclaturesLength: 1001,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   hasOutcome: true,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   outcome: { hasMore: true }
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Пример структуры товара (API v2): {
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "article": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "attributes": {},
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "balance": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "cost": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "description": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "description_simple": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "externalId": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "hierarchicalId": 7408,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "hierarchicalParent": 7406,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "id": 7408,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "images": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "indexNumber": 7091002,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "isKit": false,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "isParent": true,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "modifiers": [],
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "name": "Атол",
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "nomNumber": "X4147929",
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "published": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "short_code": null,
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "unit": null
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: }
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] outcome: { hasMore: true } hasMore: true
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] lastPosition из последнего элемента: 13160 (всего элементов: 1001, последний - товар, имя: IPC-D022-G2/U (4mm))
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Получено товаров: 921, hasMore: true, lastPosition: 13160, page: undefined
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:     [SBIS Import] Пропущено дубликатов: 921
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00:     [SBIS Import] Стр.1: товаров=921, папок=80, всего=3058
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=13160&order=after
+0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=13160
