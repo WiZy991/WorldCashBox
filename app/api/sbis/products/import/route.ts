@@ -451,6 +451,19 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
       const category = detectCategory(sbisProduct.name)
       const subcategory = detectSubcategory(sbisProduct.name, category)
       
+      // Логируем товары, которые могут быть неправильно категоризированы
+      // (попали в equipment по умолчанию, но название не содержит явных признаков оборудования)
+      if (category === 'equipment' && processedCount <= 100) {
+        const nameLower = sbisProduct.name.toLowerCase()
+        const hasEquipmentKeywords = ['касса', 'принтер', 'сканер', 'весы', 'терминал', 'регистратор', 
+          'фискальный', 'pos', 'тсд', 'эквайринг', 'ящик', 'drawer', 'printer', 'scanner', 
+          'equipment', 'hardware', 'оборудование'].some(kw => nameLower.includes(kw))
+        
+        if (!hasEquipmentKeywords && processedCount % 20 === 0) {
+          console.log(`[SBIS Import] ВНИМАНИЕ: Товар "${sbisProduct.name}" попал в категорию "equipment" по умолчанию. Возможно, нужна ручная проверка категории.`)
+        }
+      }
+      
       // Генерируем ID товара
       const productId = generateProductId(sbisProduct.name, sbisProduct.code)
       

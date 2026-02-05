@@ -196,7 +196,42 @@ export function detectCategory(productName: string): Product['category'] {
     }
   }
   
-  // По умолчанию - оборудование
+  // Дополнительная проверка: слова, которые точно НЕ относятся к оборудованию
+  const nonEquipmentKeywords = [
+    'акселерационн', 'акселерация', 'ускорение', 'развитие', 'бизнес', 'бизнес-',
+    'производств', 'производственн', 'смсп', 'смп', 'малый бизнес',
+    'цифровизац', 'цифров', 'внедрение', 'внедр',
+    'конкурс', 'победитель', 'программа', 'программ', 'пакет услуг',
+    'региональн', 'центр', 'инжиниринг', 'инжиниринга',
+    'стратеги', 'стратегия', 'индивидуальн', 'реализац',
+    'выплата', 'агентск', 'вознагражден', 'акт', 'услуг',
+    'доплата', 'выезд', 'заезд', 'поздн', 'ранн',
+    'драйвер', 'driver', 'софт', 'soft', 'unipos', 'inpas',
+    'swapdog', 'эдо', 'мес', 'месяц'
+  ]
+  
+  // Если название содержит слова, которые точно не относятся к оборудованию
+  for (const keyword of nonEquipmentKeywords) {
+    if (nameLower.includes(keyword)) {
+      // Проверяем, не является ли это услугой или ПО
+      if (nameLower.includes('услуг') || nameLower.includes('service') || 
+          nameLower.includes('драйвер') || nameLower.includes('driver') ||
+          nameLower.includes('программ') || nameLower.includes('software') ||
+          nameLower.includes('модуль') || nameLower.includes('module')) {
+        return 'software'
+      }
+      if (nameLower.includes('услуг') || nameLower.includes('service') ||
+          nameLower.includes('акселерационн') || nameLower.includes('консультац') ||
+          nameLower.includes('установк') || nameLower.includes('настройк')) {
+        return 'services'
+      }
+      // Если не подходит ни к одной категории, но точно не оборудование - ставим services
+      return 'services'
+    }
+  }
+  
+  // По умолчанию - оборудование (но это может быть неточно)
+  // ВАЖНО: Для более точной категоризации рекомендуется вручную проверять товары
   return 'equipment'
 }
 
