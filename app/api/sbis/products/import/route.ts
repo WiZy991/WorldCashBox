@@ -333,31 +333,30 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
         }
       }
       
-      // Начинаем с корня
-      await loadFromFolder(undefined, 'Корень', 0)
+    // Начинаем с корня
+    await loadFromFolder(undefined, 'Корень', 0)
       
-      // Обрабатываем очередь папок
-      console.log(`[SBIS Import] В очереди папок для обработки: ${folderQueue.length}`)
-      let foldersProcessed = 0
-      while (folderQueue.length > 0 && allProducts.length < 50000) {
-        const folder = folderQueue.shift()!
-        const productsBeforeFolder = allProducts.length
-        await loadFromFolder(folder.hierarchicalId, folder.name, folder.depth)
-        const productsAfterFolder = allProducts.length
-        foldersProcessed++
-        if (foldersProcessed % 10 === 0) {
-          console.log(`[SBIS Import] Обработано папок: ${foldersProcessed}, товаров: ${allProducts.length}, в очереди: ${folderQueue.length}`)
-        }
-        await new Promise(resolve => setTimeout(resolve, 100)) // Небольшая задержка между папками
+    // Обрабатываем очередь папок
+    console.log(`[SBIS Import] В очереди папок для обработки: ${folderQueue.length}`)
+    let foldersProcessed = 0
+    while (folderQueue.length > 0 && allProducts.length < 50000) {
+      const folder = folderQueue.shift()!
+      const productsBeforeFolder = allProducts.length
+      await loadFromFolder(folder.hierarchicalId, folder.name, folder.depth)
+      const productsAfterFolder = allProducts.length
+      foldersProcessed++
+      if (foldersProcessed % 10 === 0) {
+        console.log(`[SBIS Import] Обработано папок: ${foldersProcessed}, товаров: ${allProducts.length}, в очереди: ${folderQueue.length}`)
       }
-      
-      const productsAfterMethod1 = allProducts.length
-      const addedByMethod1 = productsAfterMethod1 - productsBeforeMethod1
-      console.log(`[SBIS Import] Рекурсивный обход завершён: ${productsAfterMethod1} товаров (добавлено методом 1: ${addedByMethod1}), обработано папок: ${processedFolders.size}, в очереди осталось: ${folderQueue.length}`)
-      
-      if (folderQueue.length > 0) {
-        console.warn(`[SBIS Import] ВНИМАНИЕ: Осталось ${folderQueue.length} необработанных папок! Возможно, достигнут лимит товаров.`)
-      }
+      await new Promise(resolve => setTimeout(resolve, 100)) // Небольшая задержка между папками
+    }
+    
+    const productsAfterMethod1 = allProducts.length
+    const addedByMethod1 = productsAfterMethod1 - productsBeforeMethod1
+    console.log(`[SBIS Import] Рекурсивный обход завершён: ${productsAfterMethod1} товаров (добавлено методом 1: ${addedByMethod1}), обработано папок: ${processedFolders.size}, в очереди осталось: ${folderQueue.length}`)
+    
+    if (folderQueue.length > 0) {
+      console.warn(`[SBIS Import] ВНИМАНИЕ: Осталось ${folderQueue.length} необработанных папок! Возможно, достигнут лимит товаров.`)
     }
     
     // Метод 2: Если position-пагинация дала мало результатов, пробуем page
