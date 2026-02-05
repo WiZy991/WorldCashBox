@@ -185,6 +185,13 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
       
       // Функция для рекурсивной загрузки из папки (используем стрелочную функцию для совместимости с ES5)
       const loadFromFolder = async (folderId: number | undefined, folderName: string, depth: number = 0): Promise<void> => {
+        // Пропускаем папку АРХИВ (в любом регистре)
+        const folderNameUpper = folderName.toUpperCase()
+        if (folderNameUpper.includes('АРХИВ') || folderNameUpper.includes('ARCHIVE')) {
+          console.log(`[SBIS Import] Пропущена папка "${folderName}" (АРХИВ)`)
+          return
+        }
+        
         if (folderId !== undefined && processedFolders.has(folderId)) {
           return // Уже обработали эту папку
         }
@@ -234,9 +241,16 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
           const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
           allProducts = [...allProducts, ...productsOnPage]
           
-          // Добавляем найденные папки в очередь для обработки
+          // Добавляем найденные папки в очередь для обработки (исключаем АРХИВ)
           if (response.folders && response.folders.length > 0) {
             for (const folder of response.folders) {
+              // Пропускаем папку АРХИВ (в любом регистре)
+              const folderNameUpper = folder.name.toUpperCase()
+              if (folderNameUpper.includes('АРХИВ') || folderNameUpper.includes('ARCHIVE')) {
+                console.log(`${indent}[SBIS Import] Пропущена папка "${folder.name}" (АРХИВ)`)
+                continue
+              }
+              
               if (!processedFolders.has(folder.hierarchicalId)) {
                 folderQueue.push({
                   hierarchicalId: folder.hierarchicalId,
