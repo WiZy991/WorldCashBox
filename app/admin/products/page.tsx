@@ -121,52 +121,72 @@ export default function AdminProducts() {
     URL.revokeObjectURL(url)
   }
 
-  const handleExportExcel = () => {
-    // Создаем CSV файл с разделителем точка с запятой для русской локали Excel
-    const separator = ';' // Точка с запятой для правильного открытия в Excel (русская локаль)
-    const headers = ['ID', 'Название', 'Категория', 'Подкатегория', 'Цена', 'Описание', 'Наличие', 'Остаток', 'Изображение', 'SBIS ID']
-    
-    // Функция для экранирования значений
-    const escapeValue = (value: any): string => {
-      if (value === null || value === undefined) return ''
-      const str = String(value)
-      // Если значение содержит разделитель, кавычки или перенос строки - оборачиваем в кавычки
-      if (str.includes(separator) || str.includes('"') || str.includes('\n') || str.includes('\r')) {
-        return `"${str.replace(/"/g, '""')}"`
-      }
-      return str
-    }
-    
-    const csvRows = [
-      headers.join(separator),
-      ...products.map(product => {
-        const row = [
-          escapeValue(product.id),
-          escapeValue(product.name),
-          escapeValue(getCategoryName(product.category)),
-          escapeValue(product.subcategory),
-          escapeValue(product.price),
-          escapeValue(product.description?.replace(/\n/g, ' ').replace(/\r/g, '')),
-          escapeValue(product.inStock ? 'Да' : 'Нет'),
-          escapeValue(product.stock),
-          escapeValue(product.image),
-          escapeValue(product.sbisId)
-        ]
-        return row.join(separator)
+  const handleExportExcel = async () => {
+    try {
+      // Динамический импорт xlsx для клиентской стороны
+      const XLSX = await import('xlsx')
+      
+      // Подготавливаем данные для Excel
+      const worksheetData = products.map(product => ({
+        'ID': product.id || '',
+        'Название': product.name || '',
+        'Категория': getCategoryName(product.category),
+        'Подкатегория': product.subcategory || '',
+        'Цена': product.price || '',
+        'Описание': product.description?.replace(/\n/g, ' ').replace(/\r/g, '') || '',
+        'Наличие': product.inStock ? 'Да' : 'Нет',
+        'Остаток': product.stock || '',
+        'Изображение': product.image || '',
+        'SBIS ID': product.sbisId || ''
+      }))
+
+      // Создаем рабочую книгу
+      const workbook = XLSX.utils.book_new()
+      
+      // Создаем рабочий лист из данных
+      const worksheet = XLSX.utils.json_to_sheet(worksheetData)
+      
+      // Настраиваем ширину столбцов для удобства чтения
+      const columnWidths = [
+        { wch: 15 }, // ID
+        { wch: 50 }, // Название
+        { wch: 25 }, // Категория
+        { wch: 25 }, // Подкатегория
+        { wch: 12 }, // Цена
+        { wch: 60 }, // Описание
+        { wch: 10 }, // Наличие
+        { wch: 10 }, // Остаток
+        { wch: 40 }, // Изображение
+        { wch: 15 }  // SBIS ID
+      ]
+      worksheet['!cols'] = columnWidths
+      
+      // Добавляем рабочий лист в книгу
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Товары')
+      
+      // Генерируем Excel файл
+      const excelBuffer = XLSX.write(workbook, { 
+        bookType: 'xlsx', 
+        type: 'array',
+        cellStyles: true
       })
-    ]
-    
-    const csvContent = csvRows.join('\n')
-    // Добавляем BOM для правильного отображения кириллицы в Excel
-    const BOM = '\uFEFF'
-    // Используем правильный MIME тип для CSV с разделителем точка с запятой
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `products-${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
+      
+      // Создаем Blob и скачиваем файл
+      const blob = new Blob([excelBuffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `products-${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Ошибка при экспорте в Excel:', error)
+      alert('Ошибка при экспорте в Excel. Убедитесь, что установлена библиотека xlsx: npm install xlsx')
+    }
   }
 
   const handleEdit = (product: Product) => {
