@@ -19,6 +19,7 @@ import {
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 1800 // Увеличиваем таймаут до 30 минут (1800 секунд) для длительного импорта
 
 const productsJsonPath = join(process.cwd(), 'data', 'products.json')
 
@@ -48,6 +49,8 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleImport(body: { priceListId?: number; warehouseName?: string; force?: boolean }) {
+  let backupPath: string | null = null // Для восстановления при ошибке
+  
   try {
     
     const SBIS_PRICE_LIST_ID = parseInt(
@@ -387,13 +390,24 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
     
     console.log(`[SBIS Import] Получено остатков (сумма по всем складам): ${stockMap.size}`)
     
-    // 5. Загружаем существующие товары
+    // 5. Загружаем существующие товары и создаем бэкап
     let existingProducts: Product[] = []
     try {
       const content = await readFile(productsJsonPath, 'utf-8')
       existingProducts = JSON.parse(content)
+      
+      // Создаем бэкап перед импортом
+      backupPath = productsJsonPath + '.backup.' + Date.now()
+      try {
+        await writeFile(backupPath, content, 'utf-8')
+        console.log(`[SBIS Import] Создан бэкап: ${backupPath}`)
+      } catch (backupError) {
+        console.warn(`[SBIS Import] Не удалось создать бэкап:`, backupError)
+        backupPath = null
+      }
     } catch {
       existingProducts = []
+      console.log(`[SBIS Import] Файл products.json не найден, создаем новый`)
     }
     
     console.log(`[SBIS Import] Существующих товаров: ${existingProducts.length}`)
@@ -566,10 +580,23 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
     })
   } catch (error) {
     console.error('[SBIS Import] Ошибка импорта товаров:', error)
+    
+    // Пытаемся восстановить из бэкапа, если он был создан
+    if (backupPath) {
+      try {
+        const backupContent = await readFile(backupPath, 'utf-8')
+        await writeFile(productsJsonPath, backupContent, 'utf-8')
+        console.log(`[SBIS Import] Данные восстановлены из бэкапа: ${backupPath}`)
+      } catch (restoreError) {
+        console.error(`[SBIS Import] Не удалось восстановить из бэкапа:`, restoreError)
+      }
+    }
+    
     return NextResponse.json(
       { 
         error: 'Ошибка импорта товаров',
-        details: error instanceof Error ? error.message : 'Неизвестная ошибка'
+        details: error instanceof Error ? error.message : 'Неизвестная ошибка',
+        message: backupPath ? 'Данные восстановлены из бэкапа.' : 'Данные не были изменены.'
       },
       { status: 500 }
     )
