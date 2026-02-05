@@ -20,6 +20,7 @@ import {
 // Помечаем route как динамический, так как он использует process.env и файловую систему
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const maxDuration = 1800 // 30 минут для синхронизации цен
 
 const productsJsonPath = join(process.cwd(), 'data', 'products.json')
 

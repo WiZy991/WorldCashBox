@@ -1,6 +1,6 @@
-# Настройка таймаута Nginx для импорта товаров
+# Настройка таймаута Nginx для импорта товаров и синхронизации цен
 
-Если при импорте товаров возникает ошибка 504 (Gateway Timeout) через ~60 секунд, это означает, что Nginx имеет таймаут по умолчанию 60 секунд.
+Если при импорте товаров или синхронизации цен возникает ошибка 504 (Gateway Timeout) через ~60 секунд, это означает, что Nginx имеет таймаут по умолчанию 60 секунд.
 
 ## Решение
 
@@ -15,9 +15,28 @@ server {
     
     client_max_body_size 20M;
     
-    # ВАЖНО: Самый специфичный location ДОЛЖЕН быть ПЕРВЫМ!
+    # ВАЖНО: Самые специфичные location ДОЛЖНЫ быть ПЕРВЫМИ!
     # Увеличиваем таймауты для API импорта товаров
     location /api/sbis/products/import {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Увеличиваем таймауты до 30 минут (1800 секунд)
+        proxy_connect_timeout 1800s;
+        proxy_send_timeout 1800s;
+        proxy_read_timeout 1800s;
+        send_timeout 1800s;
+    }
+    
+    # Увеличиваем таймауты для API синхронизации цен
+    location /api/sbis/prices/sync {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -83,7 +102,7 @@ server {
 # 1. Откройте конфигурационный файл
 sudo nano /etc/nginx/sites-available/worldcashbox
 
-# 2. Добавьте блок location /api/sbis/products/import ПЕРЕД другими location блоками
+# 2. Добавьте блоки location /api/sbis/products/import и /api/sbis/prices/sync ПЕРЕД другими location блоками
 # (скопируйте конфигурацию выше)
 
 # 3. Проверить конфигурацию (должно быть "syntax is ok" и "test is successful")
@@ -100,20 +119,23 @@ sudo systemctl status nginx
 
 **Если после перезагрузки все еще 504:**
 
-1. Проверьте, что блок `location /api/sbis/products/import` находится ПЕРЕД `location /api/` и `location /`
+1. Проверьте, что блоки `location /api/sbis/products/import` и `location /api/sbis/prices/sync` находятся ПЕРЕД `location /api/` и `location /`
 2. Проверьте логи Nginx: `sudo tail -f /var/log/nginx/error.log`
 3. Проверьте, что Next.js приложение работает: `pm2 status`
-4. Попробуйте прямой запрос к Next.js (минуя Nginx): `curl http://localhost:3000/api/sbis/products/import`
+4. Попробуйте прямой запрос к Next.js (минуя Nginx): 
+   - `curl http://localhost:3000/api/sbis/products/import`
+   - `curl http://localhost:3000/api/sbis/prices/sync`
 
 ## Проверка текущей конфигурации
 
 Если после настройки все еще получаете 504, проверьте:
 
 ```bash
-# 1. Проверьте, что блок location /api/sbis/products/import существует и идет ПЕРВЫМ
+# 1. Проверьте, что блоки location /api/sbis/products/import и /api/sbis/prices/sync существуют и идут ПЕРВЫМИ
 sudo grep -A 15 "location /api/sbis/products/import" /etc/nginx/sites-available/worldcashbox
+sudo grep -A 15 "location /api/sbis/prices/sync" /etc/nginx/sites-available/worldcashbox
 
-# 2. Проверьте порядок location блоков (должен быть: /api/sbis/products/import, затем /api/, затем /)
+# 2. Проверьте порядок location блоков (должен быть: /api/sbis/products/import, /api/sbis/prices/sync, затем /api/, затем /)
 sudo grep -n "location /" /etc/nginx/sites-available/worldcashbox
 
 # 3. Проверьте, что Nginx действительно перезагружен

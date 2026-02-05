@@ -122,31 +122,44 @@ export default function AdminProducts() {
   }
 
   const handleExportExcel = () => {
-    // Создаем CSV файл (открывается в Excel)
+    // Создаем CSV файл с разделителем точка с запятой для русской локали Excel
+    const separator = ';' // Точка с запятой для правильного открытия в Excel (русская локаль)
     const headers = ['ID', 'Название', 'Категория', 'Подкатегория', 'Цена', 'Описание', 'Наличие', 'Остаток', 'Изображение', 'SBIS ID']
     
+    // Функция для экранирования значений
+    const escapeValue = (value: any): string => {
+      if (value === null || value === undefined) return ''
+      const str = String(value)
+      // Если значение содержит разделитель, кавычки или перенос строки - оборачиваем в кавычки
+      if (str.includes(separator) || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    }
+    
     const csvRows = [
-      headers.join(','),
+      headers.join(separator),
       ...products.map(product => {
         const row = [
-          product.id || '',
-          `"${(product.name || '').replace(/"/g, '""')}"`,
-          `"${getCategoryName(product.category)}"`,
-          `"${product.subcategory || ''}"`,
-          product.price || '',
-          `"${(product.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-          product.inStock ? 'Да' : 'Нет',
-          product.stock || '',
-          `"${product.image || ''}"`,
-          product.sbisId || ''
+          escapeValue(product.id),
+          escapeValue(product.name),
+          escapeValue(getCategoryName(product.category)),
+          escapeValue(product.subcategory),
+          escapeValue(product.price),
+          escapeValue(product.description?.replace(/\n/g, ' ').replace(/\r/g, '')),
+          escapeValue(product.inStock ? 'Да' : 'Нет'),
+          escapeValue(product.stock),
+          escapeValue(product.image),
+          escapeValue(product.sbisId)
         ]
-        return row.join(',')
+        return row.join(separator)
       })
     ]
     
     const csvContent = csvRows.join('\n')
     // Добавляем BOM для правильного отображения кириллицы в Excel
     const BOM = '\uFEFF'
+    // Используем правильный MIME тип для CSV с разделителем точка с запятой
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
