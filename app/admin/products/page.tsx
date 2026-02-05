@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import { Plus, Edit, Trash2, Search, RefreshCw, CheckSquare, Square, Filter, Download } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, RefreshCw, CheckSquare, Square, Filter, Download, FileSpreadsheet } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Product } from '@/data/products'
+import { categories } from '@/data/products'
 import ProductForm from '@/components/admin/ProductForm'
 
 export default function AdminProducts() {
@@ -109,13 +110,48 @@ export default function AdminProducts() {
     setSelectedProducts(newSelected)
   }
 
-  const handleExport = () => {
+  const handleExportJSON = () => {
     const dataStr = JSON.stringify(products, null, 2)
     const dataBlob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(dataBlob)
     const link = document.createElement('a')
     link.href = url
     link.download = `products-${new Date().toISOString().split('T')[0]}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleExportExcel = () => {
+    // Создаем CSV файл (открывается в Excel)
+    const headers = ['ID', 'Название', 'Категория', 'Подкатегория', 'Цена', 'Описание', 'Наличие', 'Остаток', 'Изображение', 'SBIS ID']
+    
+    const csvRows = [
+      headers.join(','),
+      ...products.map(product => {
+        const row = [
+          product.id || '',
+          `"${(product.name || '').replace(/"/g, '""')}"`,
+          `"${getCategoryName(product.category)}"`,
+          `"${product.subcategory || ''}"`,
+          product.price || '',
+          `"${(product.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+          product.inStock ? 'Да' : 'Нет',
+          product.stock || '',
+          `"${product.image || ''}"`,
+          product.sbisId || ''
+        ]
+        return row.join(',')
+      })
+    ]
+    
+    const csvContent = csvRows.join('\n')
+    // Добавляем BOM для правильного отображения кириллицы в Excel
+    const BOM = '\uFEFF'
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `products-${new Date().toISOString().split('T')[0]}.csv`
     link.click()
     URL.revokeObjectURL(url)
   }
@@ -190,7 +226,13 @@ export default function AdminProducts() {
     currentPage * itemsPerPage
   )
 
-  const categories = Array.from(new Set(products.map(p => p.category))).sort()
+  // Получаем русские названия категорий
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId)
+    return category ? category.name : categoryId
+  }
+
+  const availableCategories = Array.from(new Set(products.map(p => p.category))).sort()
 
   return (
     <div className="flex min-h-screen bg-gray-50 overflow-x-hidden">
@@ -289,20 +331,33 @@ export default function AdminProducts() {
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 appearance-none bg-white"
               >
                 <option value="all">Все категории</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
+                {availableCategories.map(catId => {
+                  const category = categories.find(c => c.id === catId)
+                  return (
+                    <option key={catId} value={catId}>
+                      {category ? category.name : catId}
+                    </option>
+                  )
+                })}
               </select>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <button
-              onClick={handleExport}
-              className="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-700 transition-colors flex items-center space-x-2"
-              title="Экспорт товаров"
+              onClick={handleExportExcel}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center space-x-2"
+              title="Экспорт в Excel (CSV)"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span className="hidden sm:inline">Excel</span>
+            </button>
+            <button
+              onClick={handleExportJSON}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              title="Экспорт в JSON"
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Экспорт</span>
+              <span className="hidden sm:inline">JSON</span>
             </button>
             {selectedProducts.size > 0 && (
               <button
@@ -397,7 +452,7 @@ export default function AdminProducts() {
                       </td>
                       <td className="px-4 py-4">
                         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-primary-100 text-primary-800">
-                          {product.category}
+                          {getCategoryName(product.category)}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-900">
