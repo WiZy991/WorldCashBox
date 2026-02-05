@@ -120,12 +120,41 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
       console.warn(`[SBIS Import] Не удалось получить точки продаж:`, error)
     }
     
-    // 3. Загружаем ВСЕ товары
+    // 3. СНАЧАЛА получаем остатки со складов, чтобы знать, какие товары есть на складах
+    console.log(`[SBIS Import] Получение остатков товаров со складов для фильтрации: ${targetWarehouses.map(w => w.name).join(', ')}...`)
+    console.log(`[SBIS Import] ID складов: ${warehouseIds.join(', ')}`)
+    
+    let productsOnWarehouses: Set<number> = new Set() // ID товаров, которые есть на складах
+    try {
+      const stockResponse = await getSBISStock(
+        [SBIS_PRICE_LIST_ID], // priceListIds
+        undefined, // nomenclatures
+        warehouseIds, // warehouses - все склады
+        [companyId] // companies
+      )
+      
+      // Собираем ID всех товаров, которые есть на складах (даже с остатком 0)
+      for (const item of stockResponse.items) {
+        const productId = Number(item.id)
+        productsOnWarehouses.add(productId)
+      }
+      
+      console.log(`[SBIS Import] Найдено товаров на складах: ${productsOnWarehouses.size}`)
+      console.log(`[SBIS Import] Будем загружать только эти товары из прайс-листа`)
+    } catch (error) {
+      console.warn(`[SBIS Import] Ошибка получения остатков для фильтрации:`, error)
+      console.warn(`[SBIS Import] Продолжаем загрузку всех товаров из прайс-листа (без фильтрации по складу)`)
+    }
+    
+    // 4. Загружаем товары из прайс-листа, но фильтруем только те, что есть на складах
     // Пробуем разные методы:
     // - API v1 с pointId (если есть точка продаж) - должен работать для иерархии
     // - API v2 каталог
     // - API v2 прайс-лист
-    console.log(`[SBIS Import] Загрузка товаров (pointId=${pointId || 'нет'})...`)
+    console.log(`[SBIS Import] Загрузка товаров из прайс-листа (pointId=${pointId || 'нет'})...`)
+    if (productsOnWarehouses.size > 0) {
+      console.log(`[SBIS Import] Фильтруем товары: загружаем только те, что есть на складах (${productsOnWarehouses.size} товаров)`)
+    }
     
     let allProducts: Array<{ id: string | number; name: string; price: number; code?: string; article?: string; balance?: string | number }> = []
     let totalApiCalls = 0
@@ -150,9 +179,18 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
             1000
           )
           
-          allProducts = [...allProducts, ...response.items]
+          // Фильтруем товары по складу (если есть фильтр)
+          let filteredItems = response.items
+          if (productsOnWarehouses.size > 0) {
+            filteredItems = response.items.filter(item => {
+              const productId = Number(item.id)
+              return productsOnWarehouses.has(productId)
+            })
+          }
           
-          console.log(`[SBIS Import] API v1 стр.${page + 1}: товаров=${response.items.length}, всего=${allProducts.length}, hasMore=${response.hasMore}`)
+          allProducts = [...allProducts, ...filteredItems]
+          
+          console.log(`[SBIS Import] API v1 стр.${page + 1}: товаров=${response.items.length}, отфильтровано=${filteredItems.length}, всего=${allProducts.length}, hasMore=${response.hasMore}`)
           
           hasMore = response.hasMore || response.items.length === 1000
           if (hasMore && response.items.length > 0) {
@@ -170,15 +208,15 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
       console.log(`[SBIS Import] API v1 завершён: ${allProducts.length} товаров`)
     }
     
-    // Если API v1 дал мало результатов, пробуем API v2
-    if (allProducts.length < 100) {
-      console.log(`[SBIS Import] API v1 дал мало результатов (${allProducts.length}), пробуем API v2...`)
-      allProducts = []
-    }
-    
     // Метод 1: Рекурсивный обход папок через position
-    if (allProducts.length < 100) {
+    // Запускаем всегда, так как API v1 может не вернуть все товары из вложенных папок
+    // Если API v1 уже загрузил товары, дополняем их товарами из папок
+    const productsBeforeMethod1 = allProducts.length
+    if (productsBeforeMethod1 > 0) {
+      console.log(`[SBIS Import] Метод 1: Дополняем товары из папок (уже загружено: ${productsBeforeMethod1})...`)
+    } else {
       console.log(`[SBIS Import] Метод 1: Рекурсивный обход папок через position...`)
+    }
       
       const processedFolders = new Set<number>()
       const folderQueue: Array<{ hierarchicalId: number; name: string; depth: number }> = []
@@ -205,7 +243,7 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
         let lastPosition: number | undefined = folderId // Начинаем с ID папки
         let hasMore = true
         let pageCount = 0
-        const maxPagesPerFolder = 50
+        const maxPagesPerFolder = 200 // Увеличиваем для больших папок
         
         while (hasMore && pageCount < maxPagesPerFolder) {
           let response
@@ -238,8 +276,28 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
           if (!response) break
           
           // Фильтруем товары (не папки)
-          const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
-          allProducts = [...allProducts, ...productsOnPage]
+          let productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+          
+          // Фильтруем по складу (если есть фильтр)
+          if (productsOnWarehouses.size > 0) {
+            const beforeFilter = productsOnPage.length
+            productsOnPage = productsOnPage.filter(item => {
+              const productId = Number(item.id)
+              return productsOnWarehouses.has(productId)
+            })
+            if (beforeFilter > productsOnPage.length) {
+              console.log(`${indent}[SBIS Import] Отфильтровано по складу: ${beforeFilter - productsOnPage.length} товаров`)
+            }
+          }
+          
+          // Добавляем товары, избегая дубликатов по ID
+          const existingIds = new Set(allProducts.map(p => String(p.id)))
+          const newProducts = productsOnPage.filter(p => !existingIds.has(String(p.id)))
+          allProducts = [...allProducts, ...newProducts]
+          
+          if (newProducts.length < productsOnPage.length) {
+            console.log(`${indent}[SBIS Import] Пропущено дубликатов: ${productsOnPage.length - newProducts.length}`)
+          }
           
           // Добавляем найденные папки в очередь для обработки (исключаем АРХИВ)
           if (response.folders && response.folders.length > 0) {
@@ -279,13 +337,27 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
       await loadFromFolder(undefined, 'Корень', 0)
       
       // Обрабатываем очередь папок
+      console.log(`[SBIS Import] В очереди папок для обработки: ${folderQueue.length}`)
+      let foldersProcessed = 0
       while (folderQueue.length > 0 && allProducts.length < 50000) {
         const folder = folderQueue.shift()!
+        const productsBeforeFolder = allProducts.length
         await loadFromFolder(folder.hierarchicalId, folder.name, folder.depth)
+        const productsAfterFolder = allProducts.length
+        foldersProcessed++
+        if (foldersProcessed % 10 === 0) {
+          console.log(`[SBIS Import] Обработано папок: ${foldersProcessed}, товаров: ${allProducts.length}, в очереди: ${folderQueue.length}`)
+        }
         await new Promise(resolve => setTimeout(resolve, 100)) // Небольшая задержка между папками
       }
       
-      console.log(`[SBIS Import] Рекурсивный обход завершён: ${allProducts.length} товаров, обработано папок: ${processedFolders.size}`)
+      const productsAfterMethod1 = allProducts.length
+      const addedByMethod1 = productsAfterMethod1 - productsBeforeMethod1
+      console.log(`[SBIS Import] Рекурсивный обход завершён: ${productsAfterMethod1} товаров (добавлено методом 1: ${addedByMethod1}), обработано папок: ${processedFolders.size}, в очереди осталось: ${folderQueue.length}`)
+      
+      if (folderQueue.length > 0) {
+        console.warn(`[SBIS Import] ВНИМАНИЕ: Осталось ${folderQueue.length} необработанных папок! Возможно, достигнут лимит товаров.`)
+      }
     }
     
     // Метод 2: Если position-пагинация дала мало результатов, пробуем page
@@ -321,7 +393,20 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
         
         if (!response) break
         
-        const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+        let productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+        
+        // Фильтруем по складу (если есть фильтр)
+        if (productsOnWarehouses.size > 0) {
+          const beforeFilter = productsOnPage.length
+          productsOnPage = productsOnPage.filter(item => {
+            const productId = Number(item.id)
+            return productsOnWarehouses.has(productId)
+          })
+          if (beforeFilter > productsOnPage.length) {
+            console.log(`[SBIS Import] Page ${page}: отфильтровано по складу: ${beforeFilter - productsOnPage.length} товаров`)
+          }
+        }
+        
         allProducts = [...allProducts, ...productsOnPage]
         
         console.log(`[SBIS Import] Page ${page}: товаров=${productsOnPage.length}, всего=${allProducts.length}`)
@@ -362,7 +447,20 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
           break
         }
         
-        const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+        let productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+        
+        // Фильтруем по складу (если есть фильтр)
+        if (productsOnWarehouses.size > 0) {
+          const beforeFilter = productsOnPage.length
+          productsOnPage = productsOnPage.filter(item => {
+            const productId = Number(item.id)
+            return productsOnWarehouses.has(productId)
+          })
+          if (beforeFilter > productsOnPage.length) {
+            console.log(`[SBIS Import] Прайс стр.${pageCount + 1}: отфильтровано по складу: ${beforeFilter - productsOnPage.length} товаров`)
+          }
+        }
+        
         allProducts = [...allProducts, ...productsOnPage]
         
         console.log(`[SBIS Import] Прайс стр.${pageCount + 1}: товаров=${productsOnPage.length}, всего=${allProducts.length}`)
@@ -381,21 +479,40 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
     console.log(`[SBIS Import] Загрузка завершена:`)
     console.log(`[SBIS Import] - Всего товаров: ${allProducts.length}`)
     console.log(`[SBIS Import] - API вызовов: ${totalApiCalls}`)
+    console.log(`[SBIS Import] - Ожидалось товаров: ~10523 (10773 - 250 в архиве)`)
+    if (allProducts.length < 8000) {
+      console.warn(`[SBIS Import] ВНИМАНИЕ: Загружено меньше товаров, чем ожидалось! Возможно, не все папки обработаны.`)
+    }
     
-    // 4. Получаем остатки товаров со всех складов "Толстого 32А"
-    console.log(`[SBIS Import] Получение остатков товаров со складов: ${targetWarehouses.map(w => w.name).join(', ')}...`)
-    console.log(`[SBIS Import] ID складов для остатков: ${warehouseIds.join(', ')}`)
+    // 5. Получаем остатки товаров со всех складов "Толстого 32А"
+    // Если уже получили остатки для фильтрации, используем их, иначе получаем заново
+    let stockMap = new Map<number, number>()
+    let stockResponse: any = null
     
-    // Получаем остатки со всех целевых складов (warehouseIds уже определен выше на строке 81)
-    const stockResponse = await getSBISStock(
-      [SBIS_PRICE_LIST_ID], // priceListIds
-      undefined, // nomenclatures
-      warehouseIds, // warehouses - все склады "Толстого 32А"
-      [companyId] // companies
-    )
+    if (productsOnWarehouses.size > 0) {
+      // Используем уже полученные остатки для фильтрации
+      console.log(`[SBIS Import] Используем уже полученные остатки для сохранения (${productsOnWarehouses.size} товаров)`)
+      // Получаем остатки еще раз для точных значений (на случай, если они изменились)
+      stockResponse = await getSBISStock(
+        [SBIS_PRICE_LIST_ID], // priceListIds
+        undefined, // nomenclatures
+        warehouseIds, // warehouses - все склады "Толстого 32А"
+        [companyId] // companies
+      )
+    } else {
+      // Если не получили остатки для фильтрации, получаем их сейчас
+      console.log(`[SBIS Import] Получение остатков товаров со складов: ${targetWarehouses.map(w => w.name).join(', ')}...`)
+      console.log(`[SBIS Import] ID складов для остатков: ${warehouseIds.join(', ')}`)
+      
+      stockResponse = await getSBISStock(
+        [SBIS_PRICE_LIST_ID], // priceListIds
+        undefined, // nomenclatures
+        warehouseIds, // warehouses - все склады "Толстого 32А"
+        [companyId] // companies
+      )
+    }
     
     // Суммируем остатки по всем складам для каждого товара
-    const stockMap = new Map<number, number>()
     for (const item of stockResponse.items) {
       const productId = Number(item.id)
       const currentStock = stockMap.get(productId) || 0
