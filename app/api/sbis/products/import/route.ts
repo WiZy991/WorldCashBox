@@ -50,7 +50,11 @@ export async function POST(request: NextRequest) {
 async function handleImport(body: { priceListId?: number; warehouseName?: string; force?: boolean }) {
   try {
     
-    const SBIS_PRICE_LIST_ID = parseInt(process.env.SBIS_PRICE_LIST_ID || body.priceListId || '15')
+    const SBIS_PRICE_LIST_ID = parseInt(
+      process.env.SBIS_PRICE_LIST_ID || 
+      (body.priceListId ? String(body.priceListId) : '') || 
+      '15'
+    )
     const force = body.force || false
 
     console.log('[SBIS Import] Начало автоматической загрузки товаров...')

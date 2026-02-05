@@ -51,3 +51,5 @@ scripts/photo
 .env.local
 .env*.local
 
+# generated data files
+data/products.json
