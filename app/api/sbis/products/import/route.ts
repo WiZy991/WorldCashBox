@@ -475,8 +475,8 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
         (sbisProduct.code && p.sbisId === String(sbisProduct.id))
       )
       
-      // Получаем остаток
-      const stock = stockMap.get(Number(sbisProduct.id)) || 0
+      // Получаем остаток (только для товаров, не для услуг)
+      const stock = category !== 'services' ? (stockMap.get(Number(sbisProduct.id)) || 0) : undefined
       
       const productData: Product = {
         id: productId,
@@ -491,9 +491,12 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
         sbisId: sbisProduct.code || String(sbisProduct.id),
         sbisPriceListId: SBIS_PRICE_LIST_ID,
         priceUpdatedAt: now,
-        stock: stock,
-        inStock: stock > 0,
-        stockUpdatedAt: now,
+        // Для услуг не устанавливаем stock и inStock
+        ...(category !== 'services' ? {
+          stock: stock,
+          inStock: stock !== undefined && stock > 0,
+          stockUpdatedAt: now,
+        } : {}),
         sbisWarehouseId: primaryWarehouse.uuid || String(primaryWarehouse.id), // Сохраняем ID основного склада
         // Сохраняем изображение, если было
         image: existingProduct?.image,
@@ -514,17 +517,25 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
             existingProducts[index] = productData
             updatedProducts.push(productData)
           } else {
-            // Обновляем только цены и остатки
-            existingProducts[index] = {
-              ...existingProducts[index],
+            // Обновляем только цены и остатки (для услуг не обновляем stock/inStock)
+            const updateData: Partial<Product> = {
               price: productData.price,
-              stock: productData.stock,
-              inStock: productData.inStock,
               priceUpdatedAt: productData.priceUpdatedAt,
-              stockUpdatedAt: productData.stockUpdatedAt,
               sbisId: productData.sbisId,
               sbisPriceListId: productData.sbisPriceListId,
               sbisWarehouseId: productData.sbisWarehouseId
+            }
+            
+            // Для услуг не обновляем stock и inStock
+            if (category !== 'services') {
+              updateData.stock = productData.stock
+              updateData.inStock = productData.inStock
+              updateData.stockUpdatedAt = productData.stockUpdatedAt
+            }
+            
+            existingProducts[index] = {
+              ...existingProducts[index],
+              ...updateData
             }
             updatedProducts.push(existingProducts[index])
           }

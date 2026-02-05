@@ -243,7 +243,8 @@ export default function ProductPage() {
               )}
               
               {/* Stock Status */}
-              {product.inStock !== undefined && (
+              {/* Не показываем наличие для услуг */}
+              {product.category !== 'services' && product.inStock !== undefined && (
                 <div className="flex items-center space-x-4">
                   <div className={`px-4 py-2 rounded-xl font-semibold text-lg ${
                     product.inStock 

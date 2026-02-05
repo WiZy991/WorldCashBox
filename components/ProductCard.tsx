@@ -316,8 +316,8 @@ export default function ProductCard({ product, onSelect, addToCartMode = false }
               {product.id === 'bitrix24' ? 'От ' : ''}{product.price.toLocaleString('ru-RU')} ₽
             </motion.div>
           )}
-          {/* Индикатор наличия товара */}
-          {product.inStock !== undefined && (
+          {/* Индикатор наличия товара (не показываем для услуг) */}
+          {product.category !== 'services' && product.inStock !== undefined && (
             <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
               product.inStock 
                 ? 'bg-green-100 text-green-700 border border-green-300' 
