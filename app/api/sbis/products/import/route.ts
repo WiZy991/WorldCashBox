@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { Product } from '@/data/products'
-import { getSBISPrices } from '@/lib/sbis-prices'
+import { getSBISPrices, getSBISPricesV1 } from '@/lib/sbis-prices'
 import {
   getSBISStock,
   getSBISCompanies,
-  getSBISCompanyWarehouses
+  getSBISCompanyWarehouses,
+  getSBISPoints
 } from '@/lib/sbis-stock'
 import {
   detectCategory,
@@ -25,18 +26,29 @@ const productsJsonPath = join(process.cwd(), 'data', 'products.json')
  * API endpoint для автоматической загрузки всех товаров со склада "Толстого 32А"
  * 
  * Использование:
- * POST /api/sbis/products/import
+ * GET или POST /api/sbis/products/import
  * 
- * Body (опционально):
+ * Body (опционально для POST):
  * {
  *   "priceListId": 15,  // ID прайс-листа (если не указан, используется из env)
  *   "warehouseName": "Филиал в г. Владивосток", // Название склада
  *   "force": false      // Перезаписать существующие товары
  * }
  */
+
+// GET запрос для удобства тестирования через браузер
+export async function GET(request: NextRequest) {
+  return handleImport({})
+}
+
+// POST запрос с возможностью передать параметры
 export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => ({}))
+  return handleImport(body)
+}
+
+async function handleImport(body: { priceListId?: number; warehouseName?: string; force?: boolean }) {
   try {
-    const body = await request.json().catch(() => ({}))
     
     const SBIS_PRICE_LIST_ID = parseInt(process.env.SBIS_PRICE_LIST_ID || body.priceListId || '15')
     const force = body.force || false
@@ -83,133 +95,271 @@ export async function POST(request: NextRequest) {
     
     console.log(`[SBIS Import] Склады для получения остатков: ${targetWarehouses.map(w => `${w.name} (${w.id})`).join(', ')}`)
     
-    // 3. Загружаем все товары из прайс-листа (без pointId, так как это ID точки продаж, а не склада)
-    // Остатки получаем отдельно по ID складов
-    console.log(`[SBIS Import] Загрузка товаров из прайс-листа ${SBIS_PRICE_LIST_ID}...`)
-    
-    // Загружаем товары порциями по 1000 (максимум для API v2)
-    // ВАЖНО: Используем комбинированный подход - сначала пробуем position (иерархический),
-    // если position не работает (возвращает пустой объект), переключаемся на page
-    let allProducts: Array<{ id: string | number; name: string; price: number; code?: string; article?: string; balance?: string | number }> = []
-    let pageCount = 0
-    let lastPosition: number | undefined = undefined
-    const maxPages = 200 // Ограничение на 200 страниц (200,000 товаров максимум)
-    let currentPage = 0 // Для пагинации по page, если position не работает
-    let usePositionPagination = true // Флаг: использовать position или page
-    let duplicatePageCount = 0 // Счетчик дублирующихся страниц
-    let lastPageItemsCount = 0 // Количество товаров на предыдущей странице
-    let lastPagePosition: number | undefined = undefined // lastPosition предыдущей страницы
-    
-    // Продолжаем загрузку пока есть lastPosition или hasMore
-    while (pageCount < maxPages) {
-      // ВАЖНО: pointId - это ID точки продаж, а не склада!
-      // Не передаем pointId, так как ID склада не является точкой продаж
-      // Товары получаем без pointId, остатки получаем отдельно по ID складов
-      let pricesResponse
-      let retryCount = 0
-      const maxRetries = 3
-      
-      // Повторяем запрос при ошибках с экспоненциальной задержкой
-      while (retryCount < maxRetries) {
-        try {
-          pricesResponse = await getSBISPrices(
-            SBIS_PRICE_LIST_ID,
-            0, // pointId не используется (ID склада не является точкой продаж)
-            undefined, // actualDate
-            undefined, // searchString - получаем все товары
-            usePositionPagination ? undefined : currentPage, // page для пагинации (если не используем position)
-            1000, // pageSize - максимум
-            usePositionPagination ? lastPosition : undefined // position для пагинации (приоритет над page)
-          )
-          break // Успешно получили ответ
-        } catch (error: any) {
-          retryCount++
-          if (retryCount >= maxRetries) {
-            console.error(`[SBIS Import] Ошибка после ${maxRetries} попыток:`, error)
-            throw error
-          }
-          // Экспоненциальная задержка: 2s, 4s, 8s
-          const delay = Math.pow(2, retryCount) * 1000
-          console.warn(`[SBIS Import] Ошибка при запросе (попытка ${retryCount}/${maxRetries}), повтор через ${delay}ms:`, error.message || error)
-          await new Promise(resolve => setTimeout(resolve, delay))
-        }
-      }
-      
-      if (!pricesResponse) {
-        throw new Error('Не удалось получить ответ от API после всех попыток')
-      }
-      
-      allProducts = [...allProducts, ...pricesResponse.items]
-      const newLastPosition = pricesResponse.lastPosition // Сохраняем position для следующей страницы
-      
-      pageCount++
-      
-      // Проверяем, не получаем ли мы одни и те же данные (дубликаты)
-      if (!usePositionPagination && pricesResponse.items.length === lastPageItemsCount && newLastPosition === lastPagePosition) {
-        duplicatePageCount++
-        console.warn(`[SBIS Import] ВНИМАНИЕ: Получены одинаковые данные на странице ${pageCount} (товаров: ${pricesResponse.items.length}, lastPosition: ${newLastPosition}). Дубликат #${duplicatePageCount}`)
-        
-        // Если получили одинаковые данные 3 раза подряд, прекращаем загрузку
-        if (duplicatePageCount >= 3) {
-          console.error(`[SBIS Import] Получены одинаковые данные ${duplicatePageCount} раз подряд. API не возвращает новые товары. Прекращаем загрузку.`)
-          console.log(`[SBIS Import] Всего загружено уникальных товаров: ${allProducts.length}`)
-          break
+    // 2.5. Получаем точки продаж (pointId нужен для API v1)
+    console.log(`[SBIS Import] Получение списка точек продаж...`)
+    let pointId: number | undefined = undefined
+    try {
+      const points = await getSBISPoints()
+      if (points.length > 0) {
+        pointId = points[0].id
+        console.log(`[SBIS Import] Найдено точек продаж: ${points.length}`)
+        for (const point of points) {
+          console.log(`[SBIS Import] - ${point.name} (ID: ${point.id}, адрес: ${point.address || 'не указан'})`)
         }
       } else {
-        // Если получили новые данные, сбрасываем счетчик дубликатов
-        duplicatePageCount = 0
+        console.log(`[SBIS Import] Точки продаж не найдены, продолжаем без pointId`)
       }
-      
-      lastPageItemsCount = pricesResponse.items.length
-      lastPagePosition = newLastPosition
-      
-      console.log(`[SBIS Import] Страница ${pageCount}: загружено ${pricesResponse.items.length} товаров (всего: ${allProducts.length}), hasMore: ${pricesResponse.hasMore}, lastPosition: ${newLastPosition}, page: ${currentPage}, usePosition: ${usePositionPagination}`)
-      
-      // ВАЖНО: Если получили 0 товаров и пустой объект {}, это может означать:
-      // 1. Конец иерархии при использовании position (но могут быть товары в других папках через page)
-      // 2. Конец данных при использовании page
-      // Если используем position и получили 0 товаров без newLastPosition, переключаемся на page
-      if (pricesResponse.items.length === 0 && !newLastPosition && usePositionPagination) {
-        console.log(`[SBIS Import] Получено 0 товаров при использовании position, переключаемся на page для получения товаров из всех папок...`)
-        usePositionPagination = false
-        lastPosition = undefined
-        currentPage = 0 // Начинаем с первой страницы при использовании page
-        continue // Повторяем запрос с page вместо position
-      }
-      
-      // ВАЖНО: Продолжаем загрузку если есть newLastPosition (при использовании position)
-      // API v2 может возвращать hasMore: false, но при этом есть еще товары через position
-      // Это особенно важно для иерархических структур с папками - нужно пройти по всем папкам
-      if (usePositionPagination) {
-        // При использовании position продолжаем, пока есть newLastPosition
-        if (!newLastPosition && !pricesResponse.hasMore) {
-          console.log(`[SBIS Import] Нет больше товаров при использовании position (hasMore: ${pricesResponse.hasMore}, newLastPosition: ${newLastPosition})`)
-          console.log(`[SBIS Import] ВАЖНО: API не возвращает товары из вложенных папок через position.`)
-          console.log(`[SBIS Import] Всего загружено товаров: ${allProducts.length}`)
-          break
-        }
-        lastPosition = newLastPosition // Обновляем position для следующей итерации
-        if (newLastPosition) {
-          console.log(`[SBIS Import] Продолжаем загрузку с position: ${newLastPosition} (всего загружено товаров: ${allProducts.length})`)
-        }
-      } else {
-        // При использовании page продолжаем, пока получаем товары
-        // ВАЖНО: Игнорируем hasMore, так как API может неправильно его возвращать
-        if (pricesResponse.items.length === 0) {
-          console.log(`[SBIS Import] Получено 0 товаров на странице ${currentPage}, прекращаем загрузку`)
-          break
-        }
-        // Если получили товары, продолжаем на следующей странице
-        currentPage++
-        console.log(`[SBIS Import] Продолжаем загрузку через page: ${currentPage} (всего загружено товаров: ${allProducts.length})`)
-      }
-      
-      // Задержка между запросами, чтобы не перегружать API
-      // Увеличена до 2 секунд для избежания ошибок таймаута
-      await new Promise(resolve => setTimeout(resolve, 2000))
+    } catch (error) {
+      console.warn(`[SBIS Import] Не удалось получить точки продаж:`, error)
     }
     
-    console.log(`[SBIS Import] Всего загружено товаров: ${allProducts.length}`)
+    // 3. Загружаем ВСЕ товары
+    // Пробуем разные методы:
+    // - API v1 с pointId (если есть точка продаж) - должен работать для иерархии
+    // - API v2 каталог
+    // - API v2 прайс-лист
+    console.log(`[SBIS Import] Загрузка товаров (pointId=${pointId || 'нет'})...`)
+    
+    let allProducts: Array<{ id: string | number; name: string; price: number; code?: string; article?: string; balance?: string | number }> = []
+    let totalApiCalls = 0
+    
+    // Общие переменные для пагинации (определяем ДО всех методов)
+    const maxPages = 500 // Для 10773 товаров нужно ~11 страниц по 1000
+    
+    // Метод 0: API v1 с pointId (если есть точка продаж)
+    // Этот API должен возвращать ВСЕ товары из прайс-листа, включая вложенные в папки
+    if (pointId) {
+      console.log(`[SBIS Import] Метод 0: Загрузка через API v1 с pointId=${pointId}, priceListId=${SBIS_PRICE_LIST_ID}...`)
+      let page = 0
+      let hasMore = true
+      
+      while (hasMore && page < maxPages) {
+        try {
+          totalApiCalls++
+          const response = await getSBISPricesV1(
+            pointId,
+            SBIS_PRICE_LIST_ID,
+            page,
+            1000
+          )
+          
+          allProducts = [...allProducts, ...response.items]
+          
+          console.log(`[SBIS Import] API v1 стр.${page + 1}: товаров=${response.items.length}, всего=${allProducts.length}, hasMore=${response.hasMore}`)
+          
+          hasMore = response.hasMore || response.items.length === 1000
+          if (hasMore && response.items.length > 0) {
+            page++
+            await new Promise(resolve => setTimeout(resolve, 300))
+          } else {
+            hasMore = false
+          }
+        } catch (error) {
+          console.warn(`[SBIS Import] Ошибка API v1 на странице ${page}:`, error)
+          break
+        }
+      }
+      
+      console.log(`[SBIS Import] API v1 завершён: ${allProducts.length} товаров`)
+    }
+    
+    // Если API v1 дал мало результатов, пробуем API v2
+    if (allProducts.length < 100) {
+      console.log(`[SBIS Import] API v1 дал мало результатов (${allProducts.length}), пробуем API v2...`)
+      allProducts = []
+    }
+    
+    // Метод 1: Рекурсивный обход папок через position
+    if (allProducts.length < 100) {
+      console.log(`[SBIS Import] Метод 1: Рекурсивный обход папок через position...`)
+      
+      const processedFolders = new Set<number>()
+      const folderQueue: Array<{ hierarchicalId: number; name: string; depth: number }> = []
+      
+      // Функция для рекурсивной загрузки из папки
+      async function loadFromFolder(folderId: number | undefined, folderName: string, depth: number = 0): Promise<void> {
+        if (folderId !== undefined && processedFolders.has(folderId)) {
+          return // Уже обработали эту папку
+        }
+        if (folderId !== undefined) {
+          processedFolders.add(folderId)
+        }
+        
+        const indent = '  '.repeat(Math.min(depth, 3))
+        console.log(`${indent}[SBIS Import] Загрузка из "${folderName}" (id=${folderId || 'root'}, глубина=${depth})...`)
+        
+        let lastPosition: number | undefined = folderId // Начинаем с ID папки
+        let hasMore = true
+        let pageCount = 0
+        const maxPagesPerFolder = 50
+        
+        while (hasMore && pageCount < maxPagesPerFolder) {
+          let response
+          let retryCount = 0
+          const maxRetries = 3
+          
+          while (retryCount < maxRetries) {
+            try {
+              totalApiCalls++
+              response = await getSBISPrices(
+                SBIS_PRICE_LIST_ID, // Используем прайс-лист
+                0,
+                undefined,
+                undefined,
+                undefined,
+                1000,
+                lastPosition
+              )
+              break
+            } catch (error: any) {
+              retryCount++
+              if (retryCount >= maxRetries) {
+                console.error(`${indent}[SBIS Import] Ошибка после ${maxRetries} попыток:`, error)
+                return
+              }
+              await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
+            }
+          }
+          
+          if (!response) break
+          
+          // Фильтруем товары (не папки)
+          const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+          allProducts = [...allProducts, ...productsOnPage]
+          
+          // Добавляем найденные папки в очередь для обработки
+          if (response.folders && response.folders.length > 0) {
+            for (const folder of response.folders) {
+              if (!processedFolders.has(folder.hierarchicalId)) {
+                folderQueue.push({
+                  hierarchicalId: folder.hierarchicalId,
+                  name: folder.name,
+                  depth: depth + 1
+                })
+              }
+            }
+          }
+          
+          console.log(`${indent}[SBIS Import] Стр.${pageCount + 1}: товаров=${productsOnPage.length}, папок=${response.folders?.length || 0}, всего=${allProducts.length}`)
+          
+          // Обновляем position
+          if (response.lastPosition && response.lastPosition !== lastPosition) {
+            lastPosition = response.lastPosition
+            hasMore = true
+            pageCount++
+            await new Promise(resolve => setTimeout(resolve, 200))
+          } else {
+            hasMore = false
+          }
+        }
+      }
+      
+      // Начинаем с корня
+      await loadFromFolder(undefined, 'Корень', 0)
+      
+      // Обрабатываем очередь папок
+      while (folderQueue.length > 0 && allProducts.length < 50000) {
+        const folder = folderQueue.shift()!
+        await loadFromFolder(folder.hierarchicalId, folder.name, folder.depth)
+        await new Promise(resolve => setTimeout(resolve, 100)) // Небольшая задержка между папками
+      }
+      
+      console.log(`[SBIS Import] Рекурсивный обход завершён: ${allProducts.length} товаров, обработано папок: ${processedFolders.size}`)
+    }
+    
+    // Метод 2: Если position-пагинация дала мало результатов, пробуем page
+    if (allProducts.length < 100) {
+      console.log(`[SBIS Import] Метод 2: Загрузка из каталога через page-пагинацию...`)
+      allProducts = []
+      let page = 0
+      let hasMore = true
+      
+      while (hasMore && page < maxPages) {
+        let response
+        let retryCount = 0
+        const maxRetries = 3
+        
+        while (retryCount < maxRetries) {
+          try {
+            totalApiCalls++
+            response = await getSBISPrices(
+              0, // каталог
+              0,
+              undefined,
+              undefined,
+              page,
+              1000
+            )
+            break
+          } catch (error: any) {
+            retryCount++
+            if (retryCount >= maxRetries) throw error
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000))
+          }
+        }
+        
+        if (!response) break
+        
+        const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+        allProducts = [...allProducts, ...productsOnPage]
+        
+        console.log(`[SBIS Import] Page ${page}: товаров=${productsOnPage.length}, всего=${allProducts.length}`)
+        
+        hasMore = response.hasMore || response.items.length === 1000
+        if (hasMore && response.items.length > 0) {
+          page++
+          await new Promise(resolve => setTimeout(resolve, 300))
+        } else {
+          hasMore = false
+        }
+      }
+    }
+    
+    // Метод 3: Если каталог пустой, пробуем прайс-лист
+    if (allProducts.length < 100) {
+      console.log(`[SBIS Import] Метод 3: Загрузка из прайс-листа ${SBIS_PRICE_LIST_ID}...`)
+      allProducts = []
+      let lastPosition: number | undefined = undefined
+      let hasMore = true
+      let pageCount = 0
+      
+      while (hasMore && pageCount < maxPages) {
+        let response
+        try {
+          totalApiCalls++
+          response = await getSBISPrices(
+            SBIS_PRICE_LIST_ID,
+            0,
+            undefined,
+            undefined,
+            undefined,
+            1000,
+            lastPosition
+          )
+        } catch (error) {
+          console.error(`[SBIS Import] Ошибка:`, error)
+          break
+        }
+        
+        const productsOnPage = response.items.filter(item => !('isParent' in item && (item as any).isParent))
+        allProducts = [...allProducts, ...productsOnPage]
+        
+        console.log(`[SBIS Import] Прайс стр.${pageCount + 1}: товаров=${productsOnPage.length}, всего=${allProducts.length}`)
+        
+        if (response.lastPosition && response.lastPosition !== lastPosition) {
+          lastPosition = response.lastPosition
+          hasMore = true
+          pageCount++
+          await new Promise(resolve => setTimeout(resolve, 300))
+        } else {
+          hasMore = false
+        }
+      }
+    }
+    
+    console.log(`[SBIS Import] Загрузка завершена:`)
+    console.log(`[SBIS Import] - Всего товаров: ${allProducts.length}`)
+    console.log(`[SBIS Import] - API вызовов: ${totalApiCalls}`)
     
     // 4. Получаем остатки товаров со всех складов "Толстого 32А"
     console.log(`[SBIS Import] Получение остатков товаров со складов: ${targetWarehouses.map(w => w.name).join(', ')}...`)

@@ -136,30 +136,33 @@ export async function getSBISPriceLists(
  * @param pageSize - Количество записей на странице (опционально, по умолчанию 1000, максимум 1000)
  */
 export async function getSBISPrices(
-  priceListId: number,
+  priceListId: number, // 0 = получить товары из каталога (без прайс-листа)
   pointId: number,
   actualDate?: string, // Не используется в этом методе, но оставляем для совместимости
   searchString?: string,
   page?: number,
   pageSize?: number,
-  position?: number // Иерархический идентификатор для пагинации
+  position?: number, // Иерархический идентификатор для пагинации
+  hierarchicalParent?: number, // Идентификатор родительской папки для получения содержимого папки
+  order?: 'before' | 'after' // Направление выборки: before - до position, after - после position
 ): Promise<{ items: SBISPriceItem[]; folders?: Array<{ id: number; name: string; hierarchicalId: number; hierarchicalParent?: number }>; hasMore: boolean; lastPosition?: number; currentPage?: number }> {
   const accessToken = getSBISAccessToken()
 
   // Формируем параметры запроса согласно документации пункта 8
-  // ВАЖНО: pointId может быть необязательным для API v2
-  // Если pointId вызывает ошибку "Точка продаж не найдена", пробуем без него
   const params = new URLSearchParams({
-    priceListId: priceListId.toString(),
     withBalance: 'true', // Получаем остатки вместе с ценами
-    // Не используем onlyPublished, чтобы получить ВСЕ товары, включая неопубликованные
-    // onlyPublished: false - не указываем, чтобы получить все товары
   })
+  
+  // ВАЖНО: Согласно документации (пункт 8):
+  // - Если priceListId указан: возвращает товары из прайс-листа
+  // - Если priceListId НЕ указан: возвращает товары из КАТАЛОГА (все товары)
+  // Для получения всех 10773 товаров нужно запрашивать БЕЗ priceListId
+  if (priceListId && priceListId > 0) {
+    params.append('priceListId', priceListId.toString())
+  }
   
   // ВАЖНО: pointId - это идентификатор точки продаж, а не склада!
   // Если передать ID склада как pointId, API вернет ошибку "Точка продаж не найдена"
-  // Поэтому не передаем pointId, если он не является валидной точкой продаж
-  // Для получения остатков используем ID складов в отдельном запросе
   // if (pointId && pointId > 0) {
   //   params.append('pointId', pointId.toString())
   // }
@@ -173,22 +176,27 @@ export async function getSBISPrices(
     params.append('pageSize', '1000') // По умолчанию 1000 записей (максимум)
   }
   
-  // Пагинация: пробуем использовать page (как в примере документации), если не указан position
-  // В примере документации используется page: '0', pageSize: '10'
-  // Если указан position, используем его (для иерархической пагинации)
+  // hierarchicalParent НЕ поддерживается API - API игнорирует этот параметр
+  // Вместо этого используем position для обхода иерархии
+  // if (hierarchicalParent !== undefined && hierarchicalParent !== null) {
+  //   params.append('hierarchicalParent', hierarchicalParent.toString())
+  // }
+  
+  // Пагинация: используем position для обхода всей иерархии
+  // position - иерархический идентификатор последней записи
+  // order='after' - получить записи после указанной позиции (по умолчанию)
+  // order='before' - получить записи до указанной позиции
   if (position !== undefined && position !== null) {
-    // Используем position для иерархической пагинации
     params.append('position', position.toString())
-    params.append('order', 'after') // Записи после указанного position (включая товары из папок)
+    params.append('order', order || 'after')
   } else if (page !== undefined) {
-    // Используем page для обычной пагинации (как в примере документации)
     params.append('page', page.toString())
   }
 
   const url = `https://api.sbis.ru/retail/v2/nomenclature/list?${params.toString()}`
   
-  console.log(`[SBIS] Запрос списка товаров из прайс-листа (API v2): ${url}`)
-  console.log(`[SBIS] Параметры: priceListId=${priceListId}, pointId=${pointId}`)
+  console.log(`[SBIS] Запрос списка товаров (API v2): ${url}`)
+  console.log(`[SBIS] Параметры: priceListId=${priceListId || 'каталог'}, page=${page}, position=${position}`)
 
   try {
     const response = await fetch(url, {
@@ -522,5 +530,138 @@ export async function getSBISProductPrice(
   } catch (error) {
     console.error(`Ошибка получения цены товара ${sbisId} из СБИС:`, error)
     return null
+  }
+}
+
+/**
+ * Получение списка товаров через API v1 (старый API)
+ * 
+ * Документация: https://api.sbis.ru/retail/nomenclature/list
+ * Пункт 7: "Получить список товаров по API"
+ * 
+ * ВАЖНО: Этот API требует pointId (точку продаж) и priceListId
+ * 
+ * @param pointId - ID точки продаж (ОБЯЗАТЕЛЬНО!)
+ * @param priceListId - ID прайс-листа (ОБЯЗАТЕЛЬНО!)
+ * @param page - Номер страницы
+ * @param pageSize - Количество записей на странице
+ */
+export async function getSBISPricesV1(
+  pointId: number,
+  priceListId: number,
+  page?: number,
+  pageSize?: number,
+  searchString?: string
+): Promise<{ items: SBISPriceItem[]; hasMore: boolean }> {
+  const accessToken = getSBISAccessToken()
+
+  if (!pointId) {
+    throw new Error('pointId обязателен для API v1')
+  }
+  if (!priceListId) {
+    throw new Error('priceListId обязателен для API v1')
+  }
+
+  const params = new URLSearchParams({
+    pointId: pointId.toString(),
+    priceListId: priceListId.toString(),
+    withBalance: 'true',
+  })
+
+  if (page !== undefined) {
+    params.append('page', page.toString())
+  }
+  if (pageSize !== undefined) {
+    params.append('pageSize', Math.min(pageSize, 1000).toString())
+  } else {
+    params.append('pageSize', '1000')
+  }
+  if (searchString) {
+    params.append('searchString', searchString)
+  }
+
+  const url = `https://api.sbis.ru/retail/nomenclature/list?${params.toString()}`
+  
+  console.log(`[SBIS] Запрос списка товаров (API v1): ${url}`)
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-SBISAccessToken': accessToken,
+        'Content-Type': 'application/json',
+      },
+    })
+    
+    console.log(`[SBIS v1] Ответ API: статус ${response.status}`)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[SBIS v1] Ошибка API (${response.status}):`, errorText)
+      throw new Error(`СБИС API v1 вернул ошибку (${response.status}): ${errorText}`)
+    }
+
+    const data = await response.json()
+    
+    console.log(`[SBIS v1] Структура ответа:`, {
+      hasNomenclatures: !!data.nomenclatures,
+      nomenclaturesType: typeof data.nomenclatures,
+      nomenclaturesIsArray: Array.isArray(data.nomenclatures),
+      nomenclaturesLength: Array.isArray(data.nomenclatures) ? data.nomenclatures.length : (typeof data.nomenclatures === 'object' && data.nomenclatures ? Object.keys(data.nomenclatures).length : 'N/A'),
+      hasOutcome: !!data.outcome,
+      dataKeys: Object.keys(data)
+    })
+    
+    // Логируем полный ответ для отладки (первые 500 символов)
+    const dataStr = JSON.stringify(data)
+    console.log(`[SBIS v1] Полный ответ (первые 500 символов):`, dataStr.substring(0, 500))
+    
+    let nomenclatures: any[] = []
+    if (Array.isArray(data.nomenclatures)) {
+      nomenclatures = data.nomenclatures
+    } else if (data.nomenclatures && typeof data.nomenclatures === 'object') {
+      // Если это объект, преобразуем в массив
+      const objKeys = Object.keys(data.nomenclatures)
+      if (objKeys.length === 0) {
+        console.log('[SBIS v1] nomenclatures - пустой объект {}')
+        nomenclatures = []
+      } else {
+        console.log(`[SBIS v1] nomenclatures - объект с ${objKeys.length} ключами, преобразуем в массив`)
+        nomenclatures = Object.values(data.nomenclatures)
+      }
+    } else {
+      console.warn('[SBIS v1] nomenclatures не является массивом или объектом:', typeof data.nomenclatures)
+    }
+    
+    // Преобразуем в формат SBISPriceItem
+    const items: SBISPriceItem[] = nomenclatures
+      .filter((item: any) => item.isParent !== true)
+      .map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: typeof item.cost === 'number' ? item.cost : parseFloat(item.cost) || 0,
+        code: item.nomNumber ? String(item.nomNumber).trim() : undefined,
+        article: item.article ? String(item.article).trim() : undefined,
+        balance: item.balance !== null && item.balance !== undefined ? Number(item.balance) : undefined,
+        hierarchicalId: item.hierarchicalId,
+        hierarchicalParent: item.hierarchicalParent,
+      }))
+    
+    let hasMore = false
+    if (typeof data.outcome === 'boolean') {
+      hasMore = data.outcome
+    } else if (data.outcome && typeof data.outcome === 'object') {
+      hasMore = data.outcome.hasMore || false
+    }
+    
+    console.log(`[SBIS v1] Получено товаров: ${items.length}, hasMore: ${hasMore}`)
+    
+    return {
+      items: items,
+      hasMore: hasMore,
+    }
+  } catch (error) {
+    console.error('Ошибка получения списка товаров через API v1:', error)
+    throw error
   }
 }

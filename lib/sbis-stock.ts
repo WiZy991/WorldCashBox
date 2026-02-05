@@ -163,6 +163,75 @@ export async function getSBISCompanyWarehouses(companyId: number): Promise<Array
 }
 
 /**
+ * Получение списка точек продаж через СБИС API
+ * 
+ * Документация: https://api.sbis.ru/retail/point/list
+ * 
+ * pointId нужен для получения товаров из прайс-листа через API v1
+ */
+export async function getSBISPoints(): Promise<Array<{ id: number; name: string; address?: string }>> {
+  const accessToken = getSBISAccessToken()
+  const url = `https://api.sbis.ru/retail/point/list`
+
+  console.log(`[SBIS] Запрос списка точек продаж: ${url}`)
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'X-SBISAccessToken': accessToken,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[SBIS] Ошибка API точек продаж (${response.status}):`, errorText)
+      throw new Error(`СБИС API вернул ошибку (${response.status}): ${errorText}`)
+    }
+
+    const data = await response.json()
+    console.log(`[SBIS] Ответ API (список точек продаж):`, JSON.stringify(data, null, 2))
+    
+    let points: Array<{ id: number; name: string; address?: string }> = []
+    
+    if (Array.isArray(data)) {
+      points = data.map((item: any) => ({
+        id: item.id || item.pointId || item.point_id,
+        name: item.name || item.pointName || '',
+        address: item.address || '',
+      }))
+    } else if (data.points && Array.isArray(data.points)) {
+      points = data.points.map((item: any) => ({
+        id: item.id || item.pointId || item.point_id,
+        name: item.name || item.pointName || '',
+        address: item.address || '',
+      }))
+    } else if (data.salesPoints && Array.isArray(data.salesPoints)) {
+      points = data.salesPoints.map((item: any) => ({
+        id: item.id || item.pointId || item.point_id,
+        name: item.name || item.pointName || '',
+        address: item.address || '',
+      }))
+    } else {
+      console.warn('[SBIS] Неожиданная структура ответа для списка точек продаж:', Object.keys(data))
+    }
+    
+    points = points.filter(p => p.id !== undefined && p.id !== null && !isNaN(Number(p.id)))
+    
+    console.log(`[SBIS] Найдено точек продаж: ${points.length}`)
+    if (points.length > 0) {
+      console.log(`[SBIS] Первая точка продаж:`, points[0])
+    }
+    
+    return points
+  } catch (error) {
+    console.error('Ошибка получения списка точек продаж из СБИС:', error)
+    throw error
+  }
+}
+
+/**
  * Получение остатков товаров на складе через СБИС API
  * 
  * Документация: https://api.sbis.ru/retail/nomenclature/balances?
