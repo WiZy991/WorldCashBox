@@ -180,8 +180,8 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
       const processedFolders = new Set<number>()
       const folderQueue: Array<{ hierarchicalId: number; name: string; depth: number }> = []
       
-      // Функция для рекурсивной загрузки из папки
-      async function loadFromFolder(folderId: number | undefined, folderName: string, depth: number = 0): Promise<void> {
+      // Функция для рекурсивной загрузки из папки (используем стрелочную функцию для совместимости с ES5)
+      const loadFromFolder = async (folderId: number | undefined, folderName: string, depth: number = 0): Promise<void> => {
         if (folderId !== undefined && processedFolders.has(folderId)) {
           return // Уже обработали эту папку
         }
