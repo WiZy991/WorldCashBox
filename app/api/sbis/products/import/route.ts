@@ -121,28 +121,45 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
     }
     
     // 3. СНАЧАЛА получаем остатки со складов, чтобы знать, какие товары есть на складах
+    console.log(`[SBIS Import] ====== НАЧАЛО ФИЛЬТРАЦИИ ПО СКЛАДУ ======`)
     console.log(`[SBIS Import] Получение остатков товаров со складов для фильтрации: ${targetWarehouses.map(w => w.name).join(', ')}...`)
-    console.log(`[SBIS Import] ID складов: ${warehouseIds.join(', ')}`)
+    console.log(`[SBIS Import] ID складов (числовые): ${warehouseIds.join(', ')}`)
+    console.log(`[SBIS Import] Тип ID складов: ${warehouseIds.map(id => typeof id).join(', ')}`)
+    console.log(`[SBIS Import] Прайс-лист ID: ${SBIS_PRICE_LIST_ID}`)
+    console.log(`[SBIS Import] Компания ID: ${companyId}`)
     
     let productsOnWarehouses: Set<number> = new Set() // ID товаров, которые есть на складах
     try {
+      console.log(`[SBIS Import] Вызов getSBISStock с параметрами: priceListIds=[${SBIS_PRICE_LIST_ID}], warehouses=[${warehouseIds.join(', ')}], companies=[${companyId}]`)
       const stockResponse = await getSBISStock(
         [SBIS_PRICE_LIST_ID], // priceListIds
         undefined, // nomenclatures
-        warehouseIds, // warehouses - все склады
+        warehouseIds, // warehouses - все склады (числовые ID)
         [companyId] // companies
       )
+      
+      console.log(`[SBIS Import] getSBISStock вернул ${stockResponse.items.length} товаров с остатками`)
       
       // Собираем ID всех товаров, которые есть на складах (даже с остатком 0)
       for (const item of stockResponse.items) {
         const productId = Number(item.id)
-        productsOnWarehouses.add(productId)
+        if (!isNaN(productId)) {
+          productsOnWarehouses.add(productId)
+        } else {
+          console.warn(`[SBIS Import] Пропущен товар с невалидным ID: ${item.id}`)
+        }
       }
       
+      console.log(`[SBIS Import] ====== ФИЛЬТРАЦИЯ ПО СКЛАДУ ======`)
       console.log(`[SBIS Import] Найдено товаров на складах: ${productsOnWarehouses.size}`)
       console.log(`[SBIS Import] Будем загружать только эти товары из прайс-листа`)
+      if (productsOnWarehouses.size > 0) {
+        const sampleIds = Array.from(productsOnWarehouses).slice(0, 5)
+        console.log(`[SBIS Import] Примеры ID товаров на складах: ${sampleIds.join(', ')}`)
+      }
     } catch (error) {
-      console.warn(`[SBIS Import] Ошибка получения остатков для фильтрации:`, error)
+      console.error(`[SBIS Import] ====== ОШИБКА ПОЛУЧЕНИЯ ОСТАТКОВ ДЛЯ ФИЛЬТРАЦИИ ======`)
+      console.error(`[SBIS Import] Ошибка:`, error)
       console.warn(`[SBIS Import] Продолжаем загрузку всех товаров из прайс-листа (без фильтрации по складу)`)
     }
     
@@ -182,10 +199,19 @@ async function handleImport(body: { priceListId?: number; warehouseName?: string
           // Фильтруем товары по складу (если есть фильтр)
           let filteredItems = response.items
           if (productsOnWarehouses.size > 0) {
+            const beforeFilter = filteredItems.length
             filteredItems = response.items.filter(item => {
               const productId = Number(item.id)
-              return productsOnWarehouses.has(productId)
+              const hasProduct = productsOnWarehouses.has(productId)
+              if (!hasProduct && page === 0) {
+                // Логируем первые несколько пропущенных товаров для отладки
+                console.log(`[SBIS Import] API v1: товар ${productId} (${item.name?.substring(0, 30)}) не найден на складах`)
+              }
+              return hasProduct
             })
+            if (beforeFilter > filteredItems.length && page === 0) {
+              console.log(`[SBIS Import] API v1 стр.${page + 1}: отфильтровано по складу: ${beforeFilter - filteredItems.length} из ${beforeFilter} товаров`)
+            }
           }
           
           allProducts = [...allProducts, ...filteredItems]
