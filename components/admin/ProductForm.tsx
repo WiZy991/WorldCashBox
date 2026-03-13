@@ -27,6 +27,9 @@ const subcategoriesByCategory: Record<string, { value: string; label: string }[]
     { value: 'rfid', label: 'RFID-считыватели' },
     { value: 'rf_modules', label: 'POS-коммутаторы' },
     { value: 'pos_keyboards', label: 'POS-клавиатуры' },
+    { value: 'banknote_counters', label: 'Счетчики банкнот' },
+    { value: 'banknote_detectors', label: 'Детекторы банкнот' },
+    { value: 'fiscal_storage', label: 'Фискальные накопители' },
   ],
   consumables: [
     { value: 'printers', label: 'Расходные материалы для принтеров' },

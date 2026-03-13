@@ -59,6 +59,9 @@ const subcategoryKeywords: Record<string, Record<string, string[]>> = {
     'acquiring': ['эквайринг', 'acquiring', 'платежный', 'payment', 'пин-пад', 'pinpad'],
     'tsd': ['тсд', 'tsd', 'терминал сбора данных', 'data collection', 'терминал сбора'],
     'banknote': ['детектор', 'счетчик', 'банкнот', 'banknote', 'detector', 'counter', 'валютный'],
+    'banknote_counters': ['счетчик банкнот', 'banknote counter', 'счетчик денег', 'money counter', 'счетчик купюр'],
+    'banknote_detectors': ['детектор банкнот', 'banknote detector', 'детектор денег', 'money detector', 'детектор купюр', 'валютный детектор'],
+    'fiscal_storage': ['фискальный накопитель', 'фн', 'fiscal storage', 'fn-', 'фн-', 'фн ', 'накопитель фискальных данных'],
     'staff_call': ['вызов', 'персонал', 'staff', 'call', 'система вызова', 'вызов персонала']
   },
   consumables: {
@@ -299,9 +302,28 @@ export function detectSubcategory(productName: string, category: Product['catego
       return 'tsd'
     }
     
-    // Детекторы и счетчики банкнот
-    if (nameLower.includes('детектор') || nameLower.includes('счетчик') || 
-        nameLower.includes('банкнот') || nameLower.includes('banknote') ||
+    // Фискальные накопители (проверяем до детекторов/счетчиков)
+    if (nameLower.includes('фискальный накопитель') || nameLower.includes('фн-') || 
+        nameLower.includes('фн ') || nameLower.includes('fiscal storage') ||
+        (nameLower.includes('накопитель') && nameLower.includes('фискальн'))) {
+      return 'fiscal_storage'
+    }
+    
+    // Счетчики банкнот
+    if ((nameLower.includes('счетчик') && (nameLower.includes('банкнот') || nameLower.includes('купюр') || nameLower.includes('денег'))) ||
+        nameLower.includes('banknote counter') || nameLower.includes('money counter')) {
+      return 'banknote_counters'
+    }
+    
+    // Детекторы банкнот
+    if ((nameLower.includes('детектор') && (nameLower.includes('банкнот') || nameLower.includes('купюр') || nameLower.includes('денег') || nameLower.includes('валютн'))) ||
+        nameLower.includes('banknote detector') || nameLower.includes('money detector') ||
+        nameLower.includes('валютный детектор')) {
+      return 'banknote_detectors'
+    }
+    
+    // Общая категория банкнот (для обратной совместимости)
+    if (nameLower.includes('банкнот') || nameLower.includes('banknote') ||
         nameLower.includes('инкассатор') || nameLower.includes('инкассация')) {
       return 'banknote'
     }

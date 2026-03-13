@@ -2,7 +2,7 @@ export interface Product {
   id: string
   name: string
   category: 'equipment' | 'consumables' | 'software' | 'video' | 'services'
-  subcategory?: string // Подкатегория товара (например: 'drawers', 'printers', 'scanners', 'smart', 'pos', 'weights', 'tsd', 'terminals', 'cameras', 'ups', 'rfid', 'rf_modules', 'pos_keyboards', 'software_ofd', 'software_box')
+  subcategory?: string // Подкатегория товара (например: 'drawers', 'printers', 'scanners', 'smart', 'pos', 'weights', 'tsd', 'terminals', 'cameras', 'ups', 'rfid', 'rf_modules', 'pos_keyboards', 'software_ofd', 'software_box', 'banknote_counters', 'banknote_detectors', 'fiscal_storage')
   price?: number
   image?: string
   images?: string[] // Массив изображений для разных ракурсов (3D эффект)
@@ -43,6 +43,9 @@ export const subcategories: Record<string, string[]> = {
     'tsd',
     'banknote',
     'staff_call',
+    'banknote_counters',
+    'banknote_detectors',
+    'fiscal_storage',
   ],
   consumables: [
     'consumables_for_printers',

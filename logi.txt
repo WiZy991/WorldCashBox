@@ -1,312 +1,337 @@
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "externalId": "94377a27-44b5-43d7-9142-56023dbb297f",
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "hierarchicalId": 13444,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "hierarchicalParent": 13227,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "id": 13444,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "images": null,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "indexNumber": 13133003,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "isKit": false,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "isParent": null,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "modifiers": [],
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "name": "DS-H304QA(C)",
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "nomNumber": "300227075",
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "published": null,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "short_code": null,
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:   "unit": "шт"
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00: [SBIS] lastPosition из последнего элемента: 15413 (всего элементов: 435, последний - товар, имя: Интеграция ОФД в 1С)
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00: [SBIS] Получено товаров: 410, hasMore: false, lastPosition: 15413, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:     [SBIS Import] Пропущено дубликатов: 410
-0|worldcashbox  | 2026-02-05 05:56:26 +00:00:     [SBIS Import] Стр.2: товаров=410, папок=25, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15413&order=after
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15413
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   nomenclaturesType: 'object',
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   nomenclaturesLength: 'N/A',
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:   outcome: { hasMore: false }
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] nomenclatures - пустой объект {}, больше нет данных
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] nomenclatures пустой, больше нет данных для загрузки
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Получено товаров: 0, hasMore: false, lastPosition: undefined, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] 1. Правильность priceListId и pointId
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] 2. Существует ли прайс-лист и содержит ли он товары
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] 3. Структура ответа: [ 'nomenclatures', 'outcome' ]
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:     [SBIS Import] Стр.3: товаров=0, папок=0, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS Import] Обработано папок: 50, товаров: 3058, в очереди: 6031
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00:     [SBIS Import] Загрузка из "Эвотор Power" (id=12133, глубина=2)...
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=12133&order=after
-0|worldcashbox  | 2026-02-05 05:56:27 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=12133
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   nomenclaturesType: 'array',
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   nomenclaturesLength: 1001,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   outcome: { hasMore: true }
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Пример структуры товара (API v2): {
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "article": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "attributes": {
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "calories": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "caloriesPerUnit": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "carbohydrate": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "fat": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "outQuantity": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "protein": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "spirit": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "storageConditions": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "volume": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     "weight": null
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   },
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "balance": 2,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "cost": 18200,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "description": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "description_simple": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "externalId": "fdf268f4-84c8-4144-a4ad-da4d0fd75058",
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "hierarchicalId": 9303,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "hierarchicalParent": 12133,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "id": 9303,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "images": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "indexNumber": 8985003,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "isKit": false,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "isParent": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "modifiers": [],
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "name": "Модуль планшета EV.M035.49.00-01.Rev.4",
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "nomNumber": "X241717",
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "published": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "short_code": null,
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:   "unit": "шт"
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] outcome: { hasMore: true } hasMore: true
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] lastPosition из последнего элемента: 13471 (всего элементов: 1001, последний - товар, имя: DS-N332/2(C))
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Получено товаров: 921, hasMore: true, lastPosition: 13471, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     [SBIS Import] Пропущено дубликатов: 921
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00:     [SBIS Import] Стр.1: товаров=921, папок=80, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=13471&order=after
-0|worldcashbox  | 2026-02-05 05:56:29 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=13471
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   nomenclaturesType: 'array',
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   nomenclaturesLength: 407,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   outcome: { hasMore: false }
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Пример структуры товара (API v2): {
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "article": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "attributes": {
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "calories": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "caloriesPerUnit": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "carbohydrate": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "fat": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "outQuantity": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "protein": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "spirit": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "storageConditions": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "volume": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     "weight": null
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   },
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "balance": 0,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "cost": 15042,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "description": "<p>4-х канальный WiFi 2.4ГГц IP-регистратор Видеовход: 4 IP@4Мп; видеовыход: 1 VGA и 1 HDMI до 4К; аудиовыход; 1 канал RCA; Видеосжатие H.265+/H.265/H.264+/H.264; Входящий поток 50 Мбит/с; Исходящий поток 40 Мбит/с. Разрешение записи: до 4Мп. Синхр.воспр. 4 канала@4Мп (12,5 fps), 4 канала@1080P (25 fps); 1 SATA для HDD до 6Тб, 2х2 MIMO антенны,1 10M/100M Ethernet интерфейс; 2 х USB 2.0; -10°C до +55°C; 12В DC; 10Вт макс (без HDD).</p>",
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "description_simple": "4-х канальный WiFi 2.4ГГц IP-регистратор Видеовход: 4 IP@4Мп; видеовыход: 1 VGA и 1 HDMI до 4К; аудиовыход; 1 канал RCA; Видеосжатие H.265+/H.265/H.264+/H.264; Входящий поток 50 Мбит/с; Исходящий поток 40 Мбит/с. Разрешение записи: до 4Мп. Синхр.воспр. 4 канала@4Мп (12,5 fps), 4 канала@1080P (25 fps); 1 SATA для HDD до 6Тб, 2х2 MIMO антенны,1 10M/100M Ethernet интерфейс; 2 х USB 2.0; -10°C до +55°C; 12В DC; 10Вт макс (без HDD).",
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "externalId": "9b991eb9-1d76-480f-8c59-71dc6a85f6a5",
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "hierarchicalId": 13472,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "hierarchicalParent": 13227,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "id": 13472,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "images": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "indexNumber": 13161003,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "isKit": false,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "isParent": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "modifiers": [],
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "name": "DS-N304W(B)",
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "nomNumber": "303613909",
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "published": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "short_code": null,
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:   "unit": "шт"
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] lastPosition из последнего элемента: 15413 (всего элементов: 407, последний - товар, имя: Интеграция ОФД в 1С)
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00: [SBIS] Получено товаров: 382, hasMore: false, lastPosition: 15413, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     [SBIS Import] Пропущено дубликатов: 382
-0|worldcashbox  | 2026-02-05 05:56:30 +00:00:     [SBIS Import] Стр.2: товаров=382, папок=25, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15413&order=after
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15413
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   nomenclaturesType: 'object',
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   nomenclaturesLength: 'N/A',
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:   outcome: { hasMore: false }
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] nomenclatures - пустой объект {}, больше нет данных
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] nomenclatures пустой, больше нет данных для загрузки
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Получено товаров: 0, hasMore: false, lastPosition: undefined, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] 1. Правильность priceListId и pointId
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] 2. Существует ли прайс-лист и содержит ли он товары
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] 3. Структура ответа: [ 'nomenclatures', 'outcome' ]
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:     [SBIS Import] Стр.3: товаров=0, папок=0, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00:     [SBIS Import] Загрузка из "Эвотор 6" (id=15054, глубина=2)...
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15054&order=after
-0|worldcashbox  | 2026-02-05 05:56:31 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15054
-0|worldcashbox  | 2026-02-05 05:56:33 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   nomenclaturesType: 'array',
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   nomenclaturesLength: 1001,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   outcome: { hasMore: true }
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Пример структуры товара (API v2): {
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "article": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "attributes": {
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "calories": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "caloriesPerUnit": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "carbohydrate": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "fat": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "outQuantity": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "protein": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "spirit": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "storageConditions": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "volume": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     "weight": null
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   },
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "balance": 2,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "cost": 1300,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "description": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "description_simple": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "externalId": "e917ef82-f377-403d-bd7a-9c2c1a4813bb",
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "hierarchicalId": 15055,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "hierarchicalParent": 15054,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "id": 15055,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "images": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "indexNumber": 14744003,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "isKit": false,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "isParent": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "modifiers": [],
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "name": "Сетевой адаптер Эвотор 6 (K7410000139LA)",
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "nomNumber": "X4884621",
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "published": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "short_code": null,
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:   "unit": "шт"
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] outcome: { hasMore: true } hasMore: true
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] lastPosition из последнего элемента: 13480 (всего элементов: 1001, последний - товар, имя: DS-1473ZJ-155)
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Получено товаров: 922, hasMore: true, lastPosition: 13480, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     [SBIS Import] Пропущено дубликатов: 922
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00:     [SBIS Import] Стр.1: товаров=922, папок=79, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=13480&order=after
-0|worldcashbox  | 2026-02-05 05:56:34 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=13480
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesType: 'array',
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesLength: 398,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   outcome: { hasMore: false }
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Пример структуры товара (API v2): {
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "article": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "attributes": {
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "calories": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "caloriesPerUnit": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "carbohydrate": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "fat": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "outQuantity": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "protein": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "spirit": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "storageConditions": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "volume": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     "weight": null
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   },
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "balance": 0,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "cost": 3885,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "description": "<p>Настенный кронштейн, белый, для купольных камер IPC-T0XX, алюминий, 131×183.5×228.5мм</p>",
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "description_simple": "Настенный кронштейн, белый, для купольных камер IPC-T0XX, алюминий, 131×183.5×228.5мм",
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "externalId": "1f03b475-2db8-4e41-9c3b-1568c874b264",
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "hierarchicalId": 13481,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "hierarchicalParent": 13227,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "id": 13481,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "images": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "indexNumber": 13170003,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "isKit": false,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "isParent": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "modifiers": [],
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "name": "DS-1273ZJ-130-TRL",
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "nomNumber": "302700374",
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "published": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "short_code": null,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   "unit": "шт"
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] lastPosition из последнего элемента: 15413 (всего элементов: 398, последний - товар, имя: Интеграция ОФД в 1С)
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Получено товаров: 373, hasMore: false, lastPosition: 15413, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Пропущено дубликатов: 373
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Стр.2: товаров=373, папок=25, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=15413&order=after
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=15413
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesType: 'object',
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   nomenclaturesLength: 'N/A',
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:   outcome: { hasMore: false }
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] nomenclatures - пустой объект {}, больше нет данных
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] outcome: { hasMore: false } hasMore: false
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] nomenclatures пустой, больше нет данных для загрузки
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Получено товаров: 0, hasMore: false, lastPosition: undefined, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] ВНИМАНИЕ: API вернул 0 товаров! Проверьте:
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] 1. Правильность priceListId и pointId
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] 2. Существует ли прайс-лист и содержит ли он товары
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] 3. Структура ответа: [ 'nomenclatures', 'outcome' ]
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Стр.3: товаров=0, папок=0, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00:     [SBIS Import] Загрузка из "Новое ( к сортировке!)" (id=7406, глубина=2)...
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=7406&order=after
-0|worldcashbox  | 2026-02-05 05:56:35 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=7406
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Ответ API: статус 200, статус-текст: OK
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Структура ответа API: {
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   hasNomenclatures: true,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   nomenclaturesType: 'array',
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   nomenclaturesLength: 1001,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   hasOutcome: true,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   outcome: { hasMore: true }
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Пример структуры товара (API v2): {
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "article": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "attributes": {},
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "balance": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "cost": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "description": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "description_simple": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "externalId": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "hierarchicalId": 7408,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "hierarchicalParent": 7406,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "id": 7408,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "images": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "indexNumber": 7091002,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "isKit": false,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "isParent": true,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "modifiers": [],
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "name": "Атол",
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "nomNumber": "X4147929",
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "published": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "short_code": null,
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:   "unit": null
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: }
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] outcome: { hasMore: true } hasMore: true
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] lastPosition из последнего элемента: 13160 (всего элементов: 1001, последний - товар, имя: IPC-D022-G2/U (4mm))
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Получено товаров: 921, hasMore: true, lastPosition: 13160, page: undefined
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:     [SBIS Import] Пропущено дубликатов: 921
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00:     [SBIS Import] Стр.1: товаров=921, папок=80, всего=3058
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Запрос списка товаров (API v2): https://api.sbis.ru/retail/v2/nomenclature/list?withBalance=true&priceListId=15&pageSize=1000&position=13160&order=after
-0|worldcashbox  | 2026-02-05 05:56:38 +00:00: [SBIS] Параметры: priceListId=15, page=undefined, position=13160
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Загрузка завершена:
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] - Всего товаров: 3058
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] - API вызовов: 638
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] - Ожидалось товаров: ~10523 (10773 - 250 в архиве)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Получение остатков товаров со складов: Филиал в г. Владивосток, Инженерный...
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] ID складов для остатков: 125, 65867
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] ВНИМАНИЕ: Загружено меньше товаров, чем ожидалось! Возможно, не все папки обработаны.
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS] Запрос остатков: https://api.sbis.ru/retail/nomenclature/balances?priceListIds=15&warehouses=125&warehouses=65867&companies=123
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS] Ответ API (остатки): {
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00:   "balances": {}
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: }
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Получено остатков (сумма по всем складам): 0
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Создан бэкап: /var/www/worldcashbox/data/products.json.backup.1770273770852
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Существующих товаров: 2336
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Начинаем обработку 3058 товаров из СБИС...
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] После удаления дубликатов: 3058 уникальных товаров (было: 3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: SwapDog 1 мес. (ЭДО) (цена: 0, 1/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Создан новый товар #1: Акселерационная услуга, направленная на расширение и модернизацию производства и масштабирование бизнеса производственных СМСП, а именно: внедрение цифровизации производственных процессов для производственных СМСП в интересах ООО "СЫТЫЙ" (ID: x7459575, цена: 80000, категория: services)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Создан новый товар #2: Акселерационная услуга Регионального центра инжиниринга из специального пакета услуг по итогам прохождения акселерационной программы «Фабрика развития пищевой отрасли: масштабирование производств» (в целях реализации индивидуальных стратегий развития для производственных СМСП) победителю Конкурса –  внедрение цифровизации производственных процессов для производственных СМСП  в интересах ООО «Сытый» (ID: x2906972, цена: 500000, категория: software)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Выплата агентского вознаграждения, согласно акту об оказанных услугах № 1426-0000029 от 19» января 2026 г. (цена: 0, 4/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Выплата агентского вознаграждения, согласно акту об
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: оказанных услугах Nº1425-0000359  от 28 июля 2025г. (цена: 0, 5/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Доплата за поздний выезд (цена: 0, 6/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Доплата за ранний заезд (цена: 0, 7/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Драйвер "INPAS-SOFT UNIPOS Terminal. PAX Connector" (цена: 0, 8/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: ЕГАИС Профи (цена: 0, 9/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Интеграция ОФД в 1С (цена: 0, 10/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] ВНИМАНИЕ: Товар "DORS 200 Автоматический детектор рублей" попал в категорию "equipment" по умолчанию. Возможно, нужна ручная проверка категории.
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 50/3058, создано: 2, обновлено: 32, пропущено без цены: 16
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] ВНИМАНИЕ: Товар "ККТ АТОЛ 77Ф. Черный. Без ФН. USB. RS-232. Ethernet. 5.0" попал в категорию "equipment" по умолчанию. Возможно, нужна ручная проверка категории.
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 100/3058, создано: 2, обновлено: 74, пропущено без цены: 24
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Пропущен товар без цены: Кабель модуля индикатора для АТОЛ 11Ф/20Ф/30Ф AT037.02.02.ASM (Б/У) (цена: 0, 150/3058)
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 200/3058, создано: 2, обновлено: 164, пропущено без цены: 34
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 250/3058, создано: 2, обновлено: 212, пропущено без цены: 36
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 300/3058, создано: 2, обновлено: 259, пропущено без цены: 39
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 350/3058, создано: 2, обновлено: 296, пропущено без цены: 52
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 400/3058, создано: 2, обновлено: 344, пропущено без цены: 54
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 450/3058, создано: 2, обновлено: 392, пропущено без цены: 56
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 500/3058, создано: 2, обновлено: 434, пропущено без цены: 64
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 550/3058, создано: 2, обновлено: 475, пропущено без цены: 73
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 600/3058, создано: 2, обновлено: 521, пропущено без цены: 77
+0|worldcashbox  | 2026-02-05 06:42:50 +00:00: [SBIS Import] Обработано: 650/3058, создано: 2, обновлено: 560, пропущено без цены: 88
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 700/3058, создано: 2, обновлено: 590, пропущено без цены: 108
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 750/3058, создано: 2, обновлено: 637, пропущено без цены: 111
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: ДЕПОЗИТНЫЙ СЕЙФ VALBERG ASD-19 EL б/у (цена: 0, 800/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 850/3058, создано: 2, обновлено: 720, пропущено без цены: 128
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 900/3058, создано: 2, обновлено: 768, пропущено без цены: 130
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 950/3058, создано: 2, обновлено: 817, пропущено без цены: 131
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1000/3058, создано: 2, обновлено: 867, пропущено без цены: 131
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1050/3058, создано: 2, обновлено: 916, пропущено без цены: 132
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1100/3058, создано: 2, обновлено: 966, пропущено без цены: 132
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1150/3058, создано: 2, обновлено: 1015, пропущено без цены: 133
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1200/3058, создано: 2, обновлено: 1064, пропущено без цены: 134
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1250/3058, создано: 2, обновлено: 1114, пропущено без цены: 134
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1300/3058, создано: 2, обновлено: 1161, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1350/3058, создано: 2, обновлено: 1211, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1400/3058, создано: 2, обновлено: 1261, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1450/3058, создано: 2, обновлено: 1311, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1500/3058, создано: 2, обновлено: 1361, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1550/3058, создано: 2, обновлено: 1411, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1600/3058, создано: 2, обновлено: 1461, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1650/3058, создано: 2, обновлено: 1511, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1700/3058, создано: 2, обновлено: 1561, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1750/3058, создано: 2, обновлено: 1611, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1800/3058, создано: 2, обновлено: 1661, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1850/3058, создано: 2, обновлено: 1711, пропущено без цены: 137
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 1900/3058, создано: 2, обновлено: 1756, пропущено без цены: 142
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: ЭДО 1200 документов (цена: 0, 1950/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2000/3058, создано: 2, обновлено: 1835, пропущено без цены: 163
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2050/3058, создано: 2, обновлено: 1885, пропущено без цены: 163
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2100/3058, создано: 2, обновлено: 1934, пропущено без цены: 164
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2150/3058, создано: 2, обновлено: 1977, пропущено без цены: 171
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: NFR-версия Трактиръ: Front-Office + Трактиръ: Back-Office + Трактиръ: Management (4-х польз., USB) (цена: 0, 2200/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Устройство хранения ключевой информации eToken Pro 72 Kb (цена: 0, 2250/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Права использования "СБиС++ Расширенный аналитический блок" (цена: 0, 2300/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2350/3058, создано: 2, обновлено: 2030, пропущено без цены: 318
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Presto Столовая (цена: 0, 2400/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Права регистрации 50 точек продаж в системе СБИС для взаимодействия с госсистемами (цена: 0, 2450/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Права использования СБИС для заказа 100000 дополнительных кодов маркировки (цена: 0, 2500/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Права использования СБИС модуль Меркурий Оптимальный (цена: 0, 2550/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2600/3058, создано: 2, обновлено: 2058, пропущено без цены: 540
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2650/3058, создано: 2, обновлено: 2100, пропущено без цены: 548
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Настройка учёта по размерному ряду (цена: 0, 2700/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Агентское вознаграждение по iiko за август (цена: 0, 2750/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2800/3058, создано: 2, обновлено: 2175, пропущено без цены: 623
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Connector for MioBonus (цена: 0, 2850/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: iikoCard Mobile Delivery+Takeaway (цена: 0, 2900/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 2950/3058, создано: 2, обновлено: 2254, пропущено без цены: 694
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано: 3000/3058, создано: 2, обновлено: 2304, пропущено без цены: 694
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Пропущен товар без цены: Вознаграждение за продвижение продаж приложений (цена: 0, 3050/3058)
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Сохранение товаров в файл: /var/www/worldcashbox/data/products.json
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Всего товаров для сохранения: 2338
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] - Создано новых: 2
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] - Обновлено существующих: 2342
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] - Пропущено без цены: 714
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Файл успешно сохранен: /var/www/worldcashbox/data/products.json
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Размер файла: 1053825 байт
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Импорт завершен:
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] - Создано товаров: 2
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] - Обновлено товаров: 2342
+0|worldcashbox  | 2026-02-05 06:42:51 +00:00: [SBIS Import] Обработано папок: 6830, товаров: 3058, в очереди: 5985
+0|worldcashbox  | 2026-02-05 06:42:52 +00:00: [SBIS Import] Обработано папок: 6840, товаров: 3058, в очереди: 5975
+0|worldcashbox  | 2026-02-05 06:42:53 +00:00: [SBIS Import] Обработано папок: 6850, товаров: 3058, в очереди: 5965
+0|worldcashbox  | 2026-02-05 06:42:54 +00:00: [SBIS Import] Обработано папок: 6860, товаров: 3058, в очереди: 5955
+0|worldcashbox  | 2026-02-05 06:42:55 +00:00: [SBIS Import] Обработано папок: 6870, товаров: 3058, в очереди: 5945
+0|worldcashbox  | 2026-02-05 06:42:56 +00:00: [SBIS Import] Обработано папок: 6880, товаров: 3058, в очереди: 5935
+0|worldcashbox  | 2026-02-05 06:42:57 +00:00: [SBIS Import] Обработано папок: 6890, товаров: 3058, в очереди: 5925
+0|worldcashbox  | 2026-02-05 06:42:58 +00:00: [SBIS Import] Обработано папок: 6900, товаров: 3058, в очереди: 5915
+0|worldcashbox  | 2026-02-05 06:42:59 +00:00: [SBIS Import] Обработано папок: 6910, товаров: 3058, в очереди: 5905
+0|worldcashbox  | 2026-02-05 06:43:00 +00:00: [SBIS Import] Обработано папок: 6920, товаров: 3058, в очереди: 5895
+0|worldcashbox  | 2026-02-05 06:43:01 +00:00: [SBIS Import] Обработано папок: 6930, товаров: 3058, в очереди: 5885
+0|worldcashbox  | 2026-02-05 06:43:02 +00:00: [SBIS Import] Обработано папок: 6940, товаров: 3058, в очереди: 5875
+0|worldcashbox  | 2026-02-05 06:43:03 +00:00: [SBIS Import] Обработано папок: 6950, товаров: 3058, в очереди: 5865
+0|worldcashbox  | 2026-02-05 06:43:04 +00:00: [SBIS Import] Обработано папок: 6960, товаров: 3058, в очереди: 5855
+0|worldcashbox  | 2026-02-05 06:43:05 +00:00: [SBIS Import] Обработано папок: 6970, товаров: 3058, в очереди: 5845
+0|worldcashbox  | 2026-02-05 06:43:06 +00:00: [SBIS Import] Обработано папок: 6980, товаров: 3058, в очереди: 5835
+0|worldcashbox  | 2026-02-05 06:43:07 +00:00: [SBIS Import] Обработано папок: 6990, товаров: 3058, в очереди: 5825
+0|worldcashbox  | 2026-02-05 06:43:08 +00:00: [SBIS Import] Обработано папок: 7000, товаров: 3058, в очереди: 5815
+0|worldcashbox  | 2026-02-05 06:43:09 +00:00: [SBIS Import] Обработано папок: 7010, товаров: 3058, в очереди: 5805
+0|worldcashbox  | 2026-02-05 06:43:10 +00:00: [SBIS Import] Обработано папок: 7020, товаров: 3058, в очереди: 5795
+0|worldcashbox  | 2026-02-05 06:43:11 +00:00: [SBIS Import] Обработано папок: 7030, товаров: 3058, в очереди: 5785
+0|worldcashbox  | 2026-02-05 06:43:13 +00:00: [SBIS Import] Обработано папок: 7040, товаров: 3058, в очереди: 5775
+0|worldcashbox  | 2026-02-05 06:43:14 +00:00: [SBIS Import] Обработано папок: 7050, товаров: 3058, в очереди: 5765
+0|worldcashbox  | 2026-02-05 06:43:15 +00:00: [SBIS Import] Обработано папок: 7060, товаров: 3058, в очереди: 5755
+0|worldcashbox  | 2026-02-05 06:43:16 +00:00: [SBIS Import] Обработано папок: 7070, товаров: 3058, в очереди: 5745
+0|worldcashbox  | 2026-02-05 06:43:17 +00:00: [SBIS Import] Обработано папок: 7080, товаров: 3058, в очереди: 5735
+0|worldcashbox  | 2026-02-05 06:43:18 +00:00: [SBIS Import] Обработано папок: 7090, товаров: 3058, в очереди: 5725
+0|worldcashbox  | 2026-02-05 06:43:18 +00:00: Loaded 2338 products from file
+0|worldcashbox  | 2026-02-05 06:43:19 +00:00: [SBIS Import] Обработано папок: 7100, товаров: 3058, в очереди: 5715
+0|worldcashbox  | 2026-02-05 06:43:20 +00:00: [SBIS Import] Обработано папок: 7110, товаров: 3058, в очереди: 5705
+0|worldcashbox  | 2026-02-05 06:43:21 +00:00: [SBIS Import] Обработано папок: 7120, товаров: 3058, в очереди: 5695
+0|worldcashbox  | 2026-02-05 06:43:22 +00:00: [SBIS Import] Обработано папок: 7130, товаров: 3058, в очереди: 5685
+0|worldcashbox  | 2026-02-05 06:43:23 +00:00: [SBIS Import] Обработано папок: 7140, товаров: 3058, в очереди: 5675
+0|worldcashbox  | 2026-02-05 06:43:24 +00:00: [SBIS Import] Обработано папок: 7150, товаров: 3058, в очереди: 5665
+0|worldcashbox  | 2026-02-05 06:43:25 +00:00: [SBIS Import] Обработано папок: 7160, товаров: 3058, в очереди: 5655
+^[[A0|worldcashbox  | 2026-02-05 06:43:26 +00:00: [SBIS Import] Обработано папок: 7170, товаров: 3058, в очереди: 5645
+0|worldcashbox  | 2026-02-05 06:43:27 +00:00: [SBIS Import] Обработано папок: 7180, товаров: 3058, в очереди: 5635
+0|worldcashbox  | 2026-02-05 06:43:28 +00:00: [SBIS Import] Обработано папок: 7190, товаров: 3058, в очереди: 5625
+0|worldcashbox  | 2026-02-05 06:43:29 +00:00: [SBIS Import] Обработано папок: 7200, товаров: 3058, в очереди: 5615
+0|worldcashbox  | 2026-02-05 06:43:30 +00:00: [SBIS Import] Обработано папок: 7210, товаров: 3058, в очереди: 5605
+0|worldcashbox  | 2026-02-05 06:43:31 +00:00: [SBIS Import] Обработано папок: 7220, товаров: 3058, в очереди: 5595
+0|worldcashbox  | 2026-02-05 06:43:32 +00:00: [SBIS Import] Обработано папок: 7230, товаров: 3058, в очереди: 5585
+0|worldcashbox  | 2026-02-05 06:43:33 +00:00: [SBIS Import] Обработано папок: 7240, товаров: 3058, в очереди: 5575
+0|worldcashbox  | 2026-02-05 06:43:34 +00:00: [SBIS Import] Обработано папок: 7250, товаров: 3058, в очереди: 5565
+0|worldcashbox  | 2026-02-05 06:43:35 +00:00: [SBIS Import] Обработано папок: 7260, товаров: 3058, в очереди: 5555
+0|worldcashbox  | 2026-02-05 06:43:36 +00:00: [SBIS Import] Обработано папок: 7270, товаров: 3058, в очереди: 5545
+0|worldcashbox  | 2026-02-05 06:43:37 +00:00: [SBIS Import] Обработано папок: 7280, товаров: 3058, в очереди: 5535
+0|worldcashbox  | 2026-02-05 06:43:38 +00:00: [SBIS Import] Обработано папок: 7290, товаров: 3058, в очереди: 5525
+0|worldcashbox  | 2026-02-05 06:43:39 +00:00: [SBIS Import] Обработано папок: 7300, товаров: 3058, в очереди: 5515
+0|worldcashbox  | 2026-02-05 06:43:40 +00:00: [SBIS Import] Обработано папок: 7310, товаров: 3058, в очереди: 5505
+0|worldcashbox  | 2026-02-05 06:43:41 +00:00: [SBIS Import] Обработано папок: 7320, товаров: 3058, в очереди: 5495
+0|worldcashbox  | 2026-02-05 06:43:42 +00:00: [SBIS Import] Обработано папок: 7330, товаров: 3058, в очереди: 5485
+0|worldcashbox  | 2026-02-05 06:43:43 +00:00: [SBIS Import] Обработано папок: 7340, товаров: 3058, в очереди: 5475
+0|worldcashbox  | 2026-02-05 06:43:44 +00:00: [SBIS Import] Обработано папок: 7350, товаров: 3058, в очереди: 5465
+0|worldcashbox  | 2026-02-05 06:43:45 +00:00: [SBIS Import] Обработано папок: 7360, товаров: 3058, в очереди: 5455
+0|worldcashbox  | 2026-02-05 06:43:46 +00:00: [SBIS Import] Обработано папок: 7370, товаров: 3058, в очереди: 5445
+0|worldcashbox  | 2026-02-05 06:43:47 +00:00: [SBIS Import] Обработано папок: 7380, товаров: 3058, в очереди: 5435
+0|worldcashbox  | 2026-02-05 06:43:48 +00:00: [SBIS Import] Обработано папок: 7390, товаров: 3058, в очереди: 5425
+0|worldcashbox  | 2026-02-05 06:43:49 +00:00: [SBIS Import] Обработано папок: 7400, товаров: 3058, в очереди: 5415
+0|worldcashbox  | 2026-02-05 06:43:50 +00:00: [SBIS Import] Обработано папок: 7410, товаров: 3058, в очереди: 5405
+0|worldcashbox  | 2026-02-05 06:43:51 +00:00: [SBIS Import] Обработано папок: 7420, товаров: 3058, в очереди: 5395
+0|worldcashbox  | 2026-02-05 06:43:52 +00:00: [SBIS Import] Обработано папок: 7430, товаров: 3058, в очереди: 5385
+0|worldcashbox  | 2026-02-05 06:43:53 +00:00: [SBIS Import] Обработано папок: 7440, товаров: 3058, в очереди: 5375
+0|worldcashbox  | 2026-02-05 06:43:54 +00:00: [SBIS Import] Обработано папок: 7450, товаров: 3058, в очереди: 5365
+0|worldcashbox  | 2026-02-05 06:43:55 +00:00: [SBIS Import] Обработано папок: 7460, товаров: 3058, в очереди: 5355
+0|worldcashbox  | 2026-02-05 06:43:56 +00:00: [SBIS Import] Обработано папок: 7470, товаров: 3058, в очереди: 5345
+0|worldcashbox  | 2026-02-05 06:43:57 +00:00: [SBIS Import] Обработано папок: 7480, товаров: 3058, в очереди: 5335
+0|worldcashbox  | 2026-02-05 06:43:58 +00:00: [SBIS Import] Обработано папок: 7490, товаров: 3058, в очереди: 5325
+0|worldcashbox  | 2026-02-05 06:43:59 +00:00: [SBIS Import] Обработано папок: 7500, товаров: 3058, в очереди: 5315
+0|worldcashbox  | 2026-02-05 06:44:00 +00:00: [SBIS Import] Обработано папок: 7510, товаров: 3058, в очереди: 5305
+0|worldcashbox  | 2026-02-05 06:44:01 +00:00: [SBIS Import] Обработано папок: 7520, товаров: 3058, в очереди: 5295
+0|worldcashbox  | 2026-02-05 06:44:02 +00:00: [SBIS Import] Обработано папок: 7530, товаров: 3058, в очереди: 5285
+0|worldcashbox  | 2026-02-05 06:44:03 +00:00: [SBIS Import] Обработано папок: 7540, товаров: 3058, в очереди: 5275
+0|worldcashbox  | 2026-02-05 06:44:04 +00:00: [SBIS Import] Обработано папок: 7550, товаров: 3058, в очереди: 5265
+0|worldcashbox  | 2026-02-05 06:44:05 +00:00: [SBIS Import] Обработано папок: 7560, товаров: 3058, в очереди: 5255
+0|worldcashbox  | 2026-02-05 06:44:06 +00:00: [SBIS Import] Обработано папок: 7570, товаров: 3058, в очереди: 5245
+0|worldcashbox  | 2026-02-05 06:44:07 +00:00: [SBIS Import] Обработано папок: 7580, товаров: 3058, в очереди: 5235
+0|worldcashbox  | 2026-02-05 06:44:08 +00:00: [SBIS Import] Обработано папок: 7590, товаров: 3058, в очереди: 5225
+0|worldcashbox  | 2026-02-05 06:44:09 +00:00: [SBIS Import] Обработано папок: 7600, товаров: 3058, в очереди: 5215
+0|worldcashbox  | 2026-02-05 06:44:10 +00:00: [SBIS Import] Обработано папок: 7610, товаров: 3058, в очереди: 5205
+0|worldcashbox  | 2026-02-05 06:44:11 +00:00: [SBIS Import] Обработано папок: 7620, товаров: 3058, в очереди: 5195
+0|worldcashbox  | 2026-02-05 06:44:12 +00:00: [SBIS Import] Обработано папок: 7630, товаров: 3058, в очереди: 5185
+0|worldcashbox  | 2026-02-05 06:44:13 +00:00: [SBIS Import] Обработано папок: 7640, товаров: 3058, в очереди: 5175
+0|worldcashbox  | 2026-02-05 06:44:14 +00:00: [SBIS Import] Обработано папок: 7650, товаров: 3058, в очереди: 5165
+0|worldcashbox  | 2026-02-05 06:44:15 +00:00: [SBIS Import] Обработано папок: 7660, товаров: 3058, в очереди: 5155
+0|worldcashbox  | 2026-02-05 06:44:16 +00:00: [SBIS Import] Обработано папок: 7670, товаров: 3058, в очереди: 5145
+0|worldcashbox  | 2026-02-05 06:44:17 +00:00: [SBIS Import] Обработано папок: 7680, товаров: 3058, в очереди: 5135
+0|worldcashbox  | 2026-02-05 06:44:18 +00:00: [SBIS Import] Обработано папок: 7690, товаров: 3058, в очереди: 5125
+0|worldcashbox  | 2026-02-05 06:44:19 +00:00: [SBIS Import] Обработано папок: 7700, товаров: 3058, в очереди: 5115
+0|worldcashbox  | 2026-02-05 06:44:20 +00:00: [SBIS Import] Обработано папок: 7710, товаров: 3058, в очереди: 5105
+0|worldcashbox  | 2026-02-05 06:44:21 +00:00: [SBIS Import] Обработано папок: 7720, товаров: 3058, в очереди: 5095
+0|worldcashbox  | 2026-02-05 06:44:22 +00:00: [SBIS Import] Обработано папок: 7730, товаров: 3058, в очереди: 5085
+0|worldcashbox  | 2026-02-05 06:44:23 +00:00: [SBIS Import] Обработано папок: 7740, товаров: 3058, в очереди: 5075
+0|worldcashbox  | 2026-02-05 06:44:24 +00:00: [SBIS Import] Обработано папок: 7750, товаров: 3058, в очереди: 5065
+0|worldcashbox  | 2026-02-05 06:44:25 +00:00: [SBIS Import] Обработано папок: 7760, товаров: 3058, в очереди: 5055
+0|worldcashbox  | 2026-02-05 06:44:26 +00:00: [SBIS Import] Обработано папок: 7770, товаров: 3058, в очереди: 5045
+0|worldcashbox  | 2026-02-05 06:44:27 +00:00: [SBIS Import] Обработано папок: 7780, товаров: 3058, в очереди: 5035
+0|worldcashbox  | 2026-02-05 06:44:28 +00:00: [SBIS Import] Обработано папок: 7790, товаров: 3058, в очереди: 5025
+0|worldcashbox  | 2026-02-05 06:44:29 +00:00: [SBIS Import] Обработано папок: 7800, товаров: 3058, в очереди: 5015
+0|worldcashbox  | 2026-02-05 06:44:30 +00:00: [SBIS Import] Обработано папок: 7810, товаров: 3058, в очереди: 5005
+0|worldcashbox  | 2026-02-05 06:44:31 +00:00: Loaded 2338 products from file
+0|worldcashbox  | 2026-02-05 06:44:31 +00:00: [SBIS Import] Обработано папок: 7820, товаров: 3058, в очереди: 4995
+0|worldcashbox  | 2026-02-05 06:44:32 +00:00: [SBIS Import] Обработано папок: 7830, товаров: 3058, в очереди: 4985
+0|worldcashbox  | 2026-02-05 06:44:33 +00:00: [SBIS Import] Обработано папок: 7840, товаров: 3058, в очереди: 4975
+0|worldcashbox  | 2026-02-05 06:44:34 +00:00: [SBIS Import] Обработано папок: 7850, товаров: 3058, в очереди: 4965
+0|worldcashbox  | 2026-02-05 06:44:35 +00:00: [SBIS Import] Обработано папок: 7860, товаров: 3058, в очереди: 4955
+0|worldcashbox  | 2026-02-05 06:44:36 +00:00: [SBIS Import] Обработано папок: 7870, товаров: 3058, в очереди: 4945
+0|worldcashbox  | 2026-02-05 06:44:37 +00:00: [SBIS Import] Обработано папок: 7880, товаров: 3058, в очереди: 4935
+0|worldcashbox  | 2026-02-05 06:44:38 +00:00: [SBIS Import] Обработано папок: 7890, товаров: 3058, в очереди: 4925
+0|worldcashbox  | 2026-02-05 06:44:39 +00:00: [SBIS Import] Обработано папок: 7900, товаров: 3058, в очереди: 4915
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00: [SBIS Import] Обработано папок: 7910, товаров: 3058, в очереди: 4905
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00: Error: Failed to find Server Action "x". This request might be from an older or newer deployment. Original error: Cannot read properties of undefined (reading 'workers')
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at getActionModIdOrError (/var/www/worldcashbox/node_modules/next/dist/compiled/next-server/webpack:/next/dist/esm/server/app-render/action-handler.js:599:15)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at /var/www/worldcashbox/node_modules/next/dist/compiled/next-server/webpack:/next/dist/esm/server/app-render/action-handler.js:463:46
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at rE (/var/www/worldcashbox/node_modules/next/dist/compiled/next-server/webpack:/next/dist/esm/server/app-render/action-handler.js:316:9)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at r7 (/var/www/worldcashbox/node_modules/next/dist/compiled/next-server/webpack:/next/dist/esm/server/app-render/app-render.js:888:33)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at doRender (/var/www/worldcashbox/node_modules/next/src/server/base-server.ts:2330:20)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at cacheEntry.responseCache.get.routeKind (/var/www/worldcashbox/node_modules/next/src/server/base-server.ts:2569:24)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at NextNodeServer.renderToResponseWithComponentsImpl (/var/www/worldcashbox/node_modules/next/src/server/base-server.ts:2432:24)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at NextNodeServer.renderPageComponent (/var/www/worldcashbox/node_modules/next/src/server/base-server.ts:3016:16)
+0|worldcashbox  | 2026-02-05 06:44:40 +00:00:     at NextNodeServer.renderToResponseImpl (/var/www/worldcashbox/node_modules/next/src/server/base-server.ts:3078:24)
+0|worldcashbox  | 2026-02-05 06:44:41 +00:00: [SBIS Import] Обработано папок: 7920, товаров: 3058, в очереди: 4895
+0|worldcashbox  | 2026-02-05 06:44:42 +00:00: [SBIS Import] Обработано папок: 7930, товаров: 3058, в очереди: 4885
+0|worldcashbox  | 2026-02-05 06:44:43 +00:00: [SBIS Import] Обработано папок: 7940, товаров: 3058, в очереди: 4875
+0|worldcashbox  | 2026-02-05 06:44:44 +00:00: [SBIS Import] Обработано папок: 7950, товаров: 3058, в очереди: 4865
+0|worldcashbox  | 2026-02-05 06:44:45 +00:00: [SBIS Import] Обработано папок: 7960, товаров: 3058, в очереди: 4855
+0|worldcashbox  | 2026-02-05 06:44:46 +00:00: [SBIS Import] Обработано папок: 7970, товаров: 3058, в очереди: 4845
+0|worldcashbox  | 2026-02-05 06:44:47 +00:00: [SBIS Import] Обработано папок: 7980, товаров: 3058, в очереди: 4835
+0|worldcashbox  | 2026-02-05 06:44:48 +00:00: [SBIS Import] Обработано папок: 7990, товаров: 3058, в очереди: 4825
+0|worldcashbox  | 2026-02-05 06:44:49 +00:00: [SBIS Import] Обработано папок: 8000, товаров: 3058, в очереди: 4815
+0|worldcashbox  | 2026-02-05 06:44:50 +00:00: [SBIS Import] Обработано папок: 8010, товаров: 3058, в очереди: 4805
+0|worldcashbox  | 2026-02-05 06:44:51 +00:00: [SBIS Import] Обработано папок: 8020, товаров: 3058, в очереди: 4795
+0|worldcashbox  | 2026-02-05 06:44:52 +00:00: [SBIS Import] Обработано папок: 8030, товаров: 3058, в очереди: 4785
+0|worldcashbox  | 2026-02-05 06:44:53 +00:00: [SBIS Import] Обработано папок: 8040, товаров: 3058, в очереди: 4775
+0|worldcashbox  | 2026-02-05 06:44:54 +00:00: [SBIS Import] Обработано папок: 8050, товаров: 3058, в очереди: 4765
+0|worldcashbox  | 2026-02-05 06:44:55 +00:00: [SBIS Import] Обработано папок: 8060, товаров: 3058, в очереди: 4755
+0|worldcashbox  | 2026-02-05 06:44:56 +00:00: [SBIS Import] Обработано папок: 8070, товаров: 3058, в очереди: 4745
+0|worldcashbox  | 2026-02-05 06:44:57 +00:00: [SBIS Import] Обработано папок: 8080, товаров: 3058, в очереди: 4735
+0|worldcashbox  | 2026-02-05 06:44:58 +00:00: [SBIS Import] Обработано папок: 8090, товаров: 3058, в очереди: 4725
+0|worldcashbox  | 2026-02-05 06:44:59 +00:00: [SBIS Import] Обработано папок: 8100, товаров: 3058, в очереди: 4715
+0|worldcashbox  | 2026-02-05 06:45:00 +00:00: [SBIS Import] Обработано папок: 8110, товаров: 3058, в очереди: 4705
+0|worldcashbox  | 2026-02-05 06:45:01 +00:00: [SBIS Import] Обработано папок: 8120, товаров: 3058, в очереди: 4695
+0|worldcashbox  | 2026-02-05 06:45:02 +00:00: [SBIS Import] Обработано папок: 8130, товаров: 3058, в очереди: 4685
+0|worldcashbox  | 2026-02-05 06:45:03 +00:00: [SBIS Import] Обработано папок: 8140, товаров: 3058, в очереди: 4675
+0|worldcashbox  | 2026-02-05 06:45:04 +00:00: [SBIS Import] Обработано папок: 8150, товаров: 3058, в очереди: 4665
+0|worldcashbox  | 2026-02-05 06:45:05 +00:00: [SBIS Import] Обработано папок: 8160, товаров: 3058, в очереди: 4655
+0|worldcashbox  | 2026-02-05 06:45:06 +00:00: [SBIS Import] Обработано папок: 8170, товаров: 3058, в очереди: 4645
+0|worldcashbox  | 2026-02-05 06:45:07 +00:00: [SBIS Import] Обработано папок: 8180, товаров: 3058, в очереди: 4635
+0|worldcashbox  | 2026-02-05 06:45:08 +00:00: [SBIS Import] Обработано папок: 8190, товаров: 3058, в очереди: 4625
+0|worldcashbox  | 2026-02-05 06:45:09 +00:00: [SBIS Import] Обработано папок: 8200, товаров: 3058, в очереди: 4615
+0|worldcashbox  | 2026-02-05 06:45:10 +00:00: [SBIS Import] Обработано папок: 8210, товаров: 3058, в очереди: 4605
+0|worldcashbox  | 2026-02-05 06:45:11 +00:00: [SBIS Import] Обработано папок: 8220, товаров: 3058, в очереди: 4595
+0|worldcashbox  | 2026-02-05 06:45:12 +00:00: [SBIS Import] Обработано папок: 8230, товаров: 3058, в очереди: 4585
+0|worldcashbox  | 2026-02-05 06:45:13 +00:00: [SBIS Import] Обработано папок: 8240, товаров: 3058, в очереди: 4575
+0|worldcashbox  | 2026-02-05 06:45:14 +00:00: [SBIS Import] Обработано папок: 8250, товаров: 3058, в очереди: 4565
+0|worldcashbox  | 2026-02-05 06:45:15 +00:00: [SBIS Import] Обработано папок: 8260, товаров: 3058, в очереди: 4555
+0|worldcashbox  | 2026-02-05 06:45:16 +00:00: [SBIS Import] Обработано папок: 8270, товаров: 3058, в очереди: 4545
+0|worldcashbox  | 2026-02-05 06:45:17 +00:00: [SBIS Import] Обработано папок: 8280, товаров: 3058, в очереди: 4535
+0|worldcashbox  | 2026-02-05 06:45:18 +00:00: [SBIS Import] Обработано папок: 8290, товаров: 3058, в очереди: 4525
+0|worldcashbox  | 2026-02-05 06:45:19 +00:00: [SBIS Import] Обработано папок: 8300, товаров: 3058, в очереди: 4515
+0|worldcashbox  | 2026-02-05 06:45:20 +00:00: [SBIS Import] Обработано папок: 8310, товаров: 3058, в очереди: 4505
+0|worldcashbox  | 2026-02-05 06:45:21 +00:00: [SBIS Import] Обработано папок: 8320, товаров: 3058, в очереди: 4495
+0|worldcashbox  | 2026-02-05 06:45:22 +00:00: [SBIS Import] Обработано папок: 8330, товаров: 3058, в очереди: 4485
+0|worldcashbox  | 2026-02-05 06:45:23 +00:00: [SBIS Import] Обработано папок: 8340, товаров: 3058, в очереди: 4475
+0|worldcashbox  | 2026-02-05 06:45:24 +00:00: [SBIS Import] Обработано папок: 8350, товаров: 3058, в очереди: 4465
+0|worldcashbox  | 2026-02-05 06:45:25 +00:00: [SBIS Import] Обработано папок: 8360, товаров: 3058, в очереди: 4455
+0|worldcashbox  | 2026-02-05 06:45:26 +00:00: [SBIS Import] Обработано папок: 8370, товаров: 3058, в очереди: 4445
+0|worldcashbox  | 2026-02-05 06:45:27 +00:00: [SBIS Import] Обработано папок: 8380, товаров: 3058, в очереди: 4435
+0|worldcashbox  | 2026-02-05 06:45:28 +00:00: [SBIS Import] Обработано папок: 8390, товаров: 3058, в очереди: 4425
+0|worldcashbox  | 2026-02-05 06:45:29 +00:00: [SBIS Import] Обработано папок: 8400, товаров: 3058, в очереди: 4415
+0|worldcashbox  | 2026-02-05 06:45:30 +00:00: [SBIS Import] Обработано папок: 8410, товаров: 3058, в очереди: 4405
+0|worldcashbox  | 2026-02-05 06:45:31 +00:00: [SBIS Import] Обработано папок: 8420, товаров: 3058, в очереди: 4395
+0|worldcashbox  | 2026-02-05 06:45:32 +00:00: [SBIS Import] Обработано папок: 8430, товаров: 3058, в очереди: 4385
+0|worldcashbox  | 2026-02-05 06:45:33 +00:00: [SBIS Import] Обработано папок: 8440, товаров: 3058, в очереди: 4375
+0|worldcashbox  | 2026-02-05 06:45:34 +00:00: [SBIS Import] Обработано папок: 8450, товаров: 3058, в очереди: 4365
+0|worldcashbox  | 2026-02-05 06:45:35 +00:00: [SBIS Import] Обработано папок: 8460, товаров: 3058, в очереди: 4355
+0|worldcashbox  | 2026-02-05 06:45:36 +00:00: [SBIS Import] Обработано папок: 8470, товаров: 3058, в очереди: 4345
+0|worldcashbox  | 2026-02-05 06:45:37 +00:00: [SBIS Import] Обработано папок: 8480, товаров: 3058, в очереди: 4335
+0|worldcashbox  | 2026-02-05 06:45:38 +00:00: [SBIS Import] Обработано папок: 8490, товаров: 3058, в очереди: 4325
+0|worldcashbox  | 2026-02-05 06:45:39 +00:00: [SBIS Import] Обработано папок: 8500, товаров: 3058, в очереди: 4315
+0|worldcashbox  | 2026-02-05 06:45:40 +00:00: [SBIS Import] Обработано папок: 8510, товаров: 3058, в очереди: 4305
+0|worldcashbox  | 2026-02-05 06:45:41 +00:00: [SBIS Import] Обработано папок: 8520, товаров: 3058, в очереди: 4295
+0|worldcashbox  | 2026-02-05 06:45:42 +00:00: [SBIS Import] Обработано папок: 8530, товаров: 3058, в очереди: 4285
+0|worldcashbox  | 2026-02-05 06:45:43 +00:00: [SBIS Import] Обработано папок: 8540, товаров: 3058, в очереди: 4275
+0|worldcashbox  | 2026-02-05 06:45:44 +00:00: [SBIS Import] Обработано папок: 8550, товаров: 3058, в очереди: 4265
+0|worldcashbox  | 2026-02-05 06:45:45 +00:00: [SBIS Import] Обработано папок: 8560, товаров: 3058, в очереди: 4255
+0|worldcashbox  | 2026-02-05 06:45:46 +00:00: [SBIS Import] Обработано папок: 8570, товаров: 3058, в очереди: 4245
+0|worldcashbox  | 2026-02-05 06:45:47 +00:00: [SBIS Import] Обработано папок: 8580, товаров: 3058, в очереди: 4235
+0|worldcashbox  | 2026-02-05 06:45:48 +00:00: [SBIS Import] Обработано папок: 8590, товаров: 3058, в очереди: 4225
+0|worldcashbox  | 2026-02-05 06:45:49 +00:00: [SBIS Import] Обработано папок: 8600, товаров: 3058, в очереди: 4215
+0|worldcashbox  | 2026-02-05 06:45:50 +00:00: [SBIS Import] Обработано папок: 8610, товаров: 3058, в очереди: 4205
+0|worldcashbox  | 2026-02-05 06:45:51 +00:00: [SBIS Import] Обработано папок: 8620, товаров: 3058, в очереди: 4195
+0|worldcashbox  | 2026-02-05 06:45:52 +00:00: [SBIS Import] Обработано папок: 8630, товаров: 3058, в очереди: 4185
+0|worldcashbox  | 2026-02-05 06:45:53 +00:00: [SBIS Import] Обработано папок: 8640, товаров: 3058, в очереди: 4175
+0|worldcashbox  | 2026-02-05 06:45:54 +00:00: [SBIS Import] Обработано папок: 8650, товаров: 3058, в очереди: 4165
+0|worldcashbox  | 2026-02-05 06:45:55 +00:00: [SBIS Import] Обработано папок: 8660, товаров: 3058, в очереди: 4155
+0|worldcashbox  | 2026-02-05 06:45:56 +00:00: [SBIS Import] Обработано папок: 8670, товаров: 3058, в очереди: 4145
+0|worldcashbox  | 2026-02-05 06:45:57 +00:00: [SBIS Import] Обработано папок: 8680, товаров: 3058, в очереди: 4135
+0|worldcashbox  | 2026-02-05 06:45:58 +00:00: [SBIS Import] Обработано папок: 8690, товаров: 3058, в очереди: 4125
+0|worldcashbox  | 2026-02-05 06:45:59 +00:00: [SBIS Import] Обработано папок: 8700, товаров: 3058, в очереди: 4115
+0|worldcashbox  | 2026-02-05 06:46:00 +00:00: [SBIS Import] Обработано папок: 8710, товаров: 3058, в очереди: 4105
+0|worldcashbox  | 2026-02-05 06:46:01 +00:00: [SBIS Import] Обработано папок: 8720, товаров: 3058, в очереди: 4095
+0|worldcashbox  | 2026-02-05 06:46:02 +00:00: [SBIS Import] Обработано папок: 8730, товаров: 3058, в очереди: 4085
+0|worldcashbox  | 2026-02-05 06:46:03 +00:00: [SBIS Import] Обработано папок: 8740, товаров: 3058, в очереди: 4075
+0|worldcashbox  | 2026-02-05 06:46:04 +00:00: [SBIS Import] Обработано папок: 8750, товаров: 3058, в очереди: 4065
+0|worldcashbox  | 2026-02-05 06:46:05 +00:00: [SBIS Import] Обработано папок: 8760, товаров: 3058, в очереди: 4055
+0|worldcashbox  | 2026-02-05 06:46:06 +00:00: [SBIS Import] Обработано папок: 8770, товаров: 3058, в очереди: 4045
+0|worldcashbox  | 2026-02-05 06:46:07 +00:00: [SBIS Import] Обработано папок: 8780, товаров: 3058, в очереди: 4035
+0|worldcashbox  | 2026-02-05 06:46:08 +00:00: [SBIS Import] Обработано папок: 8790, товаров: 3058, в очереди: 4025
+0|worldcashbox  | 2026-02-05 06:46:09 +00:00: [SBIS Import] Обработано папок: 8800, товаров: 3058, в очереди: 4015
+0|worldcashbox  | 2026-02-05 06:46:10 +00:00: [SBIS Import] Обработано папок: 8810, товаров: 3058, в очереди: 4005
+0|worldcashbox  | 2026-02-05 06:46:11 +00:00: [SBIS Import] Обработано папок: 8820, товаров: 3058, в очереди: 3995
+0|worldcashbox  | 2026-02-05 06:46:12 +00:00: [SBIS Import] Обработано папок: 8830, товаров: 3058, в очереди: 3985
+0|worldcashbox  | 2026-02-05 06:46:13 +00:00: [SBIS Import] Обработано папок: 8840, товаров: 3058, в очереди: 3975
+0|worldcashbox  | 2026-02-05 06:46:14 +00:00: [SBIS Import] Обработано папок: 8850, товаров: 3058, в очереди: 3965
+0|worldcashbox  | 2026-02-05 06:46:15 +00:00: [SBIS Import] Обработано папок: 8860, товаров: 3058, в очереди: 3955
+0|worldcashbox  | 2026-02-05 06:46:16 +00:00: [SBIS Import] Обработано папок: 8870, товаров: 3058, в очереди: 3945
+0|worldcashbox  | 2026-02-05 06:46:17 +00:00: [SBIS Import] Обработано папок: 8880, товаров: 3058, в очереди: 3935
+0|worldcashbox  | 2026-02-05 06:46:18 +00:00: [SBIS Import] Обработано папок: 8890, товаров: 3058, в очереди: 3925
+0|worldcashbox  | 2026-02-05 06:46:19 +00:00: [SBIS Import] Обработано папок: 8900, товаров: 3058, в очереди: 3915
+0|worldcashbox  | 2026-02-05 06:46:20 +00:00: [SBIS Import] Обработано папок: 8910, товаров: 3058, в очереди: 3905
+0|worldcashbox  | 2026-02-05 06:46:21 +00:00: [SBIS Import] Обработано папок: 8920, товаров: 3058, в очереди: 3895
+0|worldcashbox  | 2026-02-05 06:46:22 +00:00: [SBIS Import] Обработано папок: 8930, товаров: 3058, в очереди: 3885
+0|worldcashbox  | 2026-02-05 06:46:23 +00:00: [SBIS Import] Обработано папок: 8940, товаров: 3058, в очереди: 3875
+0|worldcashbox  | 2026-02-05 06:46:24 +00:00: [SBIS Import] Обработано папок: 8950, товаров: 3058, в очереди: 3865
+0|worldcashbox  | 2026-02-05 06:46:25 +00:00: [SBIS Import] Обработано папок: 8960, товаров: 3058, в очереди: 3855
+0|worldcashbox  | 2026-02-05 06:46:26 +00:00: [SBIS Import] Обработано папок: 8970, товаров: 3058, в очереди: 3845
+0|worldcashbox  | 2026-02-05 06:46:27 +00:00: [SBIS Import] Обработано папок: 8980, товаров: 3058, в очереди: 3835
+0|worldcashbox  | 2026-02-05 06:46:28 +00:00: [SBIS Import] Обработано папок: 8990, товаров: 3058, в очереди: 3825
+0|worldcashbox  | 2026-02-05 06:46:29 +00:00: [SBIS Import] Обработано папок: 9000, товаров: 3058, в очереди: 3815
+0|worldcashbox  | 2026-02-05 06:46:30 +00:00: [SBIS Import] Обработано папок: 9010, товаров: 3058, в очереди: 3805
+0|worldcashbox  | 2026-02-05 06:46:31 +00:00: [SBIS Import] Обработано папок: 9020, товаров: 3058, в очереди: 3795
+0|worldcashbox  | 2026-02-05 06:46:32 +00:00: [SBIS Import] Обработано папок: 9030, товаров: 3058, в очереди: 3785
+0|worldcashbox  | 2026-02-05 06:46:33 +00:00: [SBIS Import] Обработано папок: 9040, товаров: 3058, в очереди: 3775
+0|worldcashbox  | 2026-02-05 06:46:34 +00:00: [SBIS Import] Обработано папок: 9050, товаров: 3058, в очереди: 3765
+0|worldcashbox  | 2026-02-05 06:46:35 +00:00: [SBIS Import] Обработано папок: 9060, товаров: 3058, в очереди: 3755
